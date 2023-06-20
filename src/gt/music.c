@@ -26,15 +26,17 @@ unsigned char* paused_cursor = 0;
 unsigned char paused_delay;
 unsigned char music_mode = REPEAT_NONE;
 unsigned char repeat_resume_pending = 0;
+unsigned char music_bank = 0;
 
 void init_music() {
     music_cursor = 0;
     delay_counter = 0;
 }
 
-void play_song(const unsigned char* song, char loop) {
+void play_song(const unsigned char* song, char bank_num, char loop) {
     char *prev_cursor = music_cursor;
-    change_rom_bank(BANK_COMMON);
+    music_bank = bank_num;
+    change_rom_bank(music_bank);
     music_cursor = song;
 
     switch(loop) {
@@ -77,7 +79,7 @@ void unpause_music() {
 #pragma codeseg (push, "PROG0");
 void tick_music() {
     unsigned char n, noteMask;
-    change_rom_bank(BANK_COMMON);
+    change_rom_bank(music_bank);
     if(audio_amplitudes[0] > 0) {
         audio_amplitudes[0]--;
         push_audio_param(AMPLITUDE, audio_amplitudes[0]);

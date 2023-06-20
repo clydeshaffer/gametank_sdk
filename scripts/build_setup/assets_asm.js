@@ -57,12 +57,14 @@ function generateAssetsHeaderFile(dir, bankNumber) {
 
     nameList.forEach((fname) => {
         const symName = filenameToSymbolName(dirName, fname).substring(1);
-        externLines.push(`extern const unsigned char* ${symName};`);
+        externLines.push(`extern const unsigned char* ${symName}_ptr;`);
+        externLines.push(`#define ${symName}_bank ${bankNumber}`);
+        externLines.push(`#define ${symName} ${symName}_ptr,${symName}_bank`);
     });
 
     return [
         `//@generated`,
-        '//Editing this manually is not recommended, run "make import" instead!'
+        '//Editing this manually is not recommended, run "make import" instead!',
         `#ifndef ${gate_define}`,
         `#define ${gate_define}`,
         '',

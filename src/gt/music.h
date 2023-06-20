@@ -7,7 +7,7 @@
 
 void init_music();
 
-void play_song(const unsigned char* song, char loop);
+void play_song(const unsigned char* song, char bank_num, char loop);
 
 void tick_music();
 
