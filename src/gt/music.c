@@ -76,7 +76,6 @@ void unpause_music() {
     paused_cursor = 0;
 }
 
-#pragma codeseg (push, "PROG0");
 void tick_music() {
     unsigned char n, noteMask;
     change_rom_bank(music_bank);
@@ -178,7 +177,6 @@ void tick_music() {
 
     flush_audio_params();
 }
-#pragma codeseg (pop);
 
 void do_noise_effect(char note, char bend, char duration) {
     set_note(2, note);
