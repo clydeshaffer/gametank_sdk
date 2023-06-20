@@ -15,7 +15,7 @@ int main () {
 
     while (1) {                                     //  Run forever
         clear_screen(3);
-        FillRect(col, row, 8, 8, 92);
+        draw_box_now(col, row, 8, 8, 92);
         col += dx;
         row += dy;
         if(col == 1) {

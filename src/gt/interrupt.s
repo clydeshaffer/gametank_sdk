@@ -9,7 +9,7 @@
 .import   _stop, _frameflag, _queue_pending, _queue_start
 .import   _queue_end, _queue_count, _flagsMirror, _frameflip
 .import   _banksMirror
-.export   _irq_int, _nmi_int, _NextQueue
+.export   _irq_int, _nmi_int, _next_draw_queue
 
 .pc02
 
@@ -67,14 +67,14 @@ _irq_int:
         LDA _queue_start
         CMP _queue_end
         BEQ finish_irq
-        JSR _NextQueue
+        JSR _next_draw_queue
 finish_irq:
         PLY
         PLA                    ; Restore accumulator contents
         PLX                    ; Restore X register contents
         RTI                    ; Return from all IRQ interrupts
 
-.proc _NextQueue: near
+.proc _next_draw_queue: near
         ;determined that there is more to process
         ;so load next set of parameters
         STZ BankReg

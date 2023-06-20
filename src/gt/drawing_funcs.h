@@ -41,25 +41,26 @@ void flip_pages();
 
 void load_spritesheet(char* spriteData, char bank);
 void clear_spritebank(char bank);
-void QueuePackedSprite(const Frame *sprite_table, char x, char y, char frame, char flip, char bank, char offset);
-void QueueSpriteRect();
-void QueueFillRect(unsigned char x, unsigned char y, unsigned char w, unsigned char h, unsigned char c);
-void NextQueue();
-void FlushQueue();
+void draw_sprite_frame(const Frame *sprite_table, char x, char y, char frame, char flip, char bank, char offset);
+void draw_sprite();
+void draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h, unsigned char c);
+
+void next_draw_queue();
+void await_draw_queue();
 
 
 void clear_border(char c);
 void clear_screen(char c);
 
-void FillRect(char x, char y, char w, char h, char c);
+void draw_box_now(char x, char y, char w, char h, char c);
 
-void SpriteRect(char x, char y, char w, char h, char gx, char gy);
+void draw_sprite_now(char x, char y, char w, char h, char gx, char gy);
 
 void draw_fade(unsigned char opacity);
 
 void printnum(int num);
 
-void printHEXnum(char num);
+void print_hex_num(char num);
 
 void print(char* str);
 
@@ -68,10 +69,5 @@ extern unsigned char queue_start, queue_end, queue_pending, queue_count;
 extern unsigned char queue_flags_param; //defined in draw_util.s
 
 extern Frame rect; //Defined in draw_util.s
-
-extern const unsigned char* HudSprites;
-extern const unsigned char* HeroSprites;
-extern const unsigned char* PauseScreen;
-extern const Frame* HeroFrames;
 
 #endif
