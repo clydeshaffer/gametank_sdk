@@ -43,7 +43,7 @@ function generateAssetsAssemblyFile(dir) {
     return [...exportLines, '', segmentLine, '', ...incbinLines].join('\n');
 }
 
-function generateAssetsHeaderFile(dir) {
+function generateAssetsHeaderFile(dir, bankNumber) {
 
     const nameList = fs.readdirSync(dir);
     const path = dir.split('/');
@@ -60,12 +60,15 @@ function generateAssetsHeaderFile(dir) {
     return [
         `#ifndef ${gate_define}`,
         `#define ${gate_define}`,
+        '',
+        `#define BANK_${dirName} ${bankNumber}`,
+        '',
         ...externLines,
         `#endif`
     ].join('\n');
 }
 
-function generateAssetAssemblyFiles(assetFolderNames) {
+function generateAssetAssemblyFiles(assetFolderNames, folderBankMap) {
 
     if (fs.existsSync(srcGenDir)){
         fs.rmSync(srcGenDir, { recursive: true });
@@ -73,13 +76,15 @@ function generateAssetAssemblyFiles(assetFolderNames) {
     fs.mkdirSync(srcGenDir, { recursive: true });
 
     assetFolderNames.forEach((folder) => {
-        const assetsAsm = generateAssetsAssemblyFile(`./${assetsDir}/${folder}`);
-        const assetsFileName = `${folder}.s.asset`;
+        if(fs.lstatSync(`./${assetsDir}/${folder}`).isDirectory()) {
+            const assetsAsm = generateAssetsAssemblyFile(`./${assetsDir}/${folder}`);
+            const assetsFileName = `${folder}.s.asset`;
 
-        const assetsHeader = generateAssetsHeaderFile(`./${assetsDir}/${folder}`);
-        const assetsHeaderName = `${folder}.h`
-        fs.writeFileSync(srcGenDir + '/' + assetsFileName, assetsAsm);
-        fs.writeFileSync(srcGenDir + '/' + assetsHeaderName, assetsHeader);
+            const assetsHeader = generateAssetsHeaderFile(`./${assetsDir}/${folder}`, folderBankMap[folder]);
+            const assetsHeaderName = `${folder}.h`
+            fs.writeFileSync(srcGenDir + '/' + assetsFileName, assetsAsm);
+            fs.writeFileSync(srcGenDir + '/' + assetsHeaderName, assetsHeader);
+        }
     });
 }
 

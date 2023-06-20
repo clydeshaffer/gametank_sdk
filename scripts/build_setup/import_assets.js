@@ -8,7 +8,7 @@ const linkerConfigFileName = './gametank-2M.cfg';
 const bankMakeListFileName = './bankMakeList';
 
 
-const dirInfo = fs.readdirSync(assetsDir);
+const dirInfo = fs.readdirSync(assetsDir).filter((p) => fs.statSync(assetsDir + '/' + p).isDirectory());
 
 const buildCfg = LinkerConfig.generateLinkerConfig(dirInfo, 1);
 
@@ -16,4 +16,4 @@ fs.writeFileSync(linkerConfigFileName, buildCfg.linker);
 fs.writeFileSync(bankMakeListFileName, buildCfg.bankMakeList);
 
 
-AssetAssembly.generateAssetAssemblyFiles(dirInfo);
+AssetAssembly.generateAssetAssemblyFiles(dirInfo, buildCfg.folderBankMap);

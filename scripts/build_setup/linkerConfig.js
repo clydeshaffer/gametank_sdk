@@ -6,6 +6,9 @@ function hex(num) {
 }
 
 function generateLinkerConfig(assetFolderNames, extra_code_banks) {
+
+    let folderBankMap  = {};
+
     function genSection(name, entries) {
         var outText = name + ' {\n';
         for(var entName in entries) {
@@ -108,6 +111,7 @@ SYMBOLS {
         bankNames.push(`bank${hex(bankNum)}`);
         const bankFile = `"%O.bank${hex(bankNum)}"`;
         const segmentName = names2[i];
+        folderBankMap[segmentName] = bankNum;
         section_MEMORY[bankName] = {
             start : '$8000',
             size : '$4000',
@@ -170,7 +174,8 @@ SYMBOLS {
 
     return {
         linker: output,
-        bankMakeList : `_BANKS = ${bankNames.join(' ')}`
+        bankMakeList : `_BANKS = ${bankNames.join(' ')}`,
+        folderBankMap
     }
 }
 
