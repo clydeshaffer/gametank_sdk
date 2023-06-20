@@ -20,7 +20,7 @@ function transformFilename(filename) {
 }
 
 function filenameToSymbolName(dirName, fileName) {
-    return '_ASSET__' + dirName + '__' + fileName.replace('.', '_');
+    return '_ASSET__' + dirName + '__' + fileName.replace('.', '_') + '_ptr';
 }
 
 function generateAssetsAssemblyFile(dir) {
