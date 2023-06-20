@@ -20,7 +20,7 @@ function transformFilename(filename) {
 }
 
 function filenameToSymbolName(dirName, fileName) {
-    return '_ASSET__' + dirName + '__' + fileName.replace('.', '_') + '_ptr';
+    return '_ASSET__' + dirName + '__' + fileName.replace('.', '_');
 }
 
 function generateAssetsAssemblyFile(dir) {
@@ -34,8 +34,8 @@ function generateAssetsAssemblyFile(dir) {
 
     nameList.forEach((fname) => {
         const symName = filenameToSymbolName(dirName, fname);
-        exportLines.push(`    .export ${symName}`);
-        incbinLines.push(`${symName}:`)
+        exportLines.push(`    .export ${symName}_ptr`);
+        incbinLines.push(`${symName}_ptr:`)
         incbinLines.push(`    .incbin "build/assets/${dirName}/${transformFilename(fname)}"`);
         incbinLines.push('');
     });
