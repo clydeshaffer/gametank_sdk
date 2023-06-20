@@ -1,5 +1,8 @@
 #include "gametank.h"
 #include "drawing_funcs.h"
+#include "dynawave.h"
+#include "music.h"
+#include "gen/assets/music.h"
 
 int main () {
     char col = 30, row = 20;
@@ -12,6 +15,10 @@ int main () {
     flip_pages();
 
     clear_border(0);
+
+    init_dynawave(); //Music Example: Initialize the soundcard
+    init_music(); //Music Example: Initialize the music player
+    play_song(&ASSET__music__fanfare_mid, REPEAT_NONE); //Music Example: Start playing a song
 
     while (1) {                                     //  Run forever
         clear_screen(3);
@@ -28,6 +35,8 @@ int main () {
         } else if(row == 112) {
             dy = -1;
         }
+
+        tick_music(); //Music Example: We must call this every frame to continue music playback
         
         flip_pages();
         sleep(1);
