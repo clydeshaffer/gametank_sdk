@@ -34,7 +34,7 @@ void init_music() {
 
 void play_song(const unsigned char* song, char loop) {
     char *prev_cursor = music_cursor;
-    ChangeRomBank(BANK_COMMON);
+    change_rom_bank(BANK_COMMON);
     music_cursor = song;
 
     switch(loop) {
@@ -77,7 +77,7 @@ void unpause_music() {
 #pragma codeseg (push, "PROG0");
 void tick_music() {
     unsigned char n, noteMask;
-    ChangeRomBank(BANK_COMMON);
+    change_rom_bank(BANK_COMMON);
     if(audio_amplitudes[0] > 0) {
         audio_amplitudes[0]--;
         push_audio_param(AMPLITUDE, audio_amplitudes[0]);

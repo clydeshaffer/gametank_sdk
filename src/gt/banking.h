@@ -1,7 +1,7 @@
 #ifndef BANKING_H
 #define BANKING_H
 
-void ChangeRomBank(unsigned char banknum);
+void change_rom_bank(unsigned char banknum);
 
 #define BANK_COMMON 0
 #define BANK_TILES 1

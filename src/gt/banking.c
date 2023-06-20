@@ -4,7 +4,7 @@ unsigned char romBankMirror;
 
 void SwitchRomBank(unsigned char x);
 
-void ChangeRomBank(unsigned char banknum) {
+void change_rom_bank(unsigned char banknum) {
     if(banknum == romBankMirror)
         return;
     romBankMirror = banknum;
