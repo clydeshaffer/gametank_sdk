@@ -1,0 +1,444 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/bin/node', '/usr/bin/npm', 'install', 'jimp' ]
+2 info using npm@3.5.2
+3 info using node@v8.10.0
+4 silly loadCurrentTree Starting
+5 silly install loadCurrentTree
+6 silly install readLocalPackageData
+7 silly fetchPackageMetaData jimp@^0.16.1
+8 silly fetchNamedPackageData jimp
+9 silly mapToRegistry name jimp
+10 silly mapToRegistry using default registry
+11 silly mapToRegistry registry https://registry.npmjs.org/
+12 silly mapToRegistry uri https://registry.npmjs.org/jimp
+13 verbose request uri https://registry.npmjs.org/jimp
+14 verbose request no auth needed
+15 info attempt registry request try #1 at 9:03:31 PM
+16 verbose request id 72949ff48c809d89
+17 verbose etag W/"4ecb985043cfbffaa73065295e087edd"
+18 verbose lastModified Sun, 19 Jun 2022 04:25:27 GMT
+19 http request GET https://registry.npmjs.org/jimp
+20 http 304 https://registry.npmjs.org/jimp
+21 verbose headers { date: 'Fri, 08 Jul 2022 01:03:31 GMT',
+21 verbose headers   connection: 'keep-alive',
+21 verbose headers   'cf-ray': '7274e6906ad2f04d-EWR',
+21 verbose headers   age: '148',
+21 verbose headers   'cache-control': 'public, max-age=300',
+21 verbose headers   etag: '"4ecb985043cfbffaa73065295e087edd"',
+21 verbose headers   'last-modified': 'Sun, 19 Jun 2022 04:25:27 GMT',
+21 verbose headers   vary: 'Accept-Encoding',
+21 verbose headers   'cf-cache-status': 'HIT',
+21 verbose headers   'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+21 verbose headers   'x-amz-replication-status': 'COMPLETED',
+21 verbose headers   server: 'cloudflare' }
+22 silly get cb [ 304,
+22 silly get   { date: 'Fri, 08 Jul 2022 01:03:31 GMT',
+22 silly get     connection: 'keep-alive',
+22 silly get     'cf-ray': '7274e6906ad2f04d-EWR',
+22 silly get     age: '148',
+22 silly get     'cache-control': 'public, max-age=300',
+22 silly get     etag: '"4ecb985043cfbffaa73065295e087edd"',
+22 silly get     'last-modified': 'Sun, 19 Jun 2022 04:25:27 GMT',
+22 silly get     vary: 'Accept-Encoding',
+22 silly get     'cf-cache-status': 'HIT',
+22 silly get     'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+22 silly get     'x-amz-replication-status': 'COMPLETED',
+22 silly get     server: 'cloudflare' } ]
+23 verbose etag https://registry.npmjs.org/jimp from cache
+24 verbose get saving jimp to /home/clyde/.npm/registry.npmjs.org/jimp/.cache.json
+25 silly install normalizeTree
+26 silly loadCurrentTree Finishing
+27 silly loadIdealTree Starting
+28 silly install loadIdealTree
+29 silly cloneCurrentTree Starting
+30 silly install cloneCurrentTreeToIdealTree
+31 silly cloneCurrentTree Finishing
+32 silly loadShrinkwrap Starting
+33 silly install loadShrinkwrap
+34 silly loadShrinkwrap Finishing
+35 silly loadAllDepsIntoIdealTree Starting
+36 silly install loadAllDepsIntoIdealTree
+37 silly resolveWithNewModule jimp@0.16.1 checking installable status
+38 silly cache add args [ 'jimp@^0.16.1', null ]
+39 verbose cache add spec jimp@^0.16.1
+40 silly cache add parsed spec Result {
+40 silly cache add   raw: 'jimp@^0.16.1',
+40 silly cache add   scope: null,
+40 silly cache add   name: 'jimp',
+40 silly cache add   rawSpec: '^0.16.1',
+40 silly cache add   spec: '>=0.16.1 <0.17.0',
+40 silly cache add   type: 'range' }
+41 silly addNamed jimp@>=0.16.1 <0.17.0
+42 verbose addNamed ">=0.16.1 <0.17.0" is a valid semver range for jimp
+43 silly addNameRange { name: 'jimp', range: '>=0.16.1 <0.17.0', hasData: false }
+44 silly mapToRegistry name jimp
+45 silly mapToRegistry using default registry
+46 silly mapToRegistry registry https://registry.npmjs.org/
+47 silly mapToRegistry uri https://registry.npmjs.org/jimp
+48 verbose addNameRange registry:https://registry.npmjs.org/jimp not in flight; fetching
+49 verbose get https://registry.npmjs.org/jimp not expired, no request
+50 silly addNameRange number 2 { name: 'jimp', range: '>=0.16.1 <0.17.0', hasData: true }
+51 silly addNameRange versions [ 'jimp',
+51 silly addNameRange   [ '0.1.0',
+51 silly addNameRange     '0.1.1',
+51 silly addNameRange     '0.1.2',
+51 silly addNameRange     '0.1.3',
+51 silly addNameRange     '0.1.4',
+51 silly addNameRange     '0.2.0',
+51 silly addNameRange     '0.2.1',
+51 silly addNameRange     '0.2.2',
+51 silly addNameRange     '0.2.3',
+51 silly addNameRange     '0.2.4',
+51 silly addNameRange     '0.2.5',
+51 silly addNameRange     '0.2.7',
+51 silly addNameRange     '0.2.8',
+51 silly addNameRange     '0.2.9',
+51 silly addNameRange     '0.2.10',
+51 silly addNameRange     '0.2.11',
+51 silly addNameRange     '0.2.12',
+51 silly addNameRange     '0.2.13',
+51 silly addNameRange     '0.2.14',
+51 silly addNameRange     '0.2.15',
+51 silly addNameRange     '0.2.16',
+51 silly addNameRange     '0.2.17',
+51 silly addNameRange     '0.2.18',
+51 silly addNameRange     '0.2.19',
+51 silly addNameRange     '0.2.20',
+51 silly addNameRange     '0.2.21',
+51 silly addNameRange     '0.2.22',
+51 silly addNameRange     '0.2.23',
+51 silly addNameRange     '0.2.24',
+51 silly addNameRange     '0.2.25',
+51 silly addNameRange     '0.2.26',
+51 silly addNameRange     '0.2.27',
+51 silly addNameRange     '0.2.28',
+51 silly addNameRange     '0.3.1',
+51 silly addNameRange     '0.3.2',
+51 silly addNameRange     '0.3.3',
+51 silly addNameRange     '0.3.4',
+51 silly addNameRange     '0.3.5',
+51 silly addNameRange     '0.3.6-alpha.5',
+51 silly addNameRange     '0.3.6-alpha.6',
+51 silly addNameRange     '0.3.7',
+51 silly addNameRange     '0.3.8',
+51 silly addNameRange     '0.3.9-alpha.0',
+51 silly addNameRange     '0.3.9',
+51 silly addNameRange     '0.3.10',
+51 silly addNameRange     '0.3.11',
+51 silly addNameRange     '0.4.0',
+51 silly addNameRange     '0.5.0',
+51 silly addNameRange     '0.5.1',
+51 silly addNameRange     '0.5.2',
+51 silly addNameRange     '0.5.3',
+51 silly addNameRange     '0.5.4',
+51 silly addNameRange     '0.5.5',
+51 silly addNameRange     '0.5.6',
+51 silly addNameRange     '0.6.0',
+51 silly addNameRange     '0.6.1',
+51 silly addNameRange     '0.6.2',
+51 silly addNameRange     '0.6.3',
+51 silly addNameRange     '0.6.4',
+51 silly addNameRange     '0.6.5-canary.4564f3c.0',
+51 silly addNameRange     '0.6.5-canary.eeb6481.0',
+51 silly addNameRange     '0.6.5-canary.784.118.0',
+51 silly addNameRange     '0.6.5-canary.784.124.0',
+51 silly addNameRange     '0.6.5',
+51 silly addNameRange     '0.6.6',
+51 silly addNameRange     '0.6.7',
+51 silly addNameRange     '0.6.7-canary.783.157.0',
+51 silly addNameRange     '0.6.8-canary.783.163.0',
+51 silly addNameRange     '0.6.8',
+51 silly addNameRange     '0.7.0',
+51 silly addNameRange     '0.7.1-canary.770.193.0',
+51 silly addNameRange     '0.8.0',
+51 silly addNameRange     '0.8.1-canary.786.211.0',
+51 silly addNameRange     '0.8.1-canary.786.217.0',
+51 silly addNameRange     '0.8.1-canary.786.223.0',
+51 silly addNameRange     '0.8.1-canary.786.232.0',
+51 silly addNameRange     '0.8.1-canary.786.242.0',
+51 silly addNameRange     '0.8.1-canary.786.262.0',
+51 silly addNameRange     '0.8.1',
+51 silly addNameRange     '0.8.1-canary.791.276.0',
+51 silly addNameRange     '0.8.2-canary.792.283.0',
+51 silly addNameRange     '0.8.2-canary.792.290.0',
+51 silly addNameRange     '0.8.1-canary.789.301.0',
+51 silly addNameRange     '0.8.2-canary.794.308.0',
+51 silly addNameRange     '0.8.2',
+51 silly addNameRange     '0.8.2-canary.792.332.0',
+51 silly addNameRange     '0.8.2-canary.792.339.0',
+51 silly addNameRange     '0.8.2-canary.792.349.0',
+51 silly addNameRange     '0.8.2-canary.792.353.0',
+51 silly addNameRange     '0.8.2-canary.792.360.0',
+51 silly addNameRange     '0.8.3',
+51 silly addNameRange     '0.8.4-canary.798.377.0',
+51 silly addNameRange     '0.8.4',
+51 silly addNameRange     '0.8.5-canary.800.426.0',
+51 silly addNameRange     '0.8.5-canary.b147e81.0',
+51 silly addNameRange     '0.8.5-canary.1.b147e81.0',
+51 silly addNameRange     '0.8.5-canary.799.447.0',
+51 silly addNameRange     '0.8.1-canary.789.460.0',
+51 silly addNameRange     '0.8.1-canary.791.466.0',
+51 silly addNameRange     '0.8.5',
+51 silly addNameRange     ... 70 more items ] ]
+52 silly addNamed jimp@0.16.1
+53 verbose addNamed "0.16.1" is a plain semver version for jimp
+54 silly cache afterAdd jimp@0.16.1
+55 verbose afterAdd /home/clyde/.npm/jimp/0.16.1/package/package.json not in flight; writing
+56 verbose afterAdd /home/clyde/.npm/jimp/0.16.1/package/package.json written
+57 silly fetchNamedPackageData @babel/runtime
+58 silly mapToRegistry name @babel/runtime
+59 silly mapToRegistry scope (from package name) @babel
+60 verbose mapToRegistry no registry URL found in name for scope @babel
+61 silly mapToRegistry using default registry
+62 silly mapToRegistry registry https://registry.npmjs.org/
+63 silly mapToRegistry uri https://registry.npmjs.org/@babel%2fruntime
+64 silly fetchNamedPackageData @jimp/custom
+65 silly mapToRegistry name @jimp/custom
+66 silly mapToRegistry scope (from package name) @jimp
+67 verbose mapToRegistry no registry URL found in name for scope @jimp
+68 silly mapToRegistry using default registry
+69 silly mapToRegistry registry https://registry.npmjs.org/
+70 silly mapToRegistry uri https://registry.npmjs.org/@jimp%2fcustom
+71 silly fetchNamedPackageData @jimp/plugins
+72 silly mapToRegistry name @jimp/plugins
+73 silly mapToRegistry scope (from package name) @jimp
+74 verbose mapToRegistry no registry URL found in name for scope @jimp
+75 silly mapToRegistry using default registry
+76 silly mapToRegistry registry https://registry.npmjs.org/
+77 silly mapToRegistry uri https://registry.npmjs.org/@jimp%2fplugins
+78 silly fetchNamedPackageData @jimp/types
+79 silly mapToRegistry name @jimp/types
+80 silly mapToRegistry scope (from package name) @jimp
+81 verbose mapToRegistry no registry URL found in name for scope @jimp
+82 silly mapToRegistry using default registry
+83 silly mapToRegistry registry https://registry.npmjs.org/
+84 silly mapToRegistry uri https://registry.npmjs.org/@jimp%2ftypes
+85 silly fetchNamedPackageData regenerator-runtime
+86 silly mapToRegistry name regenerator-runtime
+87 silly mapToRegistry using default registry
+88 silly mapToRegistry registry https://registry.npmjs.org/
+89 silly mapToRegistry uri https://registry.npmjs.org/regenerator-runtime
+90 verbose request uri https://registry.npmjs.org/@jimp%2fcustom
+91 verbose request no auth needed
+92 info attempt registry request try #1 at 9:03:32 PM
+93 verbose etag W/"7ebce699383db620f9a7149f0ad45d32"
+94 verbose lastModified Sat, 21 May 2022 05:59:25 GMT
+95 http request GET https://registry.npmjs.org/@jimp%2fcustom
+96 verbose request uri https://registry.npmjs.org/@jimp%2fplugins
+97 verbose request no auth needed
+98 info attempt registry request try #1 at 9:03:32 PM
+99 verbose etag W/"54de16a25df545d3d0585015f9ff9290"
+100 verbose lastModified Sat, 21 May 2022 05:59:25 GMT
+101 http request GET https://registry.npmjs.org/@jimp%2fplugins
+102 verbose request uri https://registry.npmjs.org/@babel%2fruntime
+103 verbose request no auth needed
+104 info attempt registry request try #1 at 9:03:32 PM
+105 verbose etag W/"dffe9aecec4f326d62e7d5e79ab156d4"
+106 verbose lastModified Mon, 27 Jun 2022 19:49:48 GMT
+107 http request GET https://registry.npmjs.org/@babel%2fruntime
+108 verbose request uri https://registry.npmjs.org/regenerator-runtime
+109 verbose request no auth needed
+110 info attempt registry request try #1 at 9:03:32 PM
+111 verbose etag W/"8b8d9ccebe41066614ab4157983491f6"
+112 verbose lastModified Sun, 26 Jun 2022 10:42:00 GMT
+113 http request GET https://registry.npmjs.org/regenerator-runtime
+114 verbose request uri https://registry.npmjs.org/@jimp%2ftypes
+115 verbose request no auth needed
+116 info attempt registry request try #1 at 9:03:32 PM
+117 verbose etag W/"20bb4263fc038423617d3ef39b93bb7a"
+118 verbose lastModified Sat, 21 May 2022 05:59:25 GMT
+119 http request GET https://registry.npmjs.org/@jimp%2ftypes
+120 http 304 https://registry.npmjs.org/regenerator-runtime
+121 verbose headers { date: 'Fri, 08 Jul 2022 01:03:32 GMT',
+121 verbose headers   connection: 'keep-alive',
+121 verbose headers   'cf-ray': '7274e6936d5a0cf1-EWR',
+121 verbose headers   age: '295',
+121 verbose headers   'cache-control': 'public, max-age=300',
+121 verbose headers   etag: '"8b8d9ccebe41066614ab4157983491f6"',
+121 verbose headers   'last-modified': 'Sun, 26 Jun 2022 10:42:00 GMT',
+121 verbose headers   vary: 'Accept-Encoding',
+121 verbose headers   'cf-cache-status': 'HIT',
+121 verbose headers   'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+121 verbose headers   'x-amz-replication-status': 'COMPLETED',
+121 verbose headers   server: 'cloudflare' }
+122 silly get cb [ 304,
+122 silly get   { date: 'Fri, 08 Jul 2022 01:03:32 GMT',
+122 silly get     connection: 'keep-alive',
+122 silly get     'cf-ray': '7274e6936d5a0cf1-EWR',
+122 silly get     age: '295',
+122 silly get     'cache-control': 'public, max-age=300',
+122 silly get     etag: '"8b8d9ccebe41066614ab4157983491f6"',
+122 silly get     'last-modified': 'Sun, 26 Jun 2022 10:42:00 GMT',
+122 silly get     vary: 'Accept-Encoding',
+122 silly get     'cf-cache-status': 'HIT',
+122 silly get     'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+122 silly get     'x-amz-replication-status': 'COMPLETED',
+122 silly get     server: 'cloudflare' } ]
+123 verbose etag https://registry.npmjs.org/regenerator-runtime from cache
+124 verbose get saving regenerator-runtime to /home/clyde/.npm/registry.npmjs.org/regenerator-runtime/.cache.json
+125 silly resolveWithNewModule regenerator-runtime@0.13.9 checking installable status
+126 silly cache add args [ 'regenerator-runtime@^0.13.3', null ]
+127 verbose cache add spec regenerator-runtime@^0.13.3
+128 silly cache add parsed spec Result {
+128 silly cache add   raw: 'regenerator-runtime@^0.13.3',
+128 silly cache add   scope: null,
+128 silly cache add   name: 'regenerator-runtime',
+128 silly cache add   rawSpec: '^0.13.3',
+128 silly cache add   spec: '>=0.13.3 <0.14.0',
+128 silly cache add   type: 'range' }
+129 silly addNamed regenerator-runtime@>=0.13.3 <0.14.0
+130 verbose addNamed ">=0.13.3 <0.14.0" is a valid semver range for regenerator-runtime
+131 silly addNameRange { name: 'regenerator-runtime',
+131 silly addNameRange   range: '>=0.13.3 <0.14.0',
+131 silly addNameRange   hasData: false }
+132 silly mapToRegistry name regenerator-runtime
+133 silly mapToRegistry using default registry
+134 silly mapToRegistry registry https://registry.npmjs.org/
+135 silly mapToRegistry uri https://registry.npmjs.org/regenerator-runtime
+136 verbose addNameRange registry:https://registry.npmjs.org/regenerator-runtime not in flight; fetching
+137 verbose get https://registry.npmjs.org/regenerator-runtime not expired, no request
+138 silly addNameRange number 2 { name: 'regenerator-runtime',
+138 silly addNameRange   range: '>=0.13.3 <0.14.0',
+138 silly addNameRange   hasData: true }
+139 silly addNameRange versions [ 'regenerator-runtime',
+139 silly addNameRange   [ '0.9.0',
+139 silly addNameRange     '0.9.1',
+139 silly addNameRange     '0.9.2',
+139 silly addNameRange     '0.9.3',
+139 silly addNameRange     '0.9.4',
+139 silly addNameRange     '0.9.5',
+139 silly addNameRange     '0.9.6',
+139 silly addNameRange     '0.10.0',
+139 silly addNameRange     '0.10.1',
+139 silly addNameRange     '0.10.2',
+139 silly addNameRange     '0.10.3',
+139 silly addNameRange     '0.10.4',
+139 silly addNameRange     '0.10.5',
+139 silly addNameRange     '0.11.0',
+139 silly addNameRange     '0.11.1',
+139 silly addNameRange     '0.12.0',
+139 silly addNameRange     '0.12.1',
+139 silly addNameRange     '0.13.0',
+139 silly addNameRange     '0.13.1',
+139 silly addNameRange     '0.13.2',
+139 silly addNameRange     '0.13.3',
+139 silly addNameRange     '0.13.4',
+139 silly addNameRange     '0.13.5',
+139 silly addNameRange     '0.13.6',
+139 silly addNameRange     '0.13.7',
+139 silly addNameRange     '0.13.8',
+139 silly addNameRange     '0.13.9' ] ]
+140 silly addNamed regenerator-runtime@0.13.9
+141 verbose addNamed "0.13.9" is a plain semver version for regenerator-runtime
+142 http 304 https://registry.npmjs.org/@jimp%2fcustom
+143 verbose headers { date: 'Fri, 08 Jul 2022 01:03:32 GMT',
+143 verbose headers   connection: 'keep-alive',
+143 verbose headers   'cf-ray': '7274e6932d60f04d-EWR',
+143 verbose headers   age: '146',
+143 verbose headers   'cache-control': 'public, max-age=300',
+143 verbose headers   etag: '"7ebce699383db620f9a7149f0ad45d32"',
+143 verbose headers   'last-modified': 'Sat, 21 May 2022 05:59:25 GMT',
+143 verbose headers   vary: 'Accept-Encoding',
+143 verbose headers   'cf-cache-status': 'HIT',
+143 verbose headers   'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+143 verbose headers   'x-amz-replication-status': 'COMPLETED',
+143 verbose headers   server: 'cloudflare' }
+144 silly get cb [ 304,
+144 silly get   { date: 'Fri, 08 Jul 2022 01:03:32 GMT',
+144 silly get     connection: 'keep-alive',
+144 silly get     'cf-ray': '7274e6932d60f04d-EWR',
+144 silly get     age: '146',
+144 silly get     'cache-control': 'public, max-age=300',
+144 silly get     etag: '"7ebce699383db620f9a7149f0ad45d32"',
+144 silly get     'last-modified': 'Sat, 21 May 2022 05:59:25 GMT',
+144 silly get     vary: 'Accept-Encoding',
+144 silly get     'cf-cache-status': 'HIT',
+144 silly get     'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+144 silly get     'x-amz-replication-status': 'COMPLETED',
+144 silly get     server: 'cloudflare' } ]
+145 verbose etag https://registry.npmjs.org/@jimp%2fcustom from cache
+146 verbose get saving @jimp/custom to /home/clyde/.npm/registry.npmjs.org/_40jimp_252fcustom/.cache.json
+147 http 304 https://registry.npmjs.org/@babel%2fruntime
+148 verbose headers { date: 'Fri, 08 Jul 2022 01:03:32 GMT',
+148 verbose headers   connection: 'keep-alive',
+148 verbose headers   'cf-ray': '7274e6936d7f17e5-EWR',
+148 verbose headers   age: '214',
+148 verbose headers   'cache-control': 'public, max-age=300',
+148 verbose headers   etag: '"dffe9aecec4f326d62e7d5e79ab156d4"',
+148 verbose headers   'last-modified': 'Mon, 27 Jun 2022 19:49:48 GMT',
+148 verbose headers   vary: 'Accept-Encoding',
+148 verbose headers   'cf-cache-status': 'HIT',
+148 verbose headers   'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+148 verbose headers   'x-amz-replication-status': 'COMPLETED',
+148 verbose headers   server: 'cloudflare' }
+149 silly get cb [ 304,
+149 silly get   { date: 'Fri, 08 Jul 2022 01:03:32 GMT',
+149 silly get     connection: 'keep-alive',
+149 silly get     'cf-ray': '7274e6936d7f17e5-EWR',
+149 silly get     age: '214',
+149 silly get     'cache-control': 'public, max-age=300',
+149 silly get     etag: '"dffe9aecec4f326d62e7d5e79ab156d4"',
+149 silly get     'last-modified': 'Mon, 27 Jun 2022 19:49:48 GMT',
+149 silly get     vary: 'Accept-Encoding',
+149 silly get     'cf-cache-status': 'HIT',
+149 silly get     'expect-ct': 'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
+149 silly get     'x-amz-replication-status': 'COMPLETED',
+149 silly get     server: 'cloudflare' } ]
+150 verbose etag https://registry.npmjs.org/@babel%2fruntime from cache
+151 verbose get saving @babel/runtime to /home/clyde/.npm/registry.npmjs.org/_40babel_252fruntime/.cache.json
+152 silly cache afterAdd regenerator-runtime@0.13.9
+153 verbose afterAdd /home/clyde/.npm/regenerator-runtime/0.13.9/package/package.json not in flight; writing
+154 silly resolveWithNewModule @jimp/custom@0.16.1 checking installable status
+155 silly cache add args [ '@jimp/custom@^0.16.1', null ]
+156 verbose cache add spec @jimp/custom@^0.16.1
+157 silly cache add parsed spec Result {
+157 silly cache add   raw: '@jimp/custom@^0.16.1',
+157 silly cache add   scope: '@jimp',
+157 silly cache add   name: '@jimp/custom',
+157 silly cache add   rawSpec: '^0.16.1',
+157 silly cache add   spec: '>=0.16.1 <0.17.0',
+157 silly cache add   type: 'range' }
+158 silly addNamed @jimp/custom@>=0.16.1 <0.17.0
+159 verbose addNamed ">=0.16.1 <0.17.0" is a valid semver range for @jimp/custom
+160 silly addNameRange { name: '@jimp/custom',
+160 silly addNameRange   range: '>=0.16.1 <0.17.0',
+160 silly addNameRange   hasData: false }
+161 silly mapToRegistry name @jimp/custom
+162 silly mapToRegistry scope (from package name) @jimp
+163 verbose mapToRegistry no registry URL found in name for scope @jimp
+164 silly mapToRegistry using default registry
+165 silly mapToRegistry registry https://registry.npmjs.org/
+166 silly mapToRegistry uri https://registry.npmjs.org/@jimp%2fcustom
+167 verbose addNameRange registry:https://registry.npmjs.org/@jimp%2fcustom not in flight; fetching
+168 verbose afterAdd /home/clyde/.npm/regenerator-runtime/0.13.9/package/package.json written
+169 verbose stack Error: Missing required argument #1
+169 verbose stack     at andLogAndFinish (/usr/share/npm/lib/fetch-package-metadata.js:31:3)
+169 verbose stack     at fetchPackageMetadata (/usr/share/npm/lib/fetch-package-metadata.js:51:22)
+169 verbose stack     at resolveWithNewModule (/usr/share/npm/lib/install/deps.js:456:12)
+169 verbose stack     at /usr/share/npm/lib/install/deps.js:457:7
+169 verbose stack     at /usr/share/npm/node_modules/iferr/index.js:13:50
+169 verbose stack     at /usr/share/npm/lib/fetch-package-metadata.js:37:12
+169 verbose stack     at addRequestedAndFinish (/usr/share/npm/lib/fetch-package-metadata.js:82:5)
+169 verbose stack     at returnAndAddMetadata (/usr/share/npm/lib/fetch-package-metadata.js:117:7)
+169 verbose stack     at pickVersionFromRegistryDocument (/usr/share/npm/lib/fetch-package-metadata.js:134:20)
+169 verbose stack     at /usr/share/npm/node_modules/iferr/index.js:13:50
+170 verbose cwd /home/clyde/repos/fiend/scripts
+171 error Linux 4.15.0-188-generic
+172 error argv "/usr/bin/node" "/usr/bin/npm" "install" "jimp"
+173 error node v8.10.0
+174 error npm  v3.5.2
+175 error code EMISSINGARG
+176 error typeerror Error: Missing required argument #1
+176 error typeerror     at andLogAndFinish (/usr/share/npm/lib/fetch-package-metadata.js:31:3)
+176 error typeerror     at fetchPackageMetadata (/usr/share/npm/lib/fetch-package-metadata.js:51:22)
+176 error typeerror     at resolveWithNewModule (/usr/share/npm/lib/install/deps.js:456:12)
+176 error typeerror     at /usr/share/npm/lib/install/deps.js:457:7
+176 error typeerror     at /usr/share/npm/node_modules/iferr/index.js:13:50
+176 error typeerror     at /usr/share/npm/lib/fetch-package-metadata.js:37:12
+176 error typeerror     at addRequestedAndFinish (/usr/share/npm/lib/fetch-package-metadata.js:82:5)
+176 error typeerror     at returnAndAddMetadata (/usr/share/npm/lib/fetch-package-metadata.js:117:7)
+176 error typeerror     at pickVersionFromRegistryDocument (/usr/share/npm/lib/fetch-package-metadata.js:134:20)
+176 error typeerror     at /usr/share/npm/node_modules/iferr/index.js:13:50
+177 error typeerror This is an error with npm itself. Please report this error at:
+177 error typeerror     <http://github.com/npm/npm/issues>
+178 verbose exit [ 1, true ]

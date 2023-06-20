@@ -1,0 +1,17 @@
+{
+  "name": "fiend-scripts",
+  "version": "1.0.0",
+  "description": "build scripts for Accursed Fiend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Clyde",
+  "license": "MIT",
+  "dependencies": {
+    "bitmap-manipulation": "^2.0.0",
+    "jimp": "^0.16.1",
+    "minimist": "^1.2.5",
+    "midi-file": "^1.1.2"
+  }
+}

@@ -1,0 +1,13 @@
+*.obj
+*.map
+*.bin
+*.TMP
+*.si
+*.gtg
+*.deflate
+bin
+build
+src/
+scripts/converters/node_modules
+bankMakeList
+gametank-2M.cfg
