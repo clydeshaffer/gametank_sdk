@@ -40,7 +40,10 @@ function generateAssetsAssemblyFile(dir) {
         incbinLines.push('');
     });
 
-    return [...exportLines, '', segmentLine, '', ...incbinLines].join('\n');
+    return [
+        '; @generated',
+        '; Editing this manually is not recommended, run "make import" instead!',
+        ...exportLines, '', segmentLine, '', ...incbinLines].join('\n');
 }
 
 function generateAssetsHeaderFile(dir, bankNumber) {
@@ -58,6 +61,8 @@ function generateAssetsHeaderFile(dir, bankNumber) {
     });
 
     return [
+        `//@generated`,
+        '//Editing this manually is not recommended, run "make import" instead!'
         `#ifndef ${gate_define}`,
         `#define ${gate_define}`,
         '',

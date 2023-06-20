@@ -166,7 +166,8 @@ SYMBOLS {
     function printout(str) {
         output += str + '\n';
     }
-    printout('#Linker config to create a GameTank 2 Megabyte image');
+    printout('#GENERATED Linker config to create a GameTank 2 Megabyte image');
+    printout('#Editing this manually is not recommended, run "make import" instead!');
     printout(genSection('MEMORY', section_MEMORY));
     printout('');
     printout(genSection('SEGMENTS', section_SEGMENTS));
