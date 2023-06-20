@@ -76,4 +76,6 @@
 
 extern char frameflag, frameflip, flagsMirror, banksMirror, bankflip;
 
+void wait ();
+
 #endif
