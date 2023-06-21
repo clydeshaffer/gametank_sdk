@@ -8,7 +8,7 @@ If you have pulled and built the GameTankEmulator repo in an adjacent folder, ru
 
 src/main.c contains the code that will run after the console powers on
 
-##Build requirements:
+## Build requirements:
 
 * cc65 https://cc65.github.io/
 
@@ -18,6 +18,6 @@ src/main.c contains the code that will run after the console powers on
 
 * GNU Make
 
-##Testing requirements:
+## Testing requirements:
 
 * GameTank Emulator https://github.com/clydeshaffer/GameTankEmulator
