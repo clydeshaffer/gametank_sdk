@@ -1,0 +1,90 @@
+{ "frames": [
+   {
+    "filename": "char_blue_1 0.png",
+    "frame": { "x": 0, "y": 0, "w": 25, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 24, "w": 25, "h": 32 },
+    "sourceSize": { "w": 56, "h": 56 },
+    "duration": 100
+   },
+   {
+    "filename": "char_blue_1 1.png",
+    "frame": { "x": 95, "y": 0, "w": 21, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 18, "y": 24, "w": 21, "h": 32 },
+    "sourceSize": { "w": 56, "h": 56 },
+    "duration": 100
+   },
+   {
+    "filename": "char_blue_1 2.png",
+    "frame": { "x": 0, "y": 32, "w": 17, "h": 33 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 19, "y": 23, "w": 17, "h": 33 },
+    "sourceSize": { "w": 56, "h": 56 },
+    "duration": 100
+   },
+   {
+    "filename": "char_blue_1 3.png",
+    "frame": { "x": 72, "y": 0, "w": 23, "h": 30 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 23, "w": 23, "h": 30 },
+    "sourceSize": { "w": 56, "h": 56 },
+    "duration": 100
+   },
+   {
+    "filename": "char_blue_1 4.png",
+    "frame": { "x": 25, "y": 30, "w": 21, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 17, "y": 24, "w": 21, "h": 32 },
+    "sourceSize": { "w": 56, "h": 56 },
+    "duration": 100
+   },
+   {
+    "filename": "char_blue_1 5.png",
+    "frame": { "x": 72, "y": 30, "w": 18, "h": 32 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 19, "y": 24, "w": 18, "h": 32 },
+    "sourceSize": { "w": 56, "h": 56 },
+    "duration": 100
+   },
+   {
+    "filename": "char_blue_1 6.png",
+    "frame": { "x": 50, "y": 0, "w": 22, "h": 33 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 18, "y": 23, "w": 22, "h": 33 },
+    "sourceSize": { "w": 56, "h": 56 },
+    "duration": 100
+   },
+   {
+    "filename": "char_blue_1 7.png",
+    "frame": { "x": 25, "y": 0, "w": 25, "h": 30 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 16, "y": 23, "w": 25, "h": 30 },
+    "sourceSize": { "w": 56, "h": 56 },
+    "duration": 100
+   }
+ ],
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.2.40-x64",
+  "image": "char_blue_1.bmp",
+  "format": "I8",
+  "size": { "w": 128, "h": 65 },
+  "scale": "1",
+  "frameTags": [
+  ],
+  "layers": [
+   { "name": "Sprite Sheet", "opacity": 255, "blendMode": "normal" }
+  ],
+  "slices": [
+  ]
+ }
+}
