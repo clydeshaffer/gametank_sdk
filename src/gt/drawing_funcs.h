@@ -39,7 +39,7 @@ typedef struct Frame {
 void sleep(int frames);
 void flip_pages();
 
-void load_spritesheet(char* spriteData, char bank);
+void load_spritesheet(char* spriteData, char srcBank, char ramBank);
 void clear_spritebank(char bank);
 void draw_sprite_frame(const Frame *sprite_table, char x, char y, char frame, char flip, char bank, char offset);
 void draw_sprite();

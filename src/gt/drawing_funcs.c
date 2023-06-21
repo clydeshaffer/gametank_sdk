@@ -24,12 +24,13 @@ void flip_pages() {
     *bank_reg = bankflip;
 }
 
-void load_spritesheet(char* spriteData, char bank) {
+void load_spritesheet(char* spriteData, char srcBank, char ramBank) {
     char oldFlags = flagsMirror;
     char oldBanks = banksMirror;
-    char bankNum = bank & 7;
-    char xbit = (bank & 8) << 4;
-    char ybit = (bank & 16) << 3;
+    char bankNum = ramBank & 7;
+    char xbit = (ramBank & 8) << 4;
+    char ybit = (ramBank & 16) << 3;
+    change_rom_bank(srcBank);
     flagsMirror = DMA_ENABLE;
     *dma_flags = flagsMirror;
     *vram_VX = 0;
@@ -43,7 +44,7 @@ void load_spritesheet(char* spriteData, char bank) {
 
     flagsMirror = 0;
     *dma_flags = flagsMirror;
-    banksMirror = bankflip | GRAM_PAGE(bank);
+    banksMirror = bankflip | GRAM_PAGE(ramBank);
     *bank_reg = banksMirror;
     inflatemem(vram, spriteData);
     flagsMirror = oldFlags;
@@ -92,14 +93,15 @@ Frame temp_frame;
 
 void pushRect();
 
-#pragma codeseg (push, "PROG0");
 void draw_sprite_frame(const Frame* sprite_table, char x, char y, char frame, char flip, char bank, char offset) {
     while(queue_count >= QUEUE_MAX) {
         asm("CLI");
         wait();
     }
     asm("SEI");
+    queue_flags_param = DMA_GCARRY;
     temp_frame = sprite_table[frame];
+    bank |= bankflip;
     rect.b = bank;
 
     if(flip & SPRITE_FLIP_X) {
@@ -126,7 +128,6 @@ void draw_sprite_frame(const Frame* sprite_table, char x, char y, char frame, ch
     }
     asm("CLI");
 }
-#pragma codeseg (pop);
 
 void draw_sprite() {
     if(rect.x > 127) {
