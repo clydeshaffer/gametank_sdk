@@ -1,4 +1,6 @@
-# My GameTank Game
+# Breakout
+
+Break all the bricks! Use left and right arrow to move and hit the bouncing ball.
 
 Build it with the "make" command
 
