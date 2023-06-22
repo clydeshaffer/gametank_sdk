@@ -54,7 +54,7 @@ void clear_screen(char c);
 
 void draw_box_now(char x, char y, char w, char h, char c);
 
-void draw_sprite_now(char x, char y, char w, char h, char gx, char gy);
+void draw_sprite_now(char x, char y, char w, char h, char gx, char gy, char ramBank);
 
 void draw_fade(unsigned char opacity);
 

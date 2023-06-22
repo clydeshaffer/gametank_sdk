@@ -254,7 +254,9 @@ void draw_box_now(char x, char y, char w, char h, char c) {
     *dma_flags = flagsMirror;
 }
 
-void draw_sprite_now(char x, char y, char w, char h, char gx, char gy) {
+void draw_sprite_now(char x, char y, char w, char h, char gx, char gy, char ramBank) {
+    banksMirror = bankflip | ramBank;
+    *bank_reg = banksMirror;
     if(x + w >= 128) {
         w = 128 - x;
     }
@@ -280,7 +282,7 @@ void draw_fade(unsigned char opacity) {
     *dma_flags = flagsMirror;
     banksMirror = banksMirror & 0xF8;
     *bank_reg = banksMirror;
-    draw_sprite_now(0, 0, 127, 127, opacity&0xF0, 64);
+    draw_sprite_now(0, 0, 127, 127, opacity&0xF0, 64, 0);
     wait();
     flagsMirror = oldFlags;
     banksMirror = oldBanks;
