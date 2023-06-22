@@ -255,7 +255,7 @@ void draw_box_now(char x, char y, char w, char h, char c) {
 }
 
 void draw_sprite_now(char x, char y, char w, char h, char gx, char gy, char ramBank) {
-    *dma_flags = flagsMirror;
+    *dma_flags = (flagsMirror | DMA_GCARRY) & ~(DMA_COLORFILL_ENABLE | DMA_OPAQUE);
     banksMirror = bankflip | ramBank;
     *bank_reg = banksMirror;
     if(x + w >= 128) {
