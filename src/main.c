@@ -223,15 +223,9 @@ int main () {
         ++ticks;
         
         await_draw_queue();
-        while(queue_pending != 0) {
-            asm("CLI");
-            wait();
-        }
 
         k = 0;
-        banksMirror = bankflip;
-        banksMirror &= ~BANK_GRAM_MASK;
-        banksMirror |= GRAM_PAGE(2);
+        banksMirror = bankflip | GRAM_PAGE(2);
         *bank_reg = banksMirror;
         flagsMirror = DMA_NMI | DMA_ENABLE | DMA_IRQ | DMA_OPAQUE | frameflip | DMA_GCARRY;
         *dma_flags = flagsMirror;
