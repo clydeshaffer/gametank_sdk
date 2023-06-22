@@ -54,16 +54,6 @@
 #define gamepad_1 ((volatile char *) 0x2008)
 #define gamepad_2 ((volatile char *) 0x2009)
 
-#define INPUT_MASK_UP		2056
-#define INPUT_MASK_DOWN		1028
-#define INPUT_MASK_LEFT		512
-#define INPUT_MASK_RIGHT	256
-#define INPUT_MASK_A		16
-#define INPUT_MASK_B		4096
-#define INPUT_MASK_C		8192
-#define INPUT_MASK_START	32
-#define INPUT_MASK_ALL_KEYS INPUT_MASK_UP|INPUT_MASK_DOWN|INPUT_MASK_LEFT|INPUT_MASK_RIGHT|INPUT_MASK_A|INPUT_MASK_B|INPUT_MASK_C|INPUT_MASK_START
-
 #define ORB 0
 #define ORA 1
 #define DDRB 2
