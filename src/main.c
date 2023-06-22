@@ -60,11 +60,7 @@ int main () {
     unsigned char ticks = 0;
     char player_x = 64;
     char death_count = 0;
-    flagsMirror = DMA_NMI | DMA_ENABLE | DMA_IRQ | frameflip;
-    bankflip = BANK_SECOND_FRAMEBUFFER;
-    *dma_flags = flagsMirror;
-    banksMirror = bankflip;
-    *bank_reg = banksMirror;
+    init_graphics();
 
     init_dynawave();
     init_music();
@@ -212,9 +208,9 @@ int main () {
             k += 4;
         }
 
+        sleep(1);
         flip_pages();
         tick_music();
-        sleep(1);
     }
 
   return (0);                                     //  We should never get here!

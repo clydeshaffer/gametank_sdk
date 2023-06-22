@@ -24,6 +24,15 @@ void flip_pages() {
     *bank_reg = bankflip;
 }
 
+void init_graphics() {
+    frameflip = 0;
+    flagsMirror = DMA_NMI | DMA_ENABLE | DMA_IRQ;
+    bankflip = BANK_SECOND_FRAMEBUFFER;
+    *dma_flags = flagsMirror;
+    banksMirror = bankflip;
+    *bank_reg = banksMirror;
+}
+
 void load_spritesheet(char* spriteData, char srcBank, char ramBank) {
     char oldFlags = flagsMirror;
     char oldBanks = banksMirror;
@@ -229,17 +238,7 @@ void clear_border(char c) {
 }
 
 void clear_screen(char c) {
-    *dma_flags = flagsMirror | DMA_COLORFILL_ENABLE | DMA_OPAQUE;
-    queue_pending = 1;
-    vram[VX] = 1;
-    vram[VY] = 7;
-    vram[GX] = 0;
-    vram[GY] = 0;
-    vram[WIDTH] = SCREEN_WIDTH-2;
-    vram[HEIGHT] = SCREEN_HEIGHT-7-8;
-    vram[COLOR] = ~c;
-    vram[START] = 1;
-    *dma_flags = flagsMirror;
+    draw_box(1, 7, SCREEN_WIDTH-2, SCREEN_HEIGHT - 15, c);
 }
 
 void draw_box_now(char x, char y, char w, char h, char c) {
