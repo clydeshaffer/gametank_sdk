@@ -5,17 +5,18 @@ int main () {
     char col = 30, row = 20;
     int dx = 1, dy = 1;
 
-    flip_pages();
+    init_graphics();
 
+    flip_pages();
     clear_border(0);
-
+    await_draw_queue();
     flip_pages();
-
+    await_draw_queue();
     clear_border(0);
 
     while (1) {                                     //  Run forever
         clear_screen(3);
-        draw_box_now(col, row, 8, 8, 92);
+        draw_box(col, row, 8, 8, 92);
         col += dx;
         row += dy;
         if(col == 1) {
@@ -29,8 +30,10 @@ int main () {
             dy = -1;
         }
         
-        flip_pages();
+        await_draw_queue();
         sleep(1);
+        flip_pages();
+        
     }
 
   return (0);                                     //  We should never get here!
