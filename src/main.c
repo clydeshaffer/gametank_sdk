@@ -3,7 +3,6 @@
 #include "dynawave.h"
 #include "music.h"
 #include "gen/assets/gfx.h"
-#include "banking.h"
 #include "input.h"
 
 #define BRICKS_LEFT_EDGE 16
@@ -87,12 +86,10 @@ int main () {
     await_draw_queue();
     ball_alive = 1;
 
-    change_rom_bank(BANK_gfx);
-
     while (1) {
         update_inputs();
         draw_sprite_frame(
-            &ASSET__gfx__background1_json_ptr,
+            &ASSET__gfx__background1_json,
             64, 64,
             0,
             SPRITE_FLIP_NONE,
@@ -155,14 +152,14 @@ int main () {
             if(player_x > PLAYER_LIMIT_RIGHT) player_x = PLAYER_LIMIT_RIGHT;
 
             draw_sprite_frame(
-                &ASSET__gfx__ball_json_ptr,
+                &ASSET__gfx__ball_json,
                 col, row,
                 (ticks >> 3) & 3,
                 SPRITE_FLIP_NONE,
                 0
             );
             draw_sprite_frame(
-                &ASSET__gfx__player_json_ptr,
+                &ASSET__gfx__player_json,
                 player_x, 116,
                 (ticks >> 3) % 6,
                 SPRITE_FLIP_NONE,
@@ -173,7 +170,7 @@ int main () {
             clear_border(0);
             if(ticks < 32) {
                 draw_sprite_frame(
-                    &ASSET__gfx__player_json_ptr,
+                    &ASSET__gfx__player_json,
                     player_x, 116,
                     (ticks >> 3) + 6,
                     SPRITE_FLIP_NONE,
@@ -217,7 +214,6 @@ int main () {
 
         flip_pages();
         tick_music();
-        change_rom_bank(BANK_gfx);
         sleep(1);
     }
 
