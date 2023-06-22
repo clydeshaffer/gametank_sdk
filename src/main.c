@@ -55,13 +55,13 @@ void setup_bricks() {
 int main () {
     char i, j, k;
     char ball_alive;
-    unsigned char col = 64, row = 64;
-    unsigned char dx = 1, dy = 255;
-    unsigned char ticks = 0;
+    char ball_x = 64, ball_y = 64;
+    char ball_dx = 1, ball_dy = 255;
+    char global_tick_counter = 0;
     char player_x = 64;
     char death_count = 0;
-    init_graphics();
 
+    init_graphics();
     init_dynawave();
     init_music();
 
@@ -94,46 +94,46 @@ int main () {
         );
         
         if(ball_alive) {
-            col += dx;
-            row += dy;
-            if(col == 4) {
-                dx = 1;
-            } else if(col == 119) {
-                dx = 255;
+            ball_x += ball_dx;
+            ball_y += ball_dy;
+            if(ball_x == 4) {
+                ball_dx = 1;
+            } else if(ball_x == 119) {
+                ball_dx = 255;
             }
-            if(row == 16) {
-                dy = 1;
-            } else if((row == 108) && check_player_hit(col, player_x)) {
-                dy = 255;
-            } else if(row == 127) {
+            if(ball_y == 16) {
+                ball_dy = 1;
+            } else if((ball_y == 108) && check_player_hit(ball_x, player_x)) {
+                ball_dy = 255;
+            } else if(ball_y == 127) {
                 ++death_count;
                 ball_alive = 0;
-                ticks = 0;
+                global_tick_counter = 0;
                 do_noise_effect(80, -8, 10);
             }
 
-            k = check_brick_hit(col, row);
+            k = check_brick_hit(ball_x, ball_y);
             if(k && (boxes[k-1] != 0xFF)) {
                 boxes[k-1] = 0xFF;
                 do_noise_effect(95, 12, 4);
-                if((col & 7) == 0) {
-                    dx = 255;
-                    col += dx;
-                    col += dx;
-                } else if((col & 7) == 7) {
-                    dx = 1;
-                    col += dx;
-                    col += dx;
+                if((ball_x & 7) == 0) {
+                    ball_dx = 255;
+                    ball_x += ball_dx;
+                    ball_x += ball_dx;
+                } else if((ball_x & 7) == 7) {
+                    ball_dx = 1;
+                    ball_x += ball_dx;
+                    ball_x += ball_dx;
                 }
 
-                if((row & 3) == 0) {
-                    dy = 255;
-                    row += dy;
-                    row += dy;
-                } else if((row & 3) == 3) {
-                    dy = 1;
-                    row += dy;
-                    row += dy;
+                if((ball_y & 3) == 0) {
+                    ball_dy = 255;
+                    ball_y += ball_dy;
+                    ball_y += ball_dy;
+                } else if((ball_y & 3) == 3) {
+                    ball_dy = 1;
+                    ball_y += ball_dy;
+                    ball_y += ball_dy;
                 }
             }
 
@@ -150,35 +150,35 @@ int main () {
 
             draw_sprite_frame(
                 &ASSET__gfx__ball_json,
-                col, row,
-                (ticks >> 3) & 3,
+                ball_x, ball_y,
+                (global_tick_counter >> 3) & 3,
                 SPRITE_FLIP_NONE,
                 0
             );
             draw_sprite_frame(
                 &ASSET__gfx__player_json,
                 player_x, 116,
-                (ticks >> 3) % 6,
+                (global_tick_counter >> 3) % 6,
                 SPRITE_FLIP_NONE,
                 1
             );
             clear_border(0);
         } else {
             clear_border(0);
-            if(ticks < 32) {
+            if(global_tick_counter < 32) {
                 draw_sprite_frame(
                     &ASSET__gfx__player_json,
                     player_x, 116,
-                    (ticks >> 3) + 6,
+                    (global_tick_counter >> 3) + 6,
                     SPRITE_FLIP_NONE,
                     1
                 );
-            } else if(ticks == 255) {
+            } else if(global_tick_counter == 255) {
                 ball_alive = 1;
-                col = 64;
-                row = 64;
-                dx = 1;
-                dy = 255;
+                ball_x = 64;
+                ball_y = 64;
+                ball_dx = 1;
+                ball_dy = 255;
                 player_x = 64;
                 setup_bricks();
                 if(death_count == 3) {
@@ -189,9 +189,7 @@ int main () {
             }
         }
 
-        
-
-        ++ticks;
+        ++global_tick_counter;
         
         await_draw_queue();
 
