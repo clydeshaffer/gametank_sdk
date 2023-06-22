@@ -93,7 +93,7 @@ Frame temp_frame;
 
 void pushRect();
 
-void draw_sprite_frame(const Frame* sprite_table, char x, char y, char frame, char flip, char bank, char offset) {
+void draw_sprite_frame(const Frame* sprite_table, char x, char y, char frame, char flip, char bank) {
     while(queue_count >= QUEUE_MAX) {
         asm("CLI");
         wait();
@@ -117,7 +117,7 @@ void draw_sprite_frame(const Frame* sprite_table, char x, char y, char frame, ch
         rect.gx ^= 0xFF;
         rect.gx -= temp_frame.w - 1;
     }
-    rect.gy = temp_frame.gy + offset;
+    rect.gy = temp_frame.gy;
     rect.w = temp_frame.w | (flip & SPRITE_FLIP_X ? 128 : 0);
     rect.h = temp_frame.h;
 
