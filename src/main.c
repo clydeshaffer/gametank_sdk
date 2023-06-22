@@ -4,6 +4,7 @@
 #include "music.h"
 #include "gen/assets/gfx.h"
 #include "banking.h"
+#include "input.h"
 
 #define BRICKS_LEFT_EDGE 16
 #define BRICKS_RIGHT_EDGE 112
@@ -18,26 +19,6 @@
 
 #define PLAYER_LIMIT_LEFT 17
 #define PLAYER_LIMIT_RIGHT 111
-
-int inputs = 0, last_inputs = 0;
-int inputs2 = 0, last_inputs2 = 0;
-
-void updateInputs(){
-    char inputsA, inputsB;
-    inputsA = *gamepad_2;
-    inputsA = *gamepad_1;
-    inputsB = *gamepad_1;
-
-    last_inputs = inputs;
-    inputs = ~((((int) inputsB) << 8) | inputsA);
-    inputs &= INPUT_MASK_ALL_KEYS;
-
-    inputsA = *gamepad_2;
-    inputsB = *gamepad_2;
-    last_inputs2 = inputs2;
-    inputs2 = ~((((int) inputsB) << 8) | inputsA);
-    inputs2 &= INPUT_MASK_ALL_KEYS;
-}
 
 char boxes[96];
 
@@ -109,14 +90,13 @@ int main () {
     change_rom_bank(BANK_gfx);
 
     while (1) {
-        updateInputs();
+        update_inputs();
         draw_sprite_frame(
             &ASSET__gfx__background1_json_ptr,
             64, 64,
             0,
             SPRITE_FLIP_NONE,
-            3,
-            0
+            3
         );
         
         if(ball_alive) {
@@ -163,11 +143,11 @@ int main () {
                 }
             }
 
-            if(inputs & INPUT_MASK_LEFT) {
+            if(player1_buttons & INPUT_MASK_LEFT) {
                 --player_x;
             }
 
-            if(inputs & INPUT_MASK_RIGHT) {
+            if(player1_buttons & INPUT_MASK_RIGHT) {
                 ++player_x;
             }
 
@@ -179,7 +159,6 @@ int main () {
                 col, row,
                 (ticks >> 3) & 3,
                 SPRITE_FLIP_NONE,
-                0,
                 0
             );
             draw_sprite_frame(
@@ -187,8 +166,7 @@ int main () {
                 player_x, 116,
                 (ticks >> 3) % 6,
                 SPRITE_FLIP_NONE,
-                1,
-                0
+                1
             );
             clear_border(0);
         } else {
@@ -199,8 +177,7 @@ int main () {
                     player_x, 116,
                     (ticks >> 3) + 6,
                     SPRITE_FLIP_NONE,
-                    1,
-                    0
+                    1
                 );
             } else if(ticks == 255) {
                 ball_alive = 1;
