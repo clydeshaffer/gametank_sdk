@@ -93,7 +93,8 @@ Frame temp_frame;
 
 void pushRect();
 
-void draw_sprite_frame(const Frame* sprite_table, char x, char y, char frame, char flip, char bank) {
+void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x, char y, char frame, char flip, char bank) {
+    change_rom_bank(sprite_table_bank);
     while(queue_count >= QUEUE_MAX) {
         asm("CLI");
         wait();
