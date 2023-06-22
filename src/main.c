@@ -72,12 +72,13 @@ int main () {
     load_spritesheet(&ASSET__gfx__bricks_bmp, 2);
     load_spritesheet(&ASSET__gfx__background1_bmp, 3);
 
-    flip_pages();
+    init_graphics();
 
+    flip_pages();
     clear_border(0);
     await_draw_queue();
     flip_pages();
-
+    await_draw_queue();
     clear_border(0);
     await_draw_queue();
     ball_alive = 1;
