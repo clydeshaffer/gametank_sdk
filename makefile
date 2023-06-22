@@ -111,6 +111,7 @@ dummy%:
 
 clean:
 	rm -rf $(ODIR)/*
+	rm -rf bin/*
 
 flash: $(BANKS)
 	$(FLASHTOOL)/bin/GTFO -p $(PORT) bin/$(TARGET).bank*
