@@ -59,7 +59,7 @@ char check_player_hit(unsigned char bx, unsigned char px) {
     return (px < 18);
 }
 
-char setup_bricks() {
+void setup_bricks() {
     unsigned char i,k;
     i = 0;
     for(k = 0; k < 96; ++k) {
@@ -225,16 +225,13 @@ int main () {
         await_draw_queue();
 
         k = 0;
-        banksMirror = bankflip | GRAM_PAGE(2);
-        *bank_reg = banksMirror;
-        flagsMirror = DMA_NMI | DMA_ENABLE | DMA_IRQ | DMA_OPAQUE | frameflip | DMA_GCARRY;
         *dma_flags = flagsMirror;
         for(i = 24; i < 48; i += 4) {
             for(j = 16; j < 112; j += 8) {
                 if(boxes[k] != 0xFF) {
                     flagsMirror = DMA_NMI | DMA_ENABLE | DMA_IRQ | DMA_OPAQUE | frameflip | DMA_GCARRY;
                     *dma_flags = flagsMirror;
-                    draw_sprite_now(j, i, 8, 4, boxes[k], 0);
+                    draw_sprite_now(j, i, 8, 4, boxes[k], 0, GRAM_PAGE(2));
                 }
                 ++k;
             }
