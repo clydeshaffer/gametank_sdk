@@ -81,6 +81,7 @@ int main () {
     char player_x = 64;
     char death_count = 0;
     flagsMirror = DMA_NMI | DMA_ENABLE | DMA_IRQ | frameflip;
+    bankflip = BANK_SECOND_FRAMEBUFFER;
     *dma_flags = flagsMirror;
     banksMirror = bankflip;
     *bank_reg = banksMirror;
