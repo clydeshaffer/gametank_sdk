@@ -41,7 +41,7 @@ void flip_pages();
 
 void load_spritesheet(char* spriteData, char srcBank, char ramBank);
 void clear_spritebank(char bank);
-void draw_sprite_frame(const Frame *sprite_table, char x, char y, char frame, char flip, char bank, char offset);
+void draw_sprite_frame(const Frame *sprite_table, char x, char y, char frame, char flip, char bank);
 void draw_sprite();
 void draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h, unsigned char c);
 
