@@ -38,6 +38,7 @@ typedef struct Frame {
 
 void sleep(int frames);
 void flip_pages();
+void init_graphics();
 
 void load_spritesheet(char* spriteData, char srcBank, char ramBank);
 void clear_spritebank(char bank);
