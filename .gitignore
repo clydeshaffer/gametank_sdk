@@ -5,6 +5,7 @@
 *.si
 *.gtg
 *.deflate
+.swp
 bin
 build
 src/gen
