@@ -121,6 +121,14 @@ void update_tank(char num, int inputs, int last_inputs) {
             push_audio_param(AMPLITUDE+num, 0);
         }
 
+        if(tank_x[num].b.msb & 128) {
+            tank_x[num].b.msb &= 127;
+        }
+
+        if(tank_y[num].b.msb & 128) {
+            tank_y[num].b.msb &= 127;
+        }
+
         if((tank_reloading[num] == 0)) {
             if(inputs & ~last_inputs & INPUT_MASK_A) {
                 bullet_life[next_bullet] = 255;
@@ -238,9 +246,9 @@ int main () {
                 bullet_y[i].i += bullet_vy[i];
                 --bullet_life[i];
                 if(bullet_x[i].b.msb & 128) {
-                    bullet_life[i] = 0;
+                    bullet_x[i].b.msb &= 127;
                 } else if(bullet_y[i].b.msb & 128) {
-                    bullet_life[i] = 0;
+                    bullet_y[i].b.msb &= 127;
                 } else if(check_tank_hit(0, bullet_x[i].b.msb, bullet_y[i].b.msb)){
                     bullet_life[i] = 0;
                     --tank_hp[0];
