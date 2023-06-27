@@ -82,6 +82,7 @@ void update_tank(char num, int inputs, int last_inputs) {
     if(tank_hp[num] == 0) {
         tank_hp[num] = 128;
         do_noise_effect(80, -8, 64);
+        global_tick = 0;
     }
     if(tank_hp[num] & 128) {
         if(tank_hp[num] < 192) {
@@ -96,17 +97,22 @@ void update_tank(char num, int inputs, int last_inputs) {
             tank_angle[num].b.msb -= 1;
         }
 
+        if(inputs & (INPUT_MASK_LEFT | INPUT_MASK_RIGHT)) {
+            set_note(num, (num << 2) + 20 + ((global_tick & 8) >> 2));
+            push_audio_param(AMPLITUDE+num, 64);
+        }
+
         if(inputs & INPUT_MASK_UP) {
             tank_y[num].i -= (sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128);
             tank_x[num].i += (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128);
             set_note(num, (num << 2) + 20 + ((global_tick & 4) >> 2));
-            push_audio_param(AMPLITUDE+num, 32);
+            push_audio_param(AMPLITUDE+num, 64);
         } else if (inputs & INPUT_MASK_DOWN) {
             tank_y[num].i += (sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128);
             tank_x[num].i -= (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128);
             set_note(num, (num << 2) + 21 + ((global_tick & 4) >> 2));
-            push_audio_param(AMPLITUDE+num, 32);
-        } else {
+            push_audio_param(AMPLITUDE+num, 64);
+        } else if((inputs & (INPUT_MASK_LEFT | INPUT_MASK_RIGHT)) == 0) {
             push_audio_param(AMPLITUDE+num, 0);
         }
 
@@ -220,9 +226,15 @@ int main () {
         }
         
 
-        update_tank(1, player1_buttons, player1_old_buttons);
-        update_tank(0, player2_buttons, player2_old_buttons);
+        update_tank(0, player1_buttons, player1_old_buttons);
+        update_tank(1, player2_buttons, player2_old_buttons);
         flush_audio_params();
+
+        if(global_tick == 255) {
+            if((tank_hp[0] | tank_hp[1]) & 128) {
+                init_tanks();
+            }
+        }
 
         await_draw_queue();
         sleep(1);
