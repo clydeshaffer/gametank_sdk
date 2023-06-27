@@ -35,20 +35,24 @@ int sine_wave[256] = {
 };
 
 #define BULLET_POOL_SIZE 8
+#define TANK_MAG_SIZE 3
+#define TANK_CD_FRAMES 192
 
-    unsigned char global_tick;
+unsigned char global_tick;
 
-    coordinate tank_angle[2];
-    coordinate tank_x[2];
-    coordinate tank_y[2];
-    unsigned char tank_hp[2];
+coordinate tank_angle[2];
+coordinate tank_x[2];
+coordinate tank_y[2];
+unsigned char tank_hp[2];
+unsigned char tank_ammo[2];
+unsigned char tank_reloading[2];
 
-    coordinate bullet_x[BULLET_POOL_SIZE];
-    coordinate bullet_y[BULLET_POOL_SIZE];
-    int bullet_vx[BULLET_POOL_SIZE];
-    int bullet_vy[BULLET_POOL_SIZE];
-    unsigned char bullet_life[BULLET_POOL_SIZE];
-    unsigned char next_bullet = 0;
+coordinate bullet_x[BULLET_POOL_SIZE];
+coordinate bullet_y[BULLET_POOL_SIZE];
+int bullet_vx[BULLET_POOL_SIZE];
+int bullet_vy[BULLET_POOL_SIZE];
+unsigned char bullet_life[BULLET_POOL_SIZE];
+unsigned char next_bullet = 0;
 
 void draw_tank(char num) {
     char flippage, tank_angle_frame;
@@ -117,14 +121,23 @@ void update_tank(char num, int inputs, int last_inputs) {
             push_audio_param(AMPLITUDE+num, 0);
         }
 
-        if(inputs & ~last_inputs & INPUT_MASK_A) {
-            bullet_life[next_bullet] = 255;
-            bullet_vy[next_bullet] = -(sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128) * 4;
-            bullet_vx[next_bullet] = (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128) * 4;
-            bullet_x[next_bullet].i = tank_x[num].i + (bullet_vx[next_bullet] * 4);
-            bullet_y[next_bullet].i = tank_y[num].i + (bullet_vy[next_bullet] * 4);
-            next_bullet = (next_bullet+1)%BULLET_POOL_SIZE;
-            do_noise_effect(80, 0, 1);
+        if((tank_reloading[num] == 0)) {
+            if(inputs & ~last_inputs & INPUT_MASK_A) {
+                bullet_life[next_bullet] = 255;
+                bullet_vy[next_bullet] = -(sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128) * 4;
+                bullet_vx[next_bullet] = (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128) * 4;
+                bullet_x[next_bullet].i = tank_x[num].i + (bullet_vx[next_bullet] * 4);
+                bullet_y[next_bullet].i = tank_y[num].i + (bullet_vy[next_bullet] * 4);
+                next_bullet = (next_bullet+1)%BULLET_POOL_SIZE;
+                do_noise_effect(80, 0, 1);
+                --tank_ammo[num];
+                if(tank_ammo[num] == 0) {
+                    tank_reloading[num] = TANK_CD_FRAMES;
+                    tank_ammo[num] = TANK_MAG_SIZE;
+                }
+            }
+        } else {
+            --tank_reloading[num];
         }
     }
 }
@@ -136,12 +149,16 @@ void init_tanks() {
     tank_x[0].i = 8196;
     tank_y[0].i = 8196;
     tank_hp[0] = 10;
+    tank_reloading[0] = 0;
+    tank_ammo[0] = TANK_MAG_SIZE;
 
     tank_angle[1].b.msb = 0;
     tank_angle[1].b.lsb = 0;
     tank_x[1].i = 24580;
     tank_y[1].i = 24580;
     tank_hp[1] = 10;
+    tank_reloading[1] = 0;
+    tank_ammo[1] = TANK_MAG_SIZE;
 
     for(i = 0; i < BULLET_POOL_SIZE; ++i) {
         bullet_life[i] = 0;
@@ -169,6 +186,12 @@ void draw_hp_bar(char num, char x) {
     hp = hp << 2;
     if((hp == 4) && global_tick & 8) return;
     draw_box(x, 56 - hp, 4, hp, hp_colors[tank_hp[num]-1]);
+
+    if(tank_reloading[num]) {
+        draw_box(x, 57, 4, tank_reloading[num] >> 4, 7);
+    } else {
+        draw_sprite(x, 57, 4, tank_ammo[num] << 2, 0, 0, 3);
+    }
 }
 
 int main () {
@@ -199,7 +222,7 @@ int main () {
     while (1) {             
         update_inputs();
         draw_sprite(0, 0, 127,127, 0, 0, 1);
-        clear_border(0);
+        
 
         draw_tank(0);        
         draw_tank(1);
@@ -232,7 +255,7 @@ int main () {
         
         if(intro_playing) {
             --intro_playing;
-            draw_sprite(0, 0, 127, 127, 0, 0, 3);
+            draw_sprite(7, 0, 120, 127, 7, 0, 3);
         } else {
             update_tank(0, player1_buttons, player1_old_buttons);
             update_tank(1, player2_buttons, player2_old_buttons);
@@ -244,6 +267,8 @@ int main () {
                 init_tanks();
             }
         }
+
+        clear_border(0);
 
         await_draw_queue();
         sleep(1);
