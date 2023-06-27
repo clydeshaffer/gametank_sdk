@@ -37,7 +37,13 @@ int main () {
     coordinate angle = {0};
     coordinate tank_x = {16384};
     coordinate tank_y = {16384};
-    char angle_frame;
+    coordinate bullet_x;
+    coordinate bullet_y;
+    int bullet_vx;
+    int bullet_vy;
+    char bullet_life = 0;
+
+    char tank_angle_frame;
 
     init_graphics();
 
@@ -53,23 +59,30 @@ int main () {
     while (1) {             
         update_inputs();
         clear_screen(3);
+        clear_border(0);
 
         flippage = 0;
         if(angle.b.msb <= 64) {
-            angle_frame = angle.b.msb >> 3;
+            tank_angle_frame = angle.b.msb >> 3;
         } else if(angle.b.msb <= 128) {
-            angle_frame = (128 - angle.b.msb) >> 3;
+            tank_angle_frame = (128 - angle.b.msb) >> 3;
             flippage = SPRITE_FLIP_Y;
         } else if(angle.b.msb <= 192) {
-            angle_frame = (angle.b.msb - 129) >> 3;
+            tank_angle_frame = (angle.b.msb - 129) >> 3;
             flippage = SPRITE_FLIP_BOTH;
         } else {
-            angle_frame = (256 - angle.b.msb) >> 3;
+            tank_angle_frame = (256 - angle.b.msb) >> 3;
             flippage = SPRITE_FLIP_X;
         }
 
         draw_sprite_frame(&ASSET__gfx__green_tank_json,
-        tank_x.b.msb, tank_y.b.msb, angle_frame, flippage, 0);
+        tank_x.b.msb, tank_y.b.msb, tank_angle_frame, flippage, 0);
+
+        draw_box(bullet_x.b.msb - 1, bullet_y.b.msb - 1, 3, 3, 92);
+
+        bullet_x.i += bullet_vx;
+        bullet_y.i += bullet_vy;
+
 
         if(player1_buttons & INPUT_MASK_LEFT) {
             angle.b.msb += 1;
@@ -85,6 +98,14 @@ int main () {
         } else if (player1_buttons & INPUT_MASK_DOWN) {
             tank_y.i += (sine_wave[(angle.b.msb + 64) % 256] - 128);
             tank_x.i -= (sine_wave[(angle.b.msb + 128) % 256] - 128);
+        }
+
+        if(player1_buttons & ~player1_old_buttons & INPUT_MASK_A) {
+            bullet_life = 256;
+            bullet_vy = -(sine_wave[(angle.b.msb + 64) % 256] - 128) * 2;
+            bullet_vx = (sine_wave[(angle.b.msb + 128) % 256] - 128) * 2;
+            bullet_x.i = tank_x.i + (bullet_vx * 8);
+            bullet_y.i = tank_y.i + (bullet_vy * 8);
         }
         
 
