@@ -38,7 +38,8 @@ AOBJS = $(filter-out $(ASSETLISTS),$(patsubst src/%,$(ODIR)/%,$(A_SRCS:s=o)))
 _AUDIO_FW = audio_fw.bin.deflate
 AUDIO_FW = $(patsubst %,$(ODIR)/assets/%,$(_AUDIO_FW))
 
-include bankMakeList #sets _BANKS
+-include bankMakeList #sets _BANKS
+_BANKS ?= bankFF
 BANKS = $(patsubst %,bin/$(TARGET).%,$(_BANKS))
 
 bin/$(TARGET): $(BANKS)
