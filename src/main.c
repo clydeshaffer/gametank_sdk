@@ -4,6 +4,7 @@
 #include "dynawave.h"
 #include "music.h"
 #include "gen/assets/gfx.h"
+#include "gen/assets/music.h"
 
 typedef struct {
     char lsb, msb;
@@ -173,6 +174,7 @@ void draw_hp_bar(char num, char x) {
 int main () {
     char i;
     char tank_angle_frame;
+    char intro_playing = 255;
 
     init_dynawave();
     init_music();
@@ -188,8 +190,11 @@ int main () {
     load_spritesheet(&ASSET__gfx__green_tank_bmp, 0);
     load_spritesheet(&ASSET__gfx__ground_bmp, 1);
     load_spritesheet(&ASSET__gfx__exlposion_bmp, 2);
+    load_spritesheet(&ASSET__gfx__title_bmp, 3);
 
     init_tanks();
+
+    play_song(&ASSET__music__tank_intro_mid, REPEAT_NONE);
 
     while (1) {             
         update_inputs();
@@ -225,9 +230,13 @@ int main () {
             }
         }
         
-
-        update_tank(0, player1_buttons, player1_old_buttons);
-        update_tank(1, player2_buttons, player2_old_buttons);
+        if(intro_playing) {
+            --intro_playing;
+            draw_sprite(0, 0, 127, 127, 0, 0, 3);
+        } else {
+            update_tank(0, player1_buttons, player1_old_buttons);
+            update_tank(1, player2_buttons, player2_old_buttons);
+        }
         flush_audio_params();
 
         if(global_tick == 255) {
