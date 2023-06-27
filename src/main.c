@@ -34,12 +34,9 @@ int sine_wave[256] = {
 
 #define BULLET_POOL_SIZE 8
 
-int main () {
-    char flippage, i;
-    coordinate angle = {0};
-    coordinate tank_x = {16384};
-    coordinate tank_y = {16384};
-    char tank_angle_frame;
+    coordinate tank_angle[2];
+    coordinate tank_x[2];
+    coordinate tank_y[2];
 
     coordinate bullet_x[BULLET_POOL_SIZE];
     coordinate bullet_y[BULLET_POOL_SIZE];
@@ -48,10 +45,77 @@ int main () {
     unsigned char bullet_life[BULLET_POOL_SIZE];
     unsigned char next_bullet = 0;
 
+void draw_tank(char num) {
+    char flippage, tank_angle_frame;
+    flippage = 0;
+    if(tank_angle[num].b.msb <= 64) {
+        tank_angle_frame = tank_angle[num].b.msb >> 3;
+    } else if(tank_angle[num].b.msb <= 128) {
+        tank_angle_frame = (128 - tank_angle[num].b.msb) >> 3;
+        flippage = SPRITE_FLIP_Y;
+    } else if(tank_angle[num].b.msb <= 192) {
+        tank_angle_frame = (tank_angle[num].b.msb - 129) >> 3;
+        flippage = SPRITE_FLIP_BOTH;
+    } else {
+        tank_angle_frame = (256 - tank_angle[num].b.msb) >> 3;
+        flippage = SPRITE_FLIP_X;
+    }
+    draw_sprite_frame(&ASSET__gfx__green_tank_json,
+        tank_x[num].b.msb, tank_y[num].b.msb, tank_angle_frame, flippage, 0);
+}
+
+void update_tank(char num, int inputs, int last_inputs) {
+    if(inputs & INPUT_MASK_LEFT) {
+        tank_angle[num].b.msb += 1;
+    }
+
+    if(inputs & INPUT_MASK_RIGHT) {
+        tank_angle[num].b.msb -= 1;
+    }
+
+    if(inputs & INPUT_MASK_UP) {
+        tank_y[num].i -= (sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128);
+        tank_x[num].i += (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128);
+    } else if (inputs & INPUT_MASK_DOWN) {
+        tank_y[num].i += (sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128);
+        tank_x[num].i -= (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128);
+    }
+
+    if(inputs & ~last_inputs & INPUT_MASK_A) {
+        bullet_life[next_bullet] = 255;
+        bullet_vy[next_bullet] = -(sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128) * 2;
+        bullet_vx[next_bullet] = (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128) * 2;
+        bullet_x[next_bullet].i = tank_x[num].i + (bullet_vx[next_bullet] * 8);
+        bullet_y[next_bullet].i = tank_y[num].i + (bullet_vy[next_bullet] * 8);
+        next_bullet = (next_bullet+1)%BULLET_POOL_SIZE;
+    }
+}
+
+void init_tanks() {
+    char i;
+    tank_angle[0].b.msb = 128;
+    tank_angle[0].b.lsb = 0;
+    tank_x[0].i = 8196;
+    tank_y[0].i = 8196;
+
+    tank_angle[1].b.msb = 0;
+    tank_angle[1].b.lsb = 0;
+    tank_x[1].i = 24580;
+    tank_y[1].i = 24580;
+
     for(i = 0; i < BULLET_POOL_SIZE; ++i) {
         bullet_life[i] = 0;
     }
     next_bullet = 0;
+}
+
+
+int main () {
+    char i;
+    char tank_angle_frame;
+
+    init_tanks();
+
 
     init_graphics();
 
@@ -69,22 +133,9 @@ int main () {
         clear_screen(3);
         clear_border(0);
 
-        flippage = 0;
-        if(angle.b.msb <= 64) {
-            tank_angle_frame = angle.b.msb >> 3;
-        } else if(angle.b.msb <= 128) {
-            tank_angle_frame = (128 - angle.b.msb) >> 3;
-            flippage = SPRITE_FLIP_Y;
-        } else if(angle.b.msb <= 192) {
-            tank_angle_frame = (angle.b.msb - 129) >> 3;
-            flippage = SPRITE_FLIP_BOTH;
-        } else {
-            tank_angle_frame = (256 - angle.b.msb) >> 3;
-            flippage = SPRITE_FLIP_X;
-        }
-
-        draw_sprite_frame(&ASSET__gfx__green_tank_json,
-        tank_x.b.msb, tank_y.b.msb, tank_angle_frame, flippage, 0);
+        draw_tank(0);        
+        draw_tank(1);
+        
 
 
         for(i = 0; i < BULLET_POOL_SIZE; ++i) {
@@ -98,30 +149,8 @@ int main () {
         }
         
 
-        if(player1_buttons & INPUT_MASK_LEFT) {
-            angle.b.msb += 1;
-        }
-
-        if(player1_buttons & INPUT_MASK_RIGHT) {
-            angle.b.msb -= 1;
-        }
-
-        if(player1_buttons & INPUT_MASK_UP) {
-            tank_y.i -= (sine_wave[(angle.b.msb + 64) % 256] - 128);
-            tank_x.i += (sine_wave[(angle.b.msb + 128) % 256] - 128);
-        } else if (player1_buttons & INPUT_MASK_DOWN) {
-            tank_y.i += (sine_wave[(angle.b.msb + 64) % 256] - 128);
-            tank_x.i -= (sine_wave[(angle.b.msb + 128) % 256] - 128);
-        }
-
-        if(player1_buttons & ~player1_old_buttons & INPUT_MASK_A) {
-            bullet_life[next_bullet] = 255;
-            bullet_vy[next_bullet] = -(sine_wave[(angle.b.msb + 64) % 256] - 128) * 2;
-            bullet_vx[next_bullet] = (sine_wave[(angle.b.msb + 128) % 256] - 128) * 2;
-            bullet_x[next_bullet].i = tank_x.i + (bullet_vx[next_bullet] * 8);
-            bullet_y[next_bullet].i = tank_y.i + (bullet_vy[next_bullet] * 8);
-            next_bullet = (next_bullet+1)%BULLET_POOL_SIZE;
-        }
+        update_tank(0, player1_buttons, player1_old_buttons);
+        update_tank(1, player2_buttons, player2_old_buttons);
         
 
         await_draw_queue();
