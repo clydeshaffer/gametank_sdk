@@ -139,32 +139,15 @@ void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x
     asm("CLI");
 }
 
-void draw_sprite() {
-    if(rect.x > 127) {
-        return;
-    }
-    if(rect.y > 127) {
-        return;
-    }
-    if(rect.w == 0) {
-        return;
-    }
-    if(rect.h == 0) {
-        return;
-    }
+void draw_sprite_rect() {
     if(queue_count >= QUEUE_MAX) {
         asm("CLI");
         wait();
     }
 
-    if(rect.x + rect.w >= 128) {
-        rect.w = 128 - rect.x;
-    }
-    if(rect.y + rect.h >= 128) {
-        rect.h = 128 - rect.y;
-    }
-
-   asm("SEI");
+    asm("SEI");
+    rect.b |= bankflip;
+    queue_flags_param = DMA_GCARRY;
     pushRect();
 
     if(queue_pending == 0) {

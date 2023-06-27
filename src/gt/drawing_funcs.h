@@ -43,7 +43,10 @@ void init_graphics();
 void load_spritesheet(char* spriteData, char srcBank, char ramBank);
 void clear_spritebank(char bank);
 void draw_sprite_frame(const Frame *sprite_table, char sprite_table_bank, char x, char y, char frame, char flip, char bank);
-void draw_sprite();
+
+void draw_sprite_rect();
+#define draw_sprite(X,Y,W,H,GX,GY,RAMBANK) 0;rect.x=X;rect.y=Y;rect.w=W;rect.h=H;rect.gx=GX;rect.gy=GY;rect.b=RAMBANK;draw_sprite_rect();
+
 void draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h, unsigned char c);
 
 void next_draw_queue();
