@@ -120,16 +120,26 @@ void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x
         rect.x = (temp_frame.x + x);
     }
 
-    rect.y = (temp_frame.y + y);
+    if(flip & SPRITE_FLIP_Y) {
+        rect.y = (y - temp_frame.h - temp_frame.y - 1);
+    } else {
+        rect.y = (temp_frame.y + y);
+    }
 
     rect.gx = temp_frame.gx;
     if(flip & SPRITE_FLIP_X) {
         rect.gx ^= 0xFF;
         rect.gx -= temp_frame.w - 1;
     }
+
     rect.gy = temp_frame.gy;
+    if(flip & SPRITE_FLIP_Y) {
+        rect.gy ^= 0xFF;
+        rect.gy -= temp_frame.h - 1;
+    }
+
     rect.w = temp_frame.w | (flip & SPRITE_FLIP_X ? 128 : 0);
-    rect.h = temp_frame.h;
+    rect.h = temp_frame.h | (flip & SPRITE_FLIP_Y ? 128 : 0);
 
     pushRect();
 
