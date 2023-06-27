@@ -46,6 +46,7 @@ coordinate tank_y[2];
 unsigned char tank_hp[2];
 unsigned char tank_ammo[2];
 unsigned char tank_reloading[2];
+unsigned char tank_victories[2];
 
 coordinate bullet_x[BULLET_POOL_SIZE];
 coordinate bullet_y[BULLET_POOL_SIZE];
@@ -84,7 +85,10 @@ void draw_tank(char num) {
 }
 
 void update_tank(char num, int inputs, int last_inputs) {
+    char amp_out = 0;
+    char note_out = 0;
     if(tank_hp[num] == 0) {
+        ++tank_victories[1-num];
         tank_hp[num] = 128;
         do_noise_effect(80, -8, 64);
         global_tick = 0;
@@ -103,22 +107,21 @@ void update_tank(char num, int inputs, int last_inputs) {
         }
 
         if(inputs & (INPUT_MASK_LEFT | INPUT_MASK_RIGHT)) {
-            set_note(num, (num << 2) + 20 + ((global_tick & 8) >> 2));
-            push_audio_param(AMPLITUDE+num, 64);
+            note_out = (num << 2) + 20 + ((global_tick & 8) >> 2);
+            amp_out = 64;
         }
 
         if(inputs & INPUT_MASK_UP) {
             tank_y[num].i -= (sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128);
             tank_x[num].i += (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128);
-            set_note(num, (num << 2) + 20 + ((global_tick & 4) >> 2));
-            push_audio_param(AMPLITUDE+num, 64);
+            note_out = (num << 2) + 20 + ((global_tick & 4) >> 2);
+            amp_out = 64;
         } else if (inputs & INPUT_MASK_DOWN) {
             tank_y[num].i += (sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128);
             tank_x[num].i -= (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128);
-            set_note(num, (num << 2) + 21 + ((global_tick & 4) >> 2));
-            push_audio_param(AMPLITUDE+num, 64);
-        } else if((inputs & (INPUT_MASK_LEFT | INPUT_MASK_RIGHT)) == 0) {
-            push_audio_param(AMPLITUDE+num, 0);
+            note_out = (num << 2) + 21 + ((global_tick & 4) >> 2);
+            amp_out = 64;
+            
         }
 
         if(tank_x[num].b.msb & 128) {
@@ -147,7 +150,19 @@ void update_tank(char num, int inputs, int last_inputs) {
         } else {
             --tank_reloading[num];
         }
+
+        if(tank_hp[num] == 1) {
+            if((global_tick & 0b00001100) == 0) {
+                note_out = 64;
+                amp_out = 64;
+            } else if((global_tick & 0b00001100) == 4) {
+                note_out = 59;
+                amp_out = 64;
+            }
+        }
     }
+    set_note(num, note_out);
+    push_audio_param(AMPLITUDE+num, amp_out);
 }
 
 void init_tanks() {
@@ -190,15 +205,29 @@ unsigned char hp_colors[10] = {124, 124, 124, 92, 92, 60, 60, 28, 28, 28};
 
 void draw_hp_bar(char num, char x) {
     char hp = tank_hp[num];
+    char sets;
     if(tank_hp[num] & 128) return;
     hp = hp << 2;
-    if((hp == 4) && global_tick & 8) return;
-    draw_box(x, 56 - hp, 4, hp, hp_colors[tank_hp[num]-1]);
+    if((hp != 4) || global_tick & 8) {
+        draw_box(x, 56 - hp, 4, hp, hp_colors[tank_hp[num]-1]);
+    }
 
     if(tank_reloading[num]) {
         draw_box(x, 57, 4, tank_reloading[num] >> 4, 7);
     } else {
         draw_sprite(x, 57, 4, tank_ammo[num] << 2, 0, 0, 3);
+    }
+
+    hp = tank_victories[num];
+    sets = 69;
+    while(hp >= 5) {
+        draw_sprite(x - (num * 5), sets, 9, 4, 0, 16, 3);
+        hp -= 5;
+        sets += 4;
+    }
+    if(hp) {
+        hp -= 1;
+        draw_sprite(x - (num * 5), sets, 9, 4, 0, 32 + (hp << 2), 3);
     }
 }
 
@@ -224,6 +253,8 @@ int main () {
     load_spritesheet(&ASSET__gfx__title_bmp, 3);
 
     init_tanks();
+    tank_victories[0] = 0;
+    tank_victories[1] = 0;
 
     play_song(&ASSET__music__tank_intro_mid, REPEAT_NONE);
 
@@ -263,7 +294,7 @@ int main () {
         
         if(intro_playing) {
             --intro_playing;
-            draw_sprite(7, 0, 120, 127, 7, 0, 3);
+            draw_sprite(16, 0, 111, 127, 16, 0, 3);
         } else {
             update_tank(0, player1_buttons, player1_old_buttons);
             update_tank(1, player2_buttons, player2_old_buttons);
