@@ -1,7 +1,8 @@
 #include "gametank.h"
 #include "drawing_funcs.h"
 #include "input.h"
-
+#include "dynawave.h"
+#include "music.h"
 #include "gen/assets/gfx.h"
 
 typedef struct {
@@ -34,9 +35,12 @@ int sine_wave[256] = {
 
 #define BULLET_POOL_SIZE 8
 
+    unsigned char global_tick;
+
     coordinate tank_angle[2];
     coordinate tank_x[2];
     coordinate tank_y[2];
+    unsigned char tank_hp[2];
 
     coordinate bullet_x[BULLET_POOL_SIZE];
     coordinate bullet_y[BULLET_POOL_SIZE];
@@ -47,47 +51,74 @@ int sine_wave[256] = {
 
 void draw_tank(char num) {
     char flippage, tank_angle_frame;
-    flippage = 0;
-    if(tank_angle[num].b.msb <= 64) {
-        tank_angle_frame = tank_angle[num].b.msb >> 3;
-    } else if(tank_angle[num].b.msb <= 128) {
-        tank_angle_frame = (128 - tank_angle[num].b.msb) >> 3;
-        flippage = SPRITE_FLIP_Y;
-    } else if(tank_angle[num].b.msb <= 192) {
-        tank_angle_frame = (tank_angle[num].b.msb - 129) >> 3;
-        flippage = SPRITE_FLIP_BOTH;
+    if(tank_hp[num] & 128) {
+        if(tank_hp[num] < 188) {
+            draw_sprite_frame(&ASSET__gfx__exlposion_json,
+            tank_x[num].b.msb, tank_y[num].b.msb, 
+            (tank_hp[num] & 127) >> 2
+            , 0, 2);
+        }
     } else {
-        tank_angle_frame = (256 - tank_angle[num].b.msb) >> 3;
-        flippage = SPRITE_FLIP_X;
+        flippage = 0;
+        if(tank_angle[num].b.msb <= 64) {
+            tank_angle_frame = tank_angle[num].b.msb >> 3;
+        } else if(tank_angle[num].b.msb <= 128) {
+            tank_angle_frame = (128 - tank_angle[num].b.msb) >> 3;
+            flippage = SPRITE_FLIP_Y;
+        } else if(tank_angle[num].b.msb <= 192) {
+            tank_angle_frame = (tank_angle[num].b.msb - 129) >> 3;
+            flippage = SPRITE_FLIP_BOTH;
+        } else {
+            tank_angle_frame = (256 - tank_angle[num].b.msb) >> 3;
+            flippage = SPRITE_FLIP_X;
+        }
+        tank_angle_frame += num * 9;
+        draw_sprite_frame(&ASSET__gfx__green_tank_json,
+            tank_x[num].b.msb, tank_y[num].b.msb, tank_angle_frame, flippage, 0);
     }
-    draw_sprite_frame(&ASSET__gfx__green_tank_json,
-        tank_x[num].b.msb, tank_y[num].b.msb, tank_angle_frame, flippage, 0);
 }
 
 void update_tank(char num, int inputs, int last_inputs) {
-    if(inputs & INPUT_MASK_LEFT) {
-        tank_angle[num].b.msb += 1;
+    if(tank_hp[num] == 0) {
+        tank_hp[num] = 128;
+        do_noise_effect(80, -8, 64);
     }
+    if(tank_hp[num] & 128) {
+        if(tank_hp[num] < 192) {
+            ++tank_hp[num];
+        }
+    } else {
+        if(inputs & INPUT_MASK_LEFT) {
+            tank_angle[num].b.msb += 1;
+        }
 
-    if(inputs & INPUT_MASK_RIGHT) {
-        tank_angle[num].b.msb -= 1;
-    }
+        if(inputs & INPUT_MASK_RIGHT) {
+            tank_angle[num].b.msb -= 1;
+        }
 
-    if(inputs & INPUT_MASK_UP) {
-        tank_y[num].i -= (sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128);
-        tank_x[num].i += (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128);
-    } else if (inputs & INPUT_MASK_DOWN) {
-        tank_y[num].i += (sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128);
-        tank_x[num].i -= (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128);
-    }
+        if(inputs & INPUT_MASK_UP) {
+            tank_y[num].i -= (sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128);
+            tank_x[num].i += (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128);
+            set_note(num, (num << 2) + 20 + ((global_tick & 4) >> 2));
+            push_audio_param(AMPLITUDE+num, 32);
+        } else if (inputs & INPUT_MASK_DOWN) {
+            tank_y[num].i += (sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128);
+            tank_x[num].i -= (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128);
+            set_note(num, (num << 2) + 21 + ((global_tick & 4) >> 2));
+            push_audio_param(AMPLITUDE+num, 32);
+        } else {
+            push_audio_param(AMPLITUDE+num, 0);
+        }
 
-    if(inputs & ~last_inputs & INPUT_MASK_A) {
-        bullet_life[next_bullet] = 255;
-        bullet_vy[next_bullet] = -(sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128) * 2;
-        bullet_vx[next_bullet] = (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128) * 2;
-        bullet_x[next_bullet].i = tank_x[num].i + (bullet_vx[next_bullet] * 8);
-        bullet_y[next_bullet].i = tank_y[num].i + (bullet_vy[next_bullet] * 8);
-        next_bullet = (next_bullet+1)%BULLET_POOL_SIZE;
+        if(inputs & ~last_inputs & INPUT_MASK_A) {
+            bullet_life[next_bullet] = 255;
+            bullet_vy[next_bullet] = -(sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128) * 4;
+            bullet_vx[next_bullet] = (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128) * 4;
+            bullet_x[next_bullet].i = tank_x[num].i + (bullet_vx[next_bullet] * 4);
+            bullet_y[next_bullet].i = tank_y[num].i + (bullet_vy[next_bullet] * 4);
+            next_bullet = (next_bullet+1)%BULLET_POOL_SIZE;
+            do_noise_effect(80, 0, 1);
+        }
     }
 }
 
@@ -97,11 +128,13 @@ void init_tanks() {
     tank_angle[0].b.lsb = 0;
     tank_x[0].i = 8196;
     tank_y[0].i = 8196;
+    tank_hp[0] = 10;
 
     tank_angle[1].b.msb = 0;
     tank_angle[1].b.lsb = 0;
     tank_x[1].i = 24580;
     tank_y[1].i = 24580;
+    tank_hp[1] = 10;
 
     for(i = 0; i < BULLET_POOL_SIZE; ++i) {
         bullet_life[i] = 0;
@@ -109,16 +142,36 @@ void init_tanks() {
     next_bullet = 0;
 }
 
+#define HITBOX_MANH_RADIUS 6
+char check_tank_hit(char num, char x, char y) {
+    char dx = tank_x[num].b.msb - x;
+    char dy = tank_y[num].b.msb - y;
+    if(tank_hp[num] & 128) {
+        return 0;
+    }
+    if(dx & 128) dx = -dx;
+    if(dy & 128) dy = -dy;
+    return (dx < HITBOX_MANH_RADIUS) && (dy < HITBOX_MANH_RADIUS);
+}
+
+unsigned char hp_colors[10] = {124, 124, 124, 92, 92, 60, 60, 28, 28, 28};
+
+void draw_hp_bar(char num, char x) {
+    char hp = tank_hp[num];
+    if(tank_hp[num] & 128) return;
+    hp = hp << 2;
+    if((hp == 4) && global_tick & 8) return;
+    draw_box(x, 56 - hp, 4, hp, hp_colors[tank_hp[num]-1]);
+}
 
 int main () {
     char i;
     char tank_angle_frame;
 
-    init_tanks();
-
+    init_dynawave();
+    init_music();
 
     init_graphics();
-
     flip_pages();
     clear_border(0);
     await_draw_queue();
@@ -127,16 +180,21 @@ int main () {
     clear_border(0);
 
     load_spritesheet(&ASSET__gfx__green_tank_bmp, 0);
+    load_spritesheet(&ASSET__gfx__ground_bmp, 1);
+    load_spritesheet(&ASSET__gfx__exlposion_bmp, 2);
+
+    init_tanks();
 
     while (1) {             
         update_inputs();
-        clear_screen(3);
+        draw_sprite(0, 0, 127,127, 0, 0, 1);
         clear_border(0);
 
         draw_tank(0);        
         draw_tank(1);
         
-
+        draw_hp_bar(0, 1);
+        draw_hp_bar(1, 123);
 
         for(i = 0; i < BULLET_POOL_SIZE; ++i) {
             if(bullet_life[i] > 0) {
@@ -145,18 +203,32 @@ int main () {
                 bullet_x[i].i += bullet_vx[i];
                 bullet_y[i].i += bullet_vy[i];
                 --bullet_life[i];
+                if(bullet_x[i].b.msb & 128) {
+                    bullet_life[i] = 0;
+                } else if(bullet_y[i].b.msb & 128) {
+                    bullet_life[i] = 0;
+                } else if(check_tank_hit(0, bullet_x[i].b.msb, bullet_y[i].b.msb)){
+                    bullet_life[i] = 0;
+                    --tank_hp[0];
+                    do_noise_effect(30, 32, 8);
+                } else if(check_tank_hit(1, bullet_x[i].b.msb, bullet_y[i].b.msb)) {
+                    bullet_life[i] = 0;
+                    --tank_hp[1];
+                    do_noise_effect(30, 32, 8);
+                }
             }
         }
         
 
-        update_tank(0, player1_buttons, player1_old_buttons);
-        update_tank(1, player2_buttons, player2_old_buttons);
-        
+        update_tank(1, player1_buttons, player1_old_buttons);
+        update_tank(0, player2_buttons, player2_old_buttons);
+        flush_audio_params();
 
         await_draw_queue();
         sleep(1);
         flip_pages();
-        
+        tick_music();
+        ++global_tick;
     }
 
   return (0);                                     //  We should never get here!
