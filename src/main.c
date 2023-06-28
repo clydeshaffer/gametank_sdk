@@ -307,8 +307,10 @@ int main () {
                 if((count_down & 62) == 62) {
                     set_note(0, 64);
                     push_audio_param(AMPLITUDE, 64);
+                    push_audio_param(AMPLITUDE+1, 0);
                 } else {
                     push_audio_param(AMPLITUDE, 0);
+                    push_audio_param(AMPLITUDE+1, 0);
                 }
                 draw_countdown(count_down);
                 --count_down;
@@ -319,6 +321,7 @@ int main () {
             } else if (count_down < 68) {
                 set_note(0, 69);
                 push_audio_param(AMPLITUDE, 64);
+                push_audio_param(AMPLITUDE+1, 0);
             }
         }
         flush_audio_params();
