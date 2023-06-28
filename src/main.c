@@ -231,10 +231,16 @@ void draw_hp_bar(char num, char x) {
     }
 }
 
+void draw_countdown(char count) {
+    if(count == 0) return;
+    draw_sprite_frame(&ASSET__gfx__countdown_json, 64, 64, (256 - count) >> 6, 0, 4);
+}
+
 int main () {
     char i;
     char tank_angle_frame;
     char intro_playing = 255;
+    char count_down;
 
     init_dynawave();
     init_music();
@@ -251,11 +257,12 @@ int main () {
     load_spritesheet(&ASSET__gfx__ground_bmp, 1);
     load_spritesheet(&ASSET__gfx__exlposion_bmp, 2);
     load_spritesheet(&ASSET__gfx__title_bmp, 3);
+    load_spritesheet(&ASSET__gfx__countdown_bmp, 4);
 
     init_tanks();
     tank_victories[0] = 0;
     tank_victories[1] = 0;
-
+    count_down = 63;
     play_song(&ASSET__music__tank_intro_mid, REPEAT_NONE);
 
     while (1) {             
@@ -296,14 +303,30 @@ int main () {
             --intro_playing;
             draw_sprite(16, 0, 111, 127, 16, 0, 3);
         } else {
-            update_tank(0, player1_buttons, player1_old_buttons);
-            update_tank(1, player2_buttons, player2_old_buttons);
+            if(count_down) {
+                if((count_down & 62) == 62) {
+                    set_note(0, 64);
+                    push_audio_param(AMPLITUDE, 64);
+                } else {
+                    push_audio_param(AMPLITUDE, 0);
+                }
+                draw_countdown(count_down);
+                --count_down;
+            }
+            if(count_down < 64) {
+                update_tank(0, player1_buttons, player1_old_buttons);
+                update_tank(1, player2_buttons, player2_old_buttons);
+            } else if (count_down < 68) {
+                set_note(0, 69);
+                push_audio_param(AMPLITUDE, 64);
+            }
         }
         flush_audio_params();
 
         if(global_tick == 255) {
             if((tank_hp[0] | tank_hp[1]) & 128) {
                 init_tanks();
+                count_down = 255;
             }
         }
 
