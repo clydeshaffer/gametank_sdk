@@ -1,4 +1,12 @@
-# My GameTank Game
+#! Tanks!
+
+![title card](screenshots/screenshot.png)
+![game start](screenshots/screenshot2.png)
+
+Left/right -> steer
+Up -> forward
+Down -> backward
+A -> shoot
 
 Build it with the "make" command
 
