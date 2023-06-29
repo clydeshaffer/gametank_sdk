@@ -15,6 +15,7 @@ ODIR = build
 PORT = COM3
 
 BMPSRC := $(shell find assets -name "*.bmp")
+$(info bmpsrc is $(BMPSRC))
 MIDSRC := $(shell find assets -name "*.mid")
 JSONSRC := $(shell find assets -name "*.json")
 ASSETLISTS := $(shell find src/gen/assets -name "*.s.asset")
@@ -51,20 +52,25 @@ $(BANKS): $(ASSETOBJS) $(AOBJS) $(COBJS) $(LLIBS) gametank-2M.cfg
 	mkdir -p $(@D)
 	$(LN) $(LFLAGS) $(ASSETOBJS) $(AOBJS) $(COBJS) -o bin/$(TARGET) $(LLIBS)
 
+.PRECIOUS: $(ODIR)/assets/%.gtg
 $(ODIR)/assets/%.gtg: assets/%.bmp
 	mkdir -p $(@D)
 	cd scripts/converters ;\
-	node sprite_convert.js ../../$< ../../$@
+	OUTSPRITES=$$(node sprite_convert.js ../../$< ../../$@);\
+	zopfli --deflate $$OUTSPRITES
 
+.PRECIOUS: $(ODIR)/assets/%.gtm2
 $(ODIR)/assets/%.gtm2: assets/%.mid
 	mkdir -p $(@D)
 	cd scripts/converters ;\
 	node midiconvert.js ../../$< ../../$@
 
+.PRECIOUS: $(ODIR)/assets/%.deflate
 $(ODIR)/assets/%.deflate: $(ODIR)/assets/%
 	mkdir -p $(@D)
 	zopfli --deflate $<
 
+.PRECIOUS: $(ODIR)/assets/%.gsi
 $(ODIR)/assets/%.gsi: assets/%.json
 	mkdir -p $(@D)
 	cd scripts/converters ;\
@@ -120,5 +126,9 @@ flash: $(BANKS)
 emulate: bin/$(TARGET)
 	$(EMUPATH)/bin/$(OS)/GameTankEmulator bin/$(TARGET)
 
-import:
+scripts/node_modules:
+	cd scripts/build_setup ;\
+	npm install
+
+import: scripts/node_modules
 	node ./scripts/build_setup/import_assets.js

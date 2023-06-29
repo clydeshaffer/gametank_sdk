@@ -75,12 +75,14 @@ if(outSheets.length == 1) {
     saveHeadless(flipV(outSheets[0]), outFileName);
 } else {
     var sheetNameTuples = outSheets.map((os, index) => {
+        const nameNoExt = outFileName.split('.').slice(0, -1).join('.');
         return {
-            name : (index == 0) ? outFileName : outFileName + "." + index,
+            name : (index === 0) ? outFileName : nameNoExt + '_' + index + '.gtg',
             sheet : os
         };
     });
     sheetNameTuples.forEach((tup) => {
         saveHeadless(flipV(tup.sheet), tup.name);
     });
+    console.log(sheetNameTuples.map((tup) => tup.name).join(' '));
 }
