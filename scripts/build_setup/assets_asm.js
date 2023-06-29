@@ -6,7 +6,8 @@ const assetsDir = 'assets';
 const extensionMap = {
     'bmp' : 'gtg.deflate',
     'mid' : 'gtm2',
-    'json' : 'gsi'
+    'json' : 'gsi',
+    'slc' : 'bin'
 }
 
 function transformFilename(filename) {

@@ -1,0 +1,15 @@
+{
+  "name": "sokoban_converter",
+  "version": "1.0.0",
+  "description": "",
+  "main": "sokoban.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "minimist": "^1.2.8",
+    "xml2json": "^0.12.0"
+  }
+}
