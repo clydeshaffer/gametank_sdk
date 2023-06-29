@@ -1,8 +1,12 @@
 #include "gametank.h"
 #include "drawing_funcs.h"
+#include "gen/assets/redhood.h"
+#include "gen/assets/redhood2.h"
 
 int main () {
     char col = 30, row = 20;
+    unsigned int tick = 0;
+    char frame;
     int dx = 1, dy = 1;
 
     init_graphics();
@@ -13,6 +17,9 @@ int main () {
     flip_pages();
     await_draw_queue();
     clear_border(0);
+
+    load_big_spritesheet(&ASSET__redhood__redhood1, 0);
+    load_big_spritesheet(&ASSET__redhood2__redhood2, 1);
 
     while (1) {                                     //  Run forever
         clear_screen(3);
@@ -30,6 +37,16 @@ int main () {
             dy = -1;
         }
         
+        frame = (tick >> 2) % 135;
+
+        if(frame < 82) {
+            draw_sprite_frame(&ASSET__redhood__redhood1_json, 64, 64, frame, 0, 0);
+        } else {
+            draw_sprite_frame(&ASSET__redhood2__redhood2_json, 64, 64, frame - 82, 0, 1);
+        }
+
+        ++tick;
+
         await_draw_queue();
         sleep(1);
         flip_pages();
