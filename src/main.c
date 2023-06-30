@@ -59,7 +59,6 @@ void init_player() {
     anim_timer = 0;
     anim_flip = 0;
     anim_dir = 0;
-    player_select = 0;
     pushing_box = 0;
 }
 
@@ -116,6 +115,7 @@ int main () {
     
     change_rom_bank(ASSET__maps__microban_slc_bank);
     next_level = (&ASSET__maps__microban_slc_ptr);
+    player_select = 0;
     load_next_level();
 
     update_inputs();
@@ -125,11 +125,23 @@ int main () {
     while(!(player1_buttons & INPUT_MASK_START)) {
         clear_screen(243);
         draw_sprite(0,0,127,127,0,0,2);
+        draw_sprite_frame(&ASSET__gfx__tinychars_json,
+        64, 104,(player_select << 2) + 2 + ((tick & 8) >> 3), 0, 0);
         await_draw_queue();
         sleep(1);
         flip_pages();
         update_inputs();
         tick_music();
+        ++tick;
+        if(player1_buttons & ~player1_old_buttons & INPUT_MASK_LEFT) {
+            --player_select;
+            if(player_select == 0xFF) {
+                player_select = 5;
+            }
+        }
+        if(player1_buttons & ~player1_old_buttons & INPUT_MASK_RIGHT) {
+            player_select = (player_select+1)%6;
+        }
     }
 
     while (1) {                                     //  Run forever
@@ -166,10 +178,6 @@ int main () {
 
         anim_frame += anim_dir;
         anim_frame += player_select << 2;
-
-        
-
-        
 
         update_inputs();
 
