@@ -136,7 +136,7 @@ int main () {
         clear_screen(243);
         if(anim_timer) {
             anim_frame = 2 + ((anim_timer & 4) >> 2);
-            if(tick & 1) {
+            if((tick & 1) || (player1_buttons & INPUT_MASK_B)) {
                 offset_x += move_x;
                 offset_y += move_y;
                 --anim_timer;
@@ -172,6 +172,8 @@ int main () {
         
 
         update_inputs();
+
+       
 
         if(anim_timer == 0) {
             if(player1_buttons & INPUT_MASK_LEFT) {
