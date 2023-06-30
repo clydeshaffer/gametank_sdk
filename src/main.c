@@ -5,6 +5,9 @@
 #include "gen/assets/maps.h"
 #include <zlib.h>
 #include "banking.h"
+#include "gen/assets/mid.h"
+#include "dynawave.h"
+#include "music.h"
 
 #define DEFAULT_OFFSET 4
 #define ANIM_TIME 8
@@ -29,6 +32,7 @@ char pushing_box;
 char field[256];
 char c,r,i;
 char* next_level;
+char* current_level;
 char goals_remaining;
 
 void scan_level() {
@@ -60,11 +64,11 @@ void init_player() {
 }
 
 void load_next_level() {
-    i = *next_level;
-    ++next_level;
     change_rom_bank(ASSET__maps__microban_slc_bank);
-    inflatemem(field, next_level);
-    next_level += i;
+    inflatemem(field, next_level+1);
+    current_level = next_level;
+    next_level += *next_level;
+    next_level += 1;
     init_player();
     scan_level();
 }
@@ -84,6 +88,7 @@ void draw_field() {
                 vram[GX] = (field[i] & 0x0F) << 3;
                 vram[GY] = (field[i] & 0xF0) >> 1;
                 vram[START] = 1;
+                wait();
             }
             ++i;
         }
@@ -93,6 +98,8 @@ void draw_field() {
 int main () {
 
     init_graphics();
+    init_dynawave();
+    init_music();
 
     flip_pages();
     clear_border(0);
@@ -103,12 +110,27 @@ int main () {
 
     load_spritesheet(&ASSET__gfx__tinychars_bmp, 0);
     load_spritesheet(&ASSET__gfx__tiles_bmp, 1);
+    load_spritesheet(&ASSET__gfx__title_bmp, 2);
 
     init_player();
     
     change_rom_bank(ASSET__maps__microban_slc_bank);
     next_level = (&ASSET__maps__microban_slc_ptr);
     load_next_level();
+
+    update_inputs();
+
+    //play_song(&ASSET__mid__merrymeadow_mid, REPEAT_LOOP);
+
+    while(!(player1_buttons & INPUT_MASK_START)) {
+        clear_screen(243);
+        draw_sprite(0,0,127,127,0,0,2);
+        await_draw_queue();
+        sleep(1);
+        flip_pages();
+        update_inputs();
+        tick_music();
+    }
 
     while (1) {                                     //  Run forever
         clear_screen(243);
@@ -204,8 +226,10 @@ int main () {
             }
         }
 
-
-        await_draw_queue();
+        while(queue_pending != 0) {
+            asm("CLI");
+            wait();
+        }
         draw_field();
 
         if(goals_remaining == 0) {
@@ -213,20 +237,21 @@ int main () {
         }
 
         if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
+            next_level = current_level;
             load_next_level();
         }
 
         if(pushing_box) {
-            draw_sprite((player_x << 3) + offset_x + (move_x << 3) - DEFAULT_OFFSET,
-        (player_y << 3) + offset_y + (move_y << 3) - DEFAULT_OFFSET, 8, 8, 16, 24, 1);
+            draw_sprite_now((player_x << 3) + offset_x + (move_x << 3) - DEFAULT_OFFSET,
+                (player_y << 3) + offset_y + (move_y << 3) - DEFAULT_OFFSET, 8, 8, 16, 24, 1);
         }
         draw_sprite_frame(&ASSET__gfx__tinychars_json,
         (player_x << 3) + offset_x,
         (player_y << 3) + offset_y,
         anim_frame, anim_flip, 0);
-        await_draw_queue();
         sleep(1);
         flip_pages();
+        tick_music();
         ++tick;
     }
 

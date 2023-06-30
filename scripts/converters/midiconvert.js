@@ -101,7 +101,7 @@ var frameBuffers = timeBucketedTracks.map((bucket) => {
         extraTime -= 128;
     }
     frameBuf.writeUint8(deltaTime, offset++);
-    frameBuf.writeUint8(noteMask, offset++);
+    frameBuf.writeUint8(noteMask & 3, offset++);
     tracks.forEach((n) => {
         frameBuf.writeUint8(frame[n].note, offset++);
     });

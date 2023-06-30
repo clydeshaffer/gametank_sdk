@@ -61,9 +61,7 @@ fs.readFile(inFileName, function(err, data) {
                     levelBuf.writeUint8(outchar, i);
                 }
                 const sizeBuf = Buffer.alloc(1);
-                const compressed = zlib.deflateRawSync(levelBuf, {
-                    
-                });
+                const compressed = zlib.deflateRawSync(levelBuf);
                 sizeBuf.writeUint8(compressed.length, 0);
                 console.log(levelBuf.length + " -> " + compressed.length);
                 totalSize += sizeBuf.length + compressed.length;
