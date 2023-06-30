@@ -30,6 +30,7 @@ char pushing_box;
 #define PLAYER_START 32
 #define PLAYER_GOAL_START 24
 char field[256];
+char field_original[256];
 char c,r,i;
 char* next_level;
 char* current_level;
@@ -39,6 +40,7 @@ void scan_level() {
     i = 0;
     goals_remaining = 0;
     do {
+        field_original[i] = field[i];
         if((field[i] == PLAYER_START) || (field[i] == PLAYER_GOAL_START)) {
             player_x = i & 15;
             player_y = i >> 4;
@@ -73,13 +75,13 @@ void load_next_level() {
 }
 
 void draw_field() {
-    i = 0;
+    i = 16;
     *dma_flags = (flagsMirror | DMA_GCARRY) & ~(DMA_COLORFILL_ENABLE | DMA_OPAQUE);
     banksMirror = bankflip | GRAM_PAGE(1);
     *bank_reg = banksMirror;
     vram[WIDTH] = 8;
     vram[HEIGHT] = 8;
-    for(r = 0; r < 128; r+=8) {
+    for(r = 8; r < 120; r+=8) {
         vram[VY] = r;
         for(c = 0; c < 128; c+=8) {
             if(field[i]) {
@@ -224,7 +226,12 @@ int main () {
                                 field[i] = GOAL_TILE;
                                 ++goals_remaining;
                             } else {
-                                field[i] = 0;
+                                if((field_original[i] == BARREL_TILE)
+                                || (field_original[i] == BARREL_GOAL_TILE)) {
+                                    field[i] = 0;
+                                } else {
+                                    field[i] = field_original[i];
+                                }
                             }
                         }
                     } else {
@@ -255,6 +262,7 @@ int main () {
             draw_sprite_now((player_x << 3) + offset_x + (move_x << 3) - DEFAULT_OFFSET,
                 (player_y << 3) + offset_y + (move_y << 3) - DEFAULT_OFFSET, 8, 8, 16, 24, 1);
         }
+        clear_border(0);
         draw_sprite_frame(&ASSET__gfx__tinychars_json,
         (player_x << 3) + offset_x,
         (player_y << 3) + offset_y,

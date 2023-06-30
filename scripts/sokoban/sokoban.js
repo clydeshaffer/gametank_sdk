@@ -23,7 +23,7 @@ fs.readFile(inFileName, function(err, data) {
     let totalLevels = 0;
     let totalSize = 0;
     const convertedLevels = levels.flatMap((level, index) => {
-        if(totalSize < 16384) { 
+        if(totalSize < 16300) { 
             if(level.Width <= 16 && level.Height <= 16) {
                 ++totalLevels;
                 const widthDiff = 16 - level.Width;
@@ -96,7 +96,8 @@ fs.readFile(inFileName, function(err, data) {
                             outchar = 185;
                             break;
                         default:
-                            outchar = 0;
+                            outchar = (Math.random() > 0.75) ?
+                            Math.floor(Math.random() * 5) + 64 : 0;
                     }
                     levelBuf.writeUint8(outchar, i);
                 }
