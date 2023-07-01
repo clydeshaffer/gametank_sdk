@@ -122,7 +122,7 @@ int main () {
 
     update_inputs();
 
-    //play_song(&ASSET__mid__merrymeadow_mid, REPEAT_LOOP);
+    play_song(&ASSET__mid__yeeee_mid, REPEAT_NONE);
 
     while(!(player1_buttons & INPUT_MASK_START)) {
         clear_screen(243);
@@ -145,6 +145,8 @@ int main () {
             player_select = (player_select+1)%6;
         }
     }
+
+    stop_music();
 
     while (1) {                                     //  Run forever
         clear_screen(243);
@@ -211,7 +213,7 @@ int main () {
                 anim_flip = 0;
             }
 
-            if(move_x | move_y) {
+            if(anim_timer == ANIM_TIME) {
                 i = (player_x + move_x) | ((player_y + move_y) << 4);
                 if(field[i] & 128) {
                     if((field[i] == BARREL_TILE) || (field[i] == BARREL_GOAL_TILE)) {
@@ -222,6 +224,7 @@ int main () {
                             anim_timer = 0;
                         } else {
                             pushing_box = 1;
+                            do_noise_effect(64, 0xFF, ANIM_TIME);
                             if(field[i] == BARREL_GOAL_TILE) {
                                 field[i] = GOAL_TILE;
                                 ++goals_remaining;
@@ -239,6 +242,8 @@ int main () {
                         move_y = 0;
                         anim_timer = 0;
                     }
+                } else {
+                    do_noise_effect(80,0,1);
                 }
             }
         }
@@ -251,11 +256,13 @@ int main () {
 
         if(goals_remaining == 0) {
             load_next_level();
+            play_song(&ASSET__mid__solve_mid, REPEAT_NONE);
         }
 
         if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
             next_level = current_level;
             load_next_level();
+            play_song(&ASSET__mid__oops_mid, REPEAT_NONE);
         }
 
         if(pushing_box) {

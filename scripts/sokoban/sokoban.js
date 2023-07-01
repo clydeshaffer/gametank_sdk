@@ -24,7 +24,7 @@ fs.readFile(inFileName, function(err, data) {
         const convertedLevels = levels.flatMap((level) => {
             //console.log(level);
             if(totalSize < 16300) { 
-                if(level.$.Width <= 16 && level.$.Height <= 16) {
+                if(level.$.Width <= 16 && level.$.Height <= 14) {
                     ++totalLevels;
                     const widthDiff = 16 - level.$.Width;
                     const heightDiff = 16 - level.$.Height;
