@@ -10,5 +10,6 @@ bin
 build
 src/gen
 scripts/converters/node_modules
+scripts/sokoban/node_modules
 bankMakeList
 gametank-2M.cfg
