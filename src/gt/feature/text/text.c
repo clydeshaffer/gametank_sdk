@@ -10,13 +10,16 @@
 #define TEXT_LINE_HEIGHT 8
 
 char font_slot;
-char text_cursor_x, text_cursor_y, text_print_width, text_print_line_start;
+char text_cursor_x, text_cursor_y;
+char text_print_width, text_print_line_start;
+char text_use_alt_color;
 
 void init_text() {
     text_cursor_x = 0;
     text_cursor_y = 0;
     text_print_width = 128;
     text_print_line_start = 0;
+    text_use_alt_color = 0;
 }
 
 void load_font(char slot) {
@@ -24,6 +27,7 @@ void load_font(char slot) {
     load_spritesheet(&ASSET__font__bios8_bmp, slot);
 }
 
+char text_tmp;
 void print_text(char* text) {
     *dma_flags = (flagsMirror | DMA_GCARRY) & ~(DMA_COLORFILL_ENABLE | DMA_OPAQUE);
     banksMirror = bankflip | GRAM_PAGE(font_slot);
@@ -31,8 +35,12 @@ void print_text(char* text) {
     vram[WIDTH] = TEXT_CHAR_WIDTH;
     vram[HEIGHT] = TEXT_CHAR_HEIGHT;
     vram[VY] = text_cursor_y;
+    if(text_use_alt_color) {
+        text_use_alt_color = 128;
+    }
     while(*text != 0) {
-        switch(*text) {
+        text_tmp = *text + text_use_alt_color;
+        switch(text_tmp) {
             case ' ':
                 text_cursor_x += TEXT_CHAR_WIDTH;
                 break;
@@ -50,8 +58,8 @@ void print_text(char* text) {
                     vram[VY] = text_cursor_y;
                 }
                 vram[VX] = text_cursor_x;
-                vram[GX] = (*text & 0x0F) << 3;
-                vram[GY] = (*text & 0xF0) >> 1;
+                vram[GX] = (text_tmp & 0x0F) << 3;
+                vram[GY] = ((text_tmp & 0xF0) >> 1);
                 vram[START] = 1;
                 text_cursor_x += TEXT_CHAR_WIDTH;
                 wait();
