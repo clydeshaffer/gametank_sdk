@@ -50,6 +50,8 @@ int main () {
         if(player1_buttons & ~player1_old_buttons & INPUT_MASK_UP) {
             if(keyb_row > 0) {
                 --keyb_row;
+            } else {
+                keyb_row = KEYBOARD_ROWS-1;
             }
         }
         if(player1_buttons & ~player1_old_buttons & INPUT_MASK_DOWN) {
@@ -58,16 +60,22 @@ int main () {
                 if(keyb_col >= keyboard_row_length[keyb_row]) {
                     keyb_col = keyboard_row_length[keyb_row] - 1;
                 }
+            } else {
+                keyb_row = 0;
             }
         }
         if(player1_buttons & ~player1_old_buttons & INPUT_MASK_LEFT) {
             if(keyb_col > 0) {
                 --keyb_col;
+            } else {
+                keyb_col = keyboard_row_length[keyb_row]-1;
             }
         }
         if(player1_buttons & ~player1_old_buttons & INPUT_MASK_RIGHT) {
             if(keyb_col < keyboard_row_length[keyb_row]-1) {
                 ++keyb_col;
+            } else {
+                keyb_col = 0;
             }
         }
 
