@@ -7,7 +7,8 @@
 
 #define LETTER_COLOR_RIGHT 20
 #define LETTER_COLOR_MOVED 52
-#define LETTER_COLOR_WRONG 3
+#define LETTER_COLOR_WRONG 2
+#define LETTER_COLOR_DEFAULT 3
 
 char lookup_word(char* word);
 

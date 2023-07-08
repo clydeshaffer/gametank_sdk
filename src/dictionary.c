@@ -35,6 +35,7 @@ char word_buf[WORD_LENGTH];
 char secret_word[WORD_LENGTH+1];
 char secret_letters[ALPHABET_SIZE];
 char letters_seen[ALPHABET_SIZE];
+const char qwerty_order[ALPHABET_SIZE] = {10, 23, 21, 12, 2, 13, 14, 15, 7, 16, 17, 18, 25, 24, 8, 9, 0, 3, 11, 4, 6, 22, 1, 20, 5, 19};
 
 const char letter_banks[ALPHABET_SIZE] = {
     ASSET__dict_a__words_bin_bank,
@@ -156,6 +157,7 @@ char check_guess(char* word, char* colors, char* keyb_colors) {
         if(*word == secret_word[dict_i]) {
              ++letters_seen[(*word) - 'A'];
             *colors = LETTER_COLOR_RIGHT;
+            keyb_colors[qwerty_order[(*word) - 'A']] = LETTER_COLOR_RIGHT;
         }
         ++word;
         ++colors;
@@ -167,6 +169,12 @@ char check_guess(char* word, char* colors, char* keyb_colors) {
         if(*word == secret_word[dict_i]) {
         } else if(letters_seen[(*word) - 'A'] <= secret_letters[(*word) - 'A']) {
             *colors = LETTER_COLOR_MOVED;
+            if(keyb_colors[qwerty_order[(*word) - 'A']] != LETTER_COLOR_RIGHT) {
+                keyb_colors[qwerty_order[(*word) - 'A']] = LETTER_COLOR_MOVED;
+            }
+        }
+        if(!secret_letters[(*word) - 'A']) {
+            keyb_colors[qwerty_order[(*word) - 'A']] = LETTER_COLOR_WRONG;
         }
         ++word;
         ++colors;

@@ -3,13 +3,16 @@
 #include "input.h"
 #include "feature/text/text.h"
 #include "dictionary.h"
+#include "gen/assets/gfx.h"
 
 #define KEYBOARD_X 24
 #define KEYBOARD_Y 92
 
 #define KEYBOARD_ROWS 3
 const char keyboard_row_length[KEYBOARD_ROWS] = {10, 9, 7};
+const char keyboard_row_offset[KEYBOARD_ROWS] = {0, 4, 8};
 const char keyboard_letters[] = "QWERTYUIOP      ASDFGHJKL       ZXCVBNM         ";
+char keyboard_colors[ALPHABET_SIZE];
 char keyb_col;
 char keyb_row;
 
@@ -35,6 +38,7 @@ int main () {
     init_text();
 
     load_font(7);
+    load_spritesheet(&ASSET__gfx__bg_bmp, 0);
 
     flip_pages();
     clear_border(0);
@@ -46,9 +50,13 @@ int main () {
     while (1) {
         text_print_width = 128 - 8;
 
+        for(textbuf_i = 0; textbuf_i < ALPHABET_SIZE; ++textbuf_i) {
+            keyboard_colors[textbuf_i] = LETTER_COLOR_DEFAULT;
+        }
+
         for(textbuf_i = 0; textbuf_i < TEXTBUF_SIZE; ++textbuf_i) {
             textbuf[textbuf_i] = 0;
-            box_colors[textbuf_i] = 3;
+            box_colors[textbuf_i] = 1;
         }
 
         textbuf_i = 0;
@@ -58,13 +66,13 @@ int main () {
         keyb_row = 0;
         guess_state = STATE_NONE;
         update_inputs();
-        clear_screen(3);
+        draw_sprite(0, 0, 127, 127, 0, 0, 0);
         await_draw_queue();
-        text_print_line_start = 16;
-        text_cursor_x = 16;
-        text_cursor_y = 32;
+        text_print_line_start = 44;
+        text_cursor_x = 44;
+        text_cursor_y = 16;
         text_use_alt_color = 1;
-        print_text("Word Guessin'\n\r    Game");
+        print_text("Word\n\rGuess\n\rGame");
         text_cursor_x = 20;
         text_cursor_y = KEYBOARD_Y;
         text_use_alt_color = 0; 
@@ -79,7 +87,7 @@ int main () {
         set_secret_word(word_index);
 
         while (guess_state != STATE_RESTART) { 
-            clear_screen(3);
+            draw_sprite(0, 0, 127, 127, 0, 0, 0);
 
             update_inputs();
 
@@ -133,7 +141,7 @@ int main () {
                         guess_state = 1 + lookup_word(textbuf + textbuf_word_offset);
                         if(guess_state == STATE_VALID) {
 
-                            if(check_guess(textbuf + textbuf_word_offset, box_colors + textbuf_word_offset, 0)) {
+                            if(check_guess(textbuf + textbuf_word_offset, box_colors + textbuf_word_offset, keyboard_colors)) {
                                 guess_state = STATE_WIN;
                             } else {
                                 guess_state = STATE_NONE;
@@ -154,6 +162,13 @@ int main () {
                     }
                     guess_state = STATE_NONE;
                 }
+
+                i=0;
+                for(r = 0; r < KEYBOARD_ROWS; ++r) {
+                    for(c = 0; c < (8 * keyboard_row_length[r]); c += 8) {
+                        draw_box(KEYBOARD_X + c + keyboard_row_offset[r], KEYBOARD_Y + (r << 3), 8, 8, keyboard_colors[i++]);
+                    }
+                }
                 draw_box((keyb_col << 3) + KEYBOARD_X + (keyb_row << 2), (keyb_row << 3) + KEYBOARD_Y, 8, 8, 7);
             } else {
                 if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
@@ -171,6 +186,7 @@ int main () {
             await_draw_queue();
 
             if(guess_state < STATE_WIN) {
+
                 text_print_width = 128;
                 text_use_alt_color = 0;
                 text_cursor_x = KEYBOARD_X;
