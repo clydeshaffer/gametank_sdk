@@ -30,9 +30,13 @@
 #include "gen/assets/dict_y.h"
 #include "gen/assets/dict_z.h"
 
-char word_buf[5];
+char dict_i;
+char word_buf[WORD_LENGTH];
+char secret_word[WORD_LENGTH+1];
+char secret_letters[ALPHABET_SIZE];
+char letters_seen[ALPHABET_SIZE];
 
-const char letter_banks[26] = {
+const char letter_banks[ALPHABET_SIZE] = {
     ASSET__dict_a__words_bin_bank,
     ASSET__dict_b__words_bin_bank,
     ASSET__dict_c__words_bin_bank,
@@ -109,5 +113,32 @@ char lookup_word(char* word) {
         mid = (left + right) / 2;
     }
 
+    return 0;
+}
+
+void set_secret_word(unsigned int index) {
+    long le_suffix;
+    change_rom_bank(ASSET__dict__index__counts_bin_bank);
+    dict_i = 0;
+    while(index > ((unsigned int*)&ASSET__dict__index__counts_bin_ptr)[dict_i]) {
+        index -= ((unsigned int*)&ASSET__dict__index__counts_bin_ptr)[dict_i];
+        ++dict_i;
+    }
+    secret_word[0] = dict_i + 'A';
+    change_rom_bank(letter_banks[dict_i]);
+    le_suffix = ((unsigned long*) &ASSET__dict_a__words_bin_ptr)[index];
+    word_to_buf(&le_suffix);
+    *((long*)(secret_word+1)) = *((long*)(word_buf+1)) - 0x20202020;
+    secret_word[5] = 0;
+}
+
+const char* get_secret_word() {
+    return secret_word;
+}
+
+char check_guess(char* word, char* colors) {
+    for(dict_i = 0; dict_i < WORD_LENGTH; ++dict_i) {
+
+    }
     return 0;
 }
