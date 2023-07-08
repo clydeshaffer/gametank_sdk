@@ -25,6 +25,9 @@ BMPOBJS = $(patsubst %,$(ODIR)/%,$(BMPSRC:bmp=gtg.deflate))
 MIDOBJS = $(patsubst %,$(ODIR)/%,$(MIDSRC:mid=gtm2))
 JSONOBJS = $(patsubst %,$(ODIR)/%,$(JSONSRC:json=gsi))
 
+DICTSRC = $(shell find assets -name "*.bin")
+DICTOBJS = $(patsubst %,$(ODIR)/%,$(DICTSRC))
+
 CFLAGS = -t none -Osr --cpu 65c02 --codesize 500 --static-locals -I src/gt
 AFLAGS = --cpu 65C02 --bin-include-dir lib --bin-include-dir $(ODIR)/assets
 LFLAGS = -C gametank-2M.cfg -m $(ODIR)/out.map -vm
@@ -76,6 +79,10 @@ $(ODIR)/assets/%.gsi: assets/%.json
 	cd scripts/converters ;\
 	node sprite_metadata.js ../../$< ../../$@
 
+$(ODIR)/assets/%.bin: assets/%.bin
+	mkdir -p $(@D)
+	cp $< $@
+
 $(ODIR)/assets/audio_fw.bin.deflate: $(ODIR)/assets/audio_fw.bin
 	zopfli --deflate $<
 
@@ -84,7 +91,7 @@ $(ODIR)/assets/audio_fw.bin: src/gt/audio_fw.asm gametank-acp.cfg
 	$(AS) --cpu 65C02 src/gt/audio_fw.asm -o $(ODIR)/assets/audio_fw.o
 	$(LN) -C gametank-acp.cfg $(ODIR)/assets/audio_fw.o -o $(ODIR)/assets/audio_fw.bin
 
-$(ODIR)/gen/assets/%.o: src/gen/assets/%.s.asset $(BMPOBJS) $(JSONOBJS) $(AUDIO_FW) $(MIDOBJS)
+$(ODIR)/gen/assets/%.o: src/gen/assets/%.s.asset $(BMPOBJS) $(JSONOBJS) $(AUDIO_FW) $(MIDOBJS) $(DICTOBJS)
 	mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
