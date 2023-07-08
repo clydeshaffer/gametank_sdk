@@ -18,8 +18,17 @@ char textbuf[TEXTBUF_SIZE];
 char box_colors[TEXTBUF_SIZE];
 char textbuf_i;
 char textbuf_word_offset;
-char was_valid;
+
+#define STATE_NONE 0
+#define STATE_INVALID 1
+#define STATE_VALID 2
+#define STATE_WIN 3
+#define STATE_LOSE 4
+#define STATE_RESTART 5
+char guess_state;
+
 char r,c,i;
+unsigned int word_index;
 int main () {
 
     init_graphics();
@@ -34,146 +43,189 @@ int main () {
     await_draw_queue();
     clear_border(0);
 
-    text_print_line_start = 32;
-    text_print_width = 128 - 16;
+    while (1) {
+        text_print_width = 128 - 8;
 
-    for(textbuf_i = 0; textbuf_i < TEXTBUF_SIZE; ++textbuf_i) {
-        textbuf[textbuf_i] = 0;
-        box_colors[textbuf_i] = 3;
-    }
+        for(textbuf_i = 0; textbuf_i < TEXTBUF_SIZE; ++textbuf_i) {
+            textbuf[textbuf_i] = 0;
+            box_colors[textbuf_i] = 3;
+        }
 
-    textbuf_i = 0;
-    textbuf_word_offset = 0;
+        textbuf_i = 0;
+        textbuf_word_offset = 0;
 
-    keyb_col = 0;
-    keyb_row = 0;
-    was_valid = 0;
-
-    set_secret_word(13209);
-
-    while (1) { 
-        clear_screen(3);
-
+        keyb_col = 0;
+        keyb_row = 0;
+        guess_state = STATE_NONE;
         update_inputs();
-        if(player1_buttons & ~player1_old_buttons & INPUT_MASK_UP) {
-            if(keyb_row > 0) {
-                --keyb_row;
-            } else {
-                keyb_row = KEYBOARD_ROWS-1;
-            }
-        }
-        if(player1_buttons & ~player1_old_buttons & INPUT_MASK_DOWN) {
-            if(keyb_row < KEYBOARD_ROWS-1) {
-                ++keyb_row;
-                if(keyb_col >= keyboard_row_length[keyb_row]) {
-                    keyb_col = keyboard_row_length[keyb_row] - 1;
-                }
-            } else {
-                keyb_row = 0;
-            }
-        }
-        if(player1_buttons & ~player1_old_buttons & INPUT_MASK_LEFT) {
-            if(keyb_col > 0) {
-                --keyb_col;
-            } else {
-                keyb_col = keyboard_row_length[keyb_row]-1;
-            }
-        }
-        if(player1_buttons & ~player1_old_buttons & INPUT_MASK_RIGHT) {
-            if(keyb_col < keyboard_row_length[keyb_row]-1) {
-                ++keyb_col;
-            } else {
-                keyb_col = 0;
-            }
-        }
-
-        if(player1_buttons & ~player1_old_buttons & INPUT_MASK_A) {
-            if(textbuf_i < WORD_LENGTH) {
-                textbuf[textbuf_i+textbuf_word_offset] = keyboard_letters[(keyb_row * 16) + keyb_col];
-                ++textbuf_i;
-            }
-
-            
-        }
-
-        if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
-            if(textbuf_i == WORD_LENGTH) {
-                was_valid = 1 + lookup_word(textbuf + textbuf_word_offset);
-                if(was_valid == 2) {
-
-                    for(c = 0; c < WORD_LENGTH; ++c) {
-                        if(textbuf[textbuf_word_offset + c] == 'A')
-                            box_colors[textbuf_word_offset + c] = 52;
-                        else if(textbuf[textbuf_word_offset + c] == 'B')
-                            box_colors[textbuf_word_offset + c] = 20;
-                    }
-
-                    was_valid = 0;
-                    textbuf_word_offset += 5;
-                    textbuf_i = 0;
-                }
-            }
-        }
-
-        if(player1_buttons & ~player1_old_buttons & INPUT_MASK_B) {
-            if(textbuf_i > 0) {
-                --textbuf_i;
-                textbuf[textbuf_i+textbuf_word_offset] = 0;
-            }
-            was_valid = 0;
-        }
-
-        draw_box((keyb_col << 3) + KEYBOARD_X + (keyb_row << 2), (keyb_row << 3) + KEYBOARD_Y, 8, 8, 7);
-
-        i=0;
-        for(r = 0; r < (8*GUESS_LIMIT); r += 8) {
-            for(c = 0; c < (8 * WORD_LENGTH); c += 8) {
-                draw_box(44 + c, 16 + r, 8, 8, box_colors[i++]);
-            }
-        }
-
+        clear_screen(3);
         await_draw_queue();
-
-        text_print_width = 128;
-        text_use_alt_color = 0;
-        text_cursor_x = KEYBOARD_X;
+        text_print_line_start = 16;
+        text_cursor_x = 16;
+        text_cursor_y = 32;
+        text_use_alt_color = 1;
+        print_text("Word Guessin'\n\r    Game");
+        text_cursor_x = 20;
         text_cursor_y = KEYBOARD_Y;
-        print_text("QWERTYUIOP");
-        text_cursor_x = KEYBOARD_X+4;
-        text_cursor_y = KEYBOARD_Y+8;
-        print_text("ASDFGHJKL");
-        text_cursor_x = KEYBOARD_X+8;
-        text_cursor_y = KEYBOARD_Y+16;
-        print_text("ZXCVBNM");
-
-        text_print_line_start = 44;
-        text_print_width = 8 * WORD_LENGTH;
-        text_cursor_x = 44;
-        text_cursor_y = 16;
-        print_text(textbuf);
-        if(textbuf_i < 5)
-            print_text("_");
-
-        text_print_width = 128;
-        if(was_valid == 1) {
-            text_cursor_x = 28;
-            text_cursor_y = 64;
-            print_text("not valid");
-        } else if(was_valid == 2) {
-            text_cursor_x = 44;
-            text_cursor_y = 64;
-            text_use_alt_color = 1;
-            print_text("valid");
-        } else {
-            text_cursor_x = 44;
-            text_cursor_y = 64;
-            text_use_alt_color = 1;
-            print_text(get_secret_word());
-        }
-
+        text_use_alt_color = 0; 
+        print_text("Press Start");
         sleep(1);
         flip_pages();
-        
+        while(!(player1_buttons & ~player1_old_buttons & INPUT_MASK_START)) {
+            ++word_index;
+            update_inputs();
+        }
+
+        set_secret_word(word_index);
+
+        while (guess_state != STATE_RESTART) { 
+            clear_screen(3);
+
+            update_inputs();
+
+            if(guess_state < STATE_WIN) {
+                if(player1_buttons & ~player1_old_buttons & INPUT_MASK_UP) {
+                    if(keyb_row > 0) {
+                        --keyb_row;
+                    } else {
+                        keyb_row = KEYBOARD_ROWS-1;
+                        if(keyb_col >= keyboard_row_length[keyb_row]) {
+                            keyb_col = keyboard_row_length[keyb_row] - 1;
+                        }
+                    }
+                }
+                if(player1_buttons & ~player1_old_buttons & INPUT_MASK_DOWN) {
+                    if(keyb_row < KEYBOARD_ROWS-1) {
+                        ++keyb_row;
+                        if(keyb_col >= keyboard_row_length[keyb_row]) {
+                            keyb_col = keyboard_row_length[keyb_row] - 1;
+                        }
+                    } else {
+                        keyb_row = 0;
+                    }
+                }
+                if(player1_buttons & ~player1_old_buttons & INPUT_MASK_LEFT) {
+                    if(keyb_col > 0) {
+                        --keyb_col;
+                    } else {
+                        keyb_col = keyboard_row_length[keyb_row]-1;
+                    }
+                }
+                if(player1_buttons & ~player1_old_buttons & INPUT_MASK_RIGHT) {
+                    if(keyb_col < keyboard_row_length[keyb_row]-1) {
+                        ++keyb_col;
+                    } else {
+                        keyb_col = 0;
+                    }
+                }
+
+                if(player1_buttons & ~player1_old_buttons & INPUT_MASK_A) {
+                    if(textbuf_i < WORD_LENGTH) {
+                        textbuf[textbuf_i+textbuf_word_offset] = keyboard_letters[(keyb_row * 16) + keyb_col];
+                        ++textbuf_i;
+                    }
+
+                    
+                }
+
+                if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
+                    if(textbuf_i == WORD_LENGTH) {
+                        guess_state = 1 + lookup_word(textbuf + textbuf_word_offset);
+                        if(guess_state == STATE_VALID) {
+
+                            if(check_guess(textbuf + textbuf_word_offset, box_colors + textbuf_word_offset, 0)) {
+                                guess_state = STATE_WIN;
+                            } else {
+                                guess_state = STATE_NONE;
+                                textbuf_word_offset += WORD_LENGTH;
+                                textbuf_i = 0;
+                                if(textbuf_word_offset == WORD_LENGTH*6) {
+                                    guess_state = STATE_LOSE;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if(player1_buttons & ~player1_old_buttons & INPUT_MASK_B) {
+                    if(textbuf_i > 0) {
+                        --textbuf_i;
+                        textbuf[textbuf_i+textbuf_word_offset] = 0;
+                    }
+                    guess_state = STATE_NONE;
+                }
+                draw_box((keyb_col << 3) + KEYBOARD_X + (keyb_row << 2), (keyb_row << 3) + KEYBOARD_Y, 8, 8, 7);
+            } else {
+                if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
+                    guess_state = STATE_RESTART;
+                }
+            }
+
+            i=0;
+            for(r = 0; r < (8*GUESS_LIMIT); r += 8) {
+                for(c = 0; c < (8 * WORD_LENGTH); c += 8) {
+                    draw_box(44 + c, 16 + r, 8, 8, box_colors[i++]);
+                }
+            }
+
+            await_draw_queue();
+
+            if(guess_state < STATE_WIN) {
+                text_print_width = 128;
+                text_use_alt_color = 0;
+                text_cursor_x = KEYBOARD_X;
+                text_cursor_y = KEYBOARD_Y;
+                print_text("QWERTYUIOP");
+                text_cursor_x = KEYBOARD_X+4;
+                text_cursor_y = KEYBOARD_Y+8;
+                print_text("ASDFGHJKL");
+                text_cursor_x = KEYBOARD_X+8;
+                text_cursor_y = KEYBOARD_Y+16;
+                print_text("ZXCVBNM");
+            }
+
+            text_use_alt_color = 1;
+            text_print_line_start = 44;
+            text_print_width = 8 * WORD_LENGTH;
+            text_cursor_x = 44;
+            text_cursor_y = 16;
+            print_text(textbuf);
+
+            if(guess_state == STATE_INVALID) {
+                text_print_width = 128;
+                text_cursor_x = 28;
+                text_cursor_y = 72;
+                print_text("not valid");
+            } else if(guess_state == STATE_WIN) {
+                text_print_width = 128;
+                text_cursor_x = 28;
+                text_cursor_y = 72;
+                text_use_alt_color = 1;
+                print_text("Good job!");
+                text_cursor_x = 20;
+                text_cursor_y = KEYBOARD_Y+16;
+                text_use_alt_color = 0; 
+                print_text("Press Start");
+            } else if(guess_state == STATE_LOSE) {
+                text_print_width = 128;
+                text_cursor_x = 4;
+                text_cursor_y = 72;
+                text_use_alt_color = 1;
+                text_print_line_start = 4;
+                print_text("    Too bad!\n\rIt was ");
+                print_text(get_secret_word());
+                print_text(" :(");
+                text_cursor_x = 20;
+                text_cursor_y = KEYBOARD_Y+16;
+                text_use_alt_color = 0; 
+                print_text("Press Start");
+            } else if(textbuf_i < 5)
+                print_text("_");
+
+            sleep(1);
+            flip_pages();
+            
+        }
     }
 
   return (0);

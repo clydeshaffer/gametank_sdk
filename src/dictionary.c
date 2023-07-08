@@ -123,6 +123,9 @@ void set_secret_word(unsigned int index) {
     while(index > ((unsigned int*)&ASSET__dict__index__counts_bin_ptr)[dict_i]) {
         index -= ((unsigned int*)&ASSET__dict__index__counts_bin_ptr)[dict_i];
         ++dict_i;
+        if(dict_i >= ALPHABET_SIZE) {
+            dict_i = 0;
+        }
     }
     secret_word[0] = dict_i + 'A';
     change_rom_bank(letter_banks[dict_i]);
@@ -130,15 +133,41 @@ void set_secret_word(unsigned int index) {
     word_to_buf(&le_suffix);
     *((long*)(secret_word+1)) = *((long*)(word_buf+1)) - 0x20202020;
     secret_word[5] = 0;
+
+    for(dict_i = 0; dict_i < ALPHABET_SIZE; ++dict_i) {
+        secret_letters[dict_i] = 0;
+    }
+    ++secret_letters[secret_word[0]-'A'];
+    ++secret_letters[secret_word[1]-'A'];
+    ++secret_letters[secret_word[2]-'A'];
+    ++secret_letters[secret_word[3]-'A'];
+    ++secret_letters[secret_word[4]-'A'];
 }
 
 const char* get_secret_word() {
     return secret_word;
 }
 
-char check_guess(char* word, char* colors) {
-    for(dict_i = 0; dict_i < WORD_LENGTH; ++dict_i) {
-
+char check_guess(char* word, char* colors, char* keyb_colors) {
+    for(dict_i = 0; dict_i < ALPHABET_SIZE; ++dict_i) {
+        letters_seen[dict_i] = 0;
     }
-    return 0;
+    for(dict_i = 0; dict_i < WORD_LENGTH; ++dict_i) {
+        ++letters_seen[(*word) - 'A'];
+        if(*word == secret_word[dict_i]) {
+            *colors = LETTER_COLOR_RIGHT;
+        } else if(letters_seen[(*word) - 'A'] <= secret_letters[(*word) - 'A']) {
+            *colors = LETTER_COLOR_MOVED;
+        } else {
+            *colors = LETTER_COLOR_WRONG;
+        }
+        ++word;
+        ++colors;
+    }
+    if(*(--colors) != LETTER_COLOR_RIGHT) return 0;
+    if(*(--colors) != LETTER_COLOR_RIGHT) return 0;
+    if(*(--colors) != LETTER_COLOR_RIGHT) return 0;
+    if(*(--colors) != LETTER_COLOR_RIGHT) return 0;
+    if(*(--colors) != LETTER_COLOR_RIGHT) return 0;
+    return 1;
 }

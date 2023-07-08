@@ -40,7 +40,7 @@ void print_text(char* text) {
     }
     while(*text != 0) {
         text_tmp = *text + text_use_alt_color;
-        switch(text_tmp) {
+        switch(text_tmp & 127) {
             case ' ':
                 text_cursor_x += TEXT_CHAR_WIDTH;
                 break;
@@ -50,6 +50,10 @@ void print_text(char* text) {
                 break;
             case '\r':
                 text_cursor_x = text_print_line_start;
+                break;
+            case '\f':
+                //Non standard usage but allows for centering text better with halfspace
+                text_cursor_x += TEXT_CHAR_WIDTH/2;
                 break;
             default:
                 if(text_cursor_x >= (text_print_width + text_print_line_start)) {
