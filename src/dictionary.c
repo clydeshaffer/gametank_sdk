@@ -3,6 +3,7 @@
 #include "dictionary.h"
 
 #include "gen/assets/dict__index.h"
+#include "gen/assets/dict__answers.h"
 #include "gen/assets/dict_a.h"
 #include "gen/assets/dict_b.h"
 #include "gen/assets/dict_c.h"
@@ -117,7 +118,10 @@ char lookup_word(char* word) {
     return 0;
 }
 
+
+char* word_ptr;
 void set_secret_word(unsigned int index) {
+#ifdef HARD_MODE
     long le_suffix;
     change_rom_bank(ASSET__dict__index__counts_bin_bank);
     dict_i = 0;
@@ -133,6 +137,22 @@ void set_secret_word(unsigned int index) {
     le_suffix = ((unsigned long*) &ASSET__dict_a__words_bin_ptr)[index];
     word_to_buf(&le_suffix);
     *((long*)(secret_word+1)) = *((long*)(word_buf+1)) - 0x20202020;
+    
+#else
+    while(index > 2309) {
+        index -= 2309;
+    }
+    index = (index << 2) + index;
+    word_ptr = &ASSET__dict__answers__answerlist_bin_ptr;
+    word_ptr += index;
+    change_rom_bank(ASSET__dict__answers__answerlist_bin_bank);
+    secret_word[0] = word_ptr[0] - 0x20;
+    secret_word[1] = word_ptr[1] - 0x20;
+    secret_word[2] = word_ptr[2] - 0x20;
+    secret_word[3] = word_ptr[3] - 0x20;
+    secret_word[4] = word_ptr[4] - 0x20;
+#endif
+
     secret_word[5] = 0;
 
     for(dict_i = 0; dict_i < ALPHABET_SIZE; ++dict_i) {
