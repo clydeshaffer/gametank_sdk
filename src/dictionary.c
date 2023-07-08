@@ -153,13 +153,20 @@ char check_guess(char* word, char* colors, char* keyb_colors) {
         letters_seen[dict_i] = 0;
     }
     for(dict_i = 0; dict_i < WORD_LENGTH; ++dict_i) {
+        if(*word == secret_word[dict_i]) {
+             ++letters_seen[(*word) - 'A'];
+            *colors = LETTER_COLOR_RIGHT;
+        }
+        ++word;
+        ++colors;
+    }
+    word -= WORD_LENGTH;
+    colors -= WORD_LENGTH;
+    for(dict_i = 0; dict_i < WORD_LENGTH; ++dict_i) {
         ++letters_seen[(*word) - 'A'];
         if(*word == secret_word[dict_i]) {
-            *colors = LETTER_COLOR_RIGHT;
         } else if(letters_seen[(*word) - 'A'] <= secret_letters[(*word) - 'A']) {
             *colors = LETTER_COLOR_MOVED;
-        } else {
-            *colors = LETTER_COLOR_WRONG;
         }
         ++word;
         ++colors;
