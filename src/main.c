@@ -86,7 +86,8 @@ int main () {
 
         set_secret_word(word_index);
 
-        while (guess_state != STATE_RESTART) { 
+        while (guess_state != STATE_RESTART) {
+            ++word_index;
             draw_sprite(0, 0, 127, 127, 0, 0, 0);
 
             update_inputs();
