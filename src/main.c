@@ -1,5 +1,7 @@
 #include "gametank.h"
 #include "drawing_funcs.h"
+#include "feature/text/text.h"
+#include "games/snake.h"
 
 int main () {
     char col = 30, row = 20;
@@ -13,6 +15,11 @@ int main () {
     flip_pages();
     await_draw_queue();
     clear_border(0);
+
+    init_text();
+    load_font(7);
+
+    run_snake_game();
 
     while (1) {                                     //  Run forever
         clear_screen(3);
