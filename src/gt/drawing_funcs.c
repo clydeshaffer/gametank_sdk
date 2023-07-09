@@ -210,11 +210,18 @@ void draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h
 }
 
 void await_draw_queue() {
-    while(queue_pending != 0) {
+    asm ("SEI");
+    if(queue_pending != 0) {
+        wait();
+    }
+    while(queue_end != queue_start) {
         next_draw_queue();
         asm ("CLI");
         wait();
     }
+    vram[START] = 0;
+    queue_pending = 0;
+    asm ("CLI");
 }
 
 void clear_border(char c) {
