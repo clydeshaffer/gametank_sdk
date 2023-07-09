@@ -61,7 +61,7 @@ viaWakeup:
 	STA VIA+DDRA
     LDA #$FF
     STA VIA+ORAr
-	lda #$00
+	lda #$80
 	sta _romBankMirror
 	jsr ShiftHighBits
 

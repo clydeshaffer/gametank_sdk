@@ -116,7 +116,10 @@ char skeletize_snake() {
 }
 
 void run_snake_game() {
-
+    await_draw_queue();
+    sleep(1);
+    flip_pages();
+    
     load_spritesheet(&ASSET__gfx__snake_bmp, 0);
     rnd_seed = 234;
     init_snake_game();
@@ -132,6 +135,8 @@ void run_snake_game() {
                 if(global_tick & 32) {
                     text_cursor_x = 8;
                     text_cursor_y = 96;
+                    text_print_line_start = 8;
+                    text_print_width = 128;
                     print_text("Presss ssstart");
                 }
                 if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
