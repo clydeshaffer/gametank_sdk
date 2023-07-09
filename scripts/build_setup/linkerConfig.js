@@ -106,7 +106,7 @@ SYMBOLS {
     const bankNames = [];
 
     for(var i = 0; i < asset_banks; i++) {
-        const bankNum = i;
+        const bankNum = i + 128;
         const bankName = 'BANK' + hex(bankNum);
         bankNames.push(`bank${hex(bankNum)}`);
         const bankFile = `"%O.bank${hex(bankNum)}"`;
@@ -126,7 +126,7 @@ SYMBOLS {
     }
 
     for(var i = 1; i <= extra_code_banks; i++) {
-        const bankNum = 126 - extra_code_banks + i;
+        const bankNum = 254 - extra_code_banks + i;
         const bankName = 'BANK' + hex(bankNum);
         bankNames.push(`bank${hex(bankNum)}`);
         const bankFile = `"%O.bank${hex(bankNum)}"`;
@@ -147,8 +147,8 @@ SYMBOLS {
     section_MEMORY['ROM'] = {
         start : '$C000',
         size : '$4000',
-        file : '"%O.bank7F"',
-        bank : '127',
+        file : '"%O.bankFF"',
+        bank : '255',
         fill : 'yes'
     };
 
@@ -160,7 +160,7 @@ SYMBOLS {
     }
 
     bankNames.push('filler');
-    bankNames.push('bank7F');
+    bankNames.push('bankFF');
 
     var output = '';
     function printout(str) {
