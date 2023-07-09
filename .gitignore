@@ -1,7 +1,7 @@
 .swp
 *.obj
 *.map
-*.bin
+build/*.bin
 *.TMP
 *.si
 *.gtg
