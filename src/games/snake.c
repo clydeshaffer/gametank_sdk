@@ -5,16 +5,22 @@
 #include "feature/text/text.h"
 #include "../gen/assets/gfx.h"
 #include "random.h"
+#include "music.h"
 
 #define SNAKE_STATE_TITLE 0
 #define SNAKE_STATE_RUNNING 1
-#define SNAKE_STATE_GAMEOVER 2
+#define SNAKE_STATE_DYING 2
 
 #define SNAKE_TILE_EGG 15
 
 static char snake_head_pos, snake_head_dir;
 static char snake_tail_pos, snake_tail_dir;
 static char i, dir_buffer;
+
+#define DIR_RIGHT 0
+#define DIR_DOWN 1
+#define DIR_LEFT 2
+#define DIR_UP 3
 
 static const char dir_offset[4] = {1, 16, 255, 240};
 
@@ -34,10 +40,21 @@ void init_snake_game() {
     snake_head_dir = 0;
     snake_tail_pos = 132;
     snake_tail_dir = 0;
-    rnd_seed = 234;
     clear_field();
+    for(i = 1; i < 15; ++i) {
+        field[i + 16] = 30;
+        field[i + 224] = 62;
+    }
+    for(i = 32; i < 224; i += 16) {
+        field[i] = 45;
+        field[i+15] = 47;
+    }
     field[snake_head_pos] = 2;
     field[snake_tail_pos] = 7;
+    field[16] = 29;
+    field[31] = 31;
+    field[224] = 61;
+    field[239] = 63;
     dir_buffer = 255;
     for(i = snake_tail_pos + 1; i < snake_head_pos; ++ i) {
         field[i] = 10;
@@ -45,7 +62,8 @@ void init_snake_game() {
     rnd_egg();
 }
 
-void iterate_snake() {
+char iterate_snake() {
+    i = snake_head_dir;
     if((dir_buffer != 255) && ((dir_buffer & 16) != (snake_head_dir & 16))) {
         field[snake_head_pos] = 8 + dir_buffer + ((snake_head_dir & 32) >> 5);
         snake_head_dir = dir_buffer;
@@ -56,21 +74,51 @@ void iterate_snake() {
     }
     snake_head_pos += dir_offset[snake_head_dir >> 4];
 
-    if(field[snake_head_pos] != SNAKE_TILE_EGG) {
+    if(field[snake_head_pos] == 0) {
         field[snake_tail_pos] = 0;
         snake_tail_pos += dir_offset[snake_tail_dir >> 4];
         snake_tail_dir = field[snake_tail_pos] & 0xF0;
         field[snake_tail_pos] = 7 + snake_tail_dir;
-    } else {
+    } else if(field[snake_head_pos] == SNAKE_TILE_EGG) {
+        do_noise_effect(80, 40, 4);
         rnd_egg();
+    } else {
+        snake_head_pos -= dir_offset[snake_head_dir >> 4];
+        snake_head_dir = i;
+        field[snake_head_pos] = 2 + snake_head_dir;
+        return 1;
     }
 
     field[snake_head_pos] = 2 + snake_head_dir;
+    return 0;
+}
+
+static const char corner_reverse_dirs[8] = {DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT};
+
+char skeletize_snake() {
+    if(snake_head_pos == snake_tail_pos) {
+        if(field[snake_head_pos] & 128) {
+            return 1;
+        }
+        field[snake_head_pos] += 192;
+        return 0;
+    }
+    field[snake_head_pos] += 192;
+    snake_head_pos += dir_offset[snake_head_dir >> 4];
+    i = field[snake_head_pos] & 15;
+    if((i == 8) || (i == 9)) {
+        i = field[snake_head_pos];
+        i = ((i & 0x30) >> 3) | (i & 1);
+        i = corner_reverse_dirs[i];
+        snake_head_dir = i << 4;
+    }
+    return 0;
 }
 
 void run_snake_game() {
 
     load_spritesheet(&ASSET__gfx__snake_bmp, 0);
+    rnd_seed = 234;
     init_snake_game();
 
     while(1) {
@@ -78,6 +126,7 @@ void run_snake_game() {
         clear_screen(76);
         switch(game_state) {
             case SNAKE_STATE_TITLE:
+                rnd();
                 draw_sprite(15, 32, 98, 40, 0, 32, 0);
                 await_draw_queue();
                 if(global_tick & 32) {
@@ -104,18 +153,32 @@ void run_snake_game() {
                     dir_buffer = 48;
                 }
 
-                if((global_tick & 15) == 15) {
-                    iterate_snake();
+                if((global_tick & 7) == 7) {
+                    if(iterate_snake()) {
+                        game_state = SNAKE_STATE_DYING;
+                        snake_head_dir = (snake_head_dir + 32) & 0x30;
+                    }
                 }
 
                 await_draw_queue();
                 draw_field(0);
                 
                 break;
+            case SNAKE_STATE_DYING:
+                if((global_tick & 7) == 7) {
+                    if(skeletize_snake())
+                        init_snake_game();
+                    else
+                        do_noise_effect(80, 250, 3);
+                }
+                await_draw_queue();
+                draw_field(0);
+                break;
         }
         
         sleep(1);
         flip_pages();
         ++global_tick;
+        tick_music();
     }
 }

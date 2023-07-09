@@ -1,5 +1,7 @@
 #include "gametank.h"
 #include "drawing_funcs.h"
+#include "dynawave.h"
+#include "music.h"
 #include "feature/text/text.h"
 #include "games/snake.h"
 
@@ -8,6 +10,8 @@ int main () {
     int dx = 1, dy = 1;
 
     init_graphics();
+    init_dynawave();
+    init_music();
 
     flip_pages();
     clear_border(0);
