@@ -120,16 +120,26 @@ void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x
         rect.x = (temp_frame.x + x);
     }
 
-    rect.y = (temp_frame.y + y);
+    if(flip & SPRITE_FLIP_Y) {
+        rect.y = (y - temp_frame.h - temp_frame.y - 1);
+    } else {
+        rect.y = (temp_frame.y + y);
+    }
 
     rect.gx = temp_frame.gx;
     if(flip & SPRITE_FLIP_X) {
         rect.gx ^= 0xFF;
         rect.gx -= temp_frame.w - 1;
     }
+
     rect.gy = temp_frame.gy;
+    if(flip & SPRITE_FLIP_Y) {
+        rect.gy ^= 0xFF;
+        rect.gy -= temp_frame.h - 1;
+    }
+
     rect.w = temp_frame.w | (flip & SPRITE_FLIP_X ? 128 : 0);
-    rect.h = temp_frame.h;
+    rect.h = temp_frame.h | (flip & SPRITE_FLIP_Y ? 128 : 0);
 
     pushRect();
 
@@ -139,32 +149,15 @@ void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x
     asm("CLI");
 }
 
-void draw_sprite() {
-    if(rect.x > 127) {
-        return;
-    }
-    if(rect.y > 127) {
-        return;
-    }
-    if(rect.w == 0) {
-        return;
-    }
-    if(rect.h == 0) {
-        return;
-    }
+void draw_sprite_rect() {
     if(queue_count >= QUEUE_MAX) {
         asm("CLI");
         wait();
     }
 
-    if(rect.x + rect.w >= 128) {
-        rect.w = 128 - rect.x;
-    }
-    if(rect.y + rect.h >= 128) {
-        rect.h = 128 - rect.y;
-    }
-
-   asm("SEI");
+    asm("SEI");
+    rect.b |= bankflip;
+    queue_flags_param = DMA_GCARRY;
     pushRect();
 
     if(queue_pending == 0) {
@@ -223,6 +216,7 @@ void await_draw_queue() {
     }
     while(queue_end != queue_start) {
         next_draw_queue();
+        asm ("CLI");
         wait();
     }
     vram[START] = 0;

@@ -88,8 +88,18 @@ var frameBuffers = timeBucketedTracks.map((bucket) => {
         tracks.push(i);
     }
     tracks.sort();
-    var frameBuf = Buffer.alloc(noteCount+2);
+    var extraTime = 0;
+    if(deltaTime > 255) {
+        extraTime = deltaTime - 255;
+        deltaTime = 255;
+    }
+    var frameBuf = Buffer.alloc(noteCount+2+(2 * Math.ceil(extraTime / 128)));
     var offset = 0;
+    while(extraTime > 0) {
+        frameBuf.writeUint8(Math.min(128, extraTime), offset++);
+        frameBuf.writeUint8(0, offset++);
+        extraTime -= 128;
+    }
     frameBuf.writeUint8(deltaTime, offset++);
     frameBuf.writeUint8(noteMask, offset++);
     tracks.forEach((n) => {

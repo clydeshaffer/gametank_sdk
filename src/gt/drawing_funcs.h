@@ -41,9 +41,18 @@ void flip_pages();
 void init_graphics();
 
 void load_spritesheet(char* spriteData, char srcBank, char ramBank);
+#define load_big_spritesheet(NAME,BANK) \
+load_spritesheet(NAME##_bmp, BANK); \
+load_spritesheet(NAME##_1_bmp, BANK|QUADRANT_1); \
+load_spritesheet(NAME##_2_bmp, BANK|QUADRANT_2); \
+load_spritesheet(NAME##_3_bmp, BANK|QUADRANT_3);
+
 void clear_spritebank(char bank);
 void draw_sprite_frame(const Frame *sprite_table, char sprite_table_bank, char x, char y, char frame, char flip, char bank);
-void draw_sprite();
+
+void draw_sprite_rect();
+#define draw_sprite(X,Y,W,H,GX,GY,RAMBANK) rect.x=X;rect.y=Y;rect.w=W;rect.h=H;rect.gx=GX;rect.gy=GY;rect.b=RAMBANK;draw_sprite_rect();
+
 void draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h, unsigned char c);
 
 void next_draw_queue();
