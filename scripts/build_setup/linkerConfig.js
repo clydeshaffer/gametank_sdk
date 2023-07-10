@@ -126,11 +126,7 @@ SYMBOLS {
     }
 
     for(var i = 1; i <= extra_code_banks; i++) {
-<<<<<<< HEAD
-        const bankNum = (126 - extra_code_banks + i) + 128;
-=======
         const bankNum = 254 - extra_code_banks + i;
->>>>>>> main
         const bankName = 'BANK' + hex(bankNum);
         bankNames.push(`bank${hex(bankNum)}`);
         const bankFile = `"%O.bank${hex(bankNum)}"`;
