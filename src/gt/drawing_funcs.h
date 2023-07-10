@@ -41,6 +41,10 @@ void flip_pages();
 void init_graphics();
 
 void load_spritesheet(char* spriteData, char srcBank, char ramBank);
+#define load_wide_spritesheet(NAME,BANK) \
+load_spritesheet(NAME##_bmp, BANK); \
+load_spritesheet(NAME##_1_bmp, BANK|QUADRANT_1);
+
 #define load_big_spritesheet(NAME,BANK) \
 load_spritesheet(NAME##_bmp, BANK); \
 load_spritesheet(NAME##_1_bmp, BANK|QUADRANT_1); \

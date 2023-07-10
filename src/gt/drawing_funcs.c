@@ -31,6 +31,10 @@ void init_graphics() {
     *dma_flags = flagsMirror;
     banksMirror = bankflip;
     *bank_reg = banksMirror;
+    queue_count = 0;
+    queue_start = 0;
+    queue_end = 0;
+    queue_pending = 0;
 }
 
 void load_spritesheet(char* spriteData, char srcBank, char ramBank) {
