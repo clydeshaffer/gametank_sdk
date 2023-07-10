@@ -173,8 +173,10 @@ int main () {
                 SPRITE_FLIP_NONE,
                 1
             );
+            await_draw_queue();
             clear_border(0);
         } else {
+            await_draw_queue();
             clear_border(0);
             if(global_tick_counter < 32) {
                 draw_sprite_frame(
