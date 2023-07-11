@@ -13,6 +13,7 @@ static char rotation;
 static coordinate ship_x;
 static unsigned char ship_vx;
 static char i;
+static char highest_bullet;
 
 #define SHIP_Y 108
 #define BULLET_SPAWN_OFFSET 8
@@ -21,12 +22,30 @@ static char bullet_x[BULLET_COUNT];
 static char bullet_y[BULLET_COUNT];
 static char next_bullet;
 
-#define ENEMY_COUNT 5
+#define MAX_ENEMY_COUNT 12
 static char enemy_group_x;
-static char enemy_x[ENEMY_COUNT];
-static char enemy_y[ENEMY_COUNT];
-static char enemy_type[ENEMY_COUNT];
+static char enemy_x[MAX_ENEMY_COUNT];
+static char enemy_y[MAX_ENEMY_COUNT];
+static char enemy_type[MAX_ENEMY_COUNT];
 static char bg_x, bg_y;
+
+void enemy_formation_1() {
+    for(i = 0; i < 12; ++i) {
+        enemy_type[i] = 2;
+        enemy_x[i] = ((i % 6) << 4);
+        enemy_y[i] = (i > 5) ? 44 : 24;
+    }
+    enemy_group_x = 32;
+}
+
+void enemy_formation_2() {
+    for(i = 0; i < 5; ++i) {
+        enemy_type[i] = 1 + (i & 1);
+        enemy_x[i] = (i << 4);
+        enemy_y[i] = 24 + ((i & 1) * 20);
+    }
+    enemy_group_x = 40;
+}
 
 void draw_bullets() {
     for(i = 0; i < BULLET_COUNT; ++i) {
@@ -38,7 +57,7 @@ void draw_bullets() {
 }
 
 void draw_enemies() {
-    for(i = 0; i < ENEMY_COUNT; ++i) {
+    for(i = 0; i < MAX_ENEMY_COUNT; ++i) {
         switch(enemy_type[i]) {
             case 1:
                 draw_sprite_frame(&ASSET__gfx__bug_json, enemy_x[i] + enemy_group_x, enemy_y[i], (global_tick >> 2) & 3, 0, 1);
@@ -46,6 +65,31 @@ void draw_enemies() {
             case 2:
                 draw_sprite_frame(&ASSET__gfx__smolbug_json, enemy_x[i] + enemy_group_x, enemy_y[i], (global_tick >> 1) & 3, 0, 2);
                 break;
+        }
+    }
+}
+
+char delta(char a, char b) {
+    if(a > b) return a - b;
+    return b - a;
+}
+
+void move_enemies() {
+    if((global_tick & 3) == 3) {
+        enemy_group_x += ((global_tick & 64) >> 5) - 1;
+    }
+    if(bullet_y[highest_bullet]) {
+        for(i = 0; i < MAX_ENEMY_COUNT; ++i) {
+            if(enemy_type[i]) {
+                if((bullet_y[highest_bullet] - enemy_y[i]) < 8) {
+                    if(delta(enemy_x[i] + enemy_group_x, bullet_x[highest_bullet]) < 8) {
+                        enemy_type[i] = 0;
+                        bullet_y[highest_bullet] = 0;
+                        highest_bullet = (highest_bullet + 1) % BULLET_COUNT;
+                        break;
+                    }
+                }
+            }
         }
     }
 }
@@ -81,13 +125,10 @@ void run_invaders_game() {
     ship_x.b.msb = 64;
     ship_x.b.lsb = 0;
     ship_vx = 128;
+    next_bullet = 0;
+    highest_bullet = 0;
 
-    for(i = 0; i < ENEMY_COUNT; ++i) {
-        enemy_type[i] = 1 + (i & 1);
-        enemy_x[i] = (i << 4);
-        enemy_y[i] = 24 + ((i & 1) * 20);
-    }
-    enemy_group_x = 40;
+    enemy_formation_1();
 
     while(1) {
         update_inputs();
@@ -111,6 +152,7 @@ void run_invaders_game() {
         if(player1_buttons & ~player1_old_buttons & INPUT_MASK_A)  {
             bullet_x[next_bullet] = ship_x.b.msb;
             bullet_y[next_bullet] = SHIP_Y-BULLET_SPAWN_OFFSET;
+            highest_bullet = next_bullet;
             next_bullet = (next_bullet + 1) % BULLET_COUNT;
             do_noise_effect(90, 150, 3);
         }
@@ -129,9 +171,7 @@ void run_invaders_game() {
             ship_x.b.lsb = 0;
         }
 
-        if((global_tick & 3) == 3) {
-            enemy_group_x += ((global_tick & 64) >> 5) - 1;
-        }
+        move_enemies();
 
         draw_sprite_frame(&ASSET__gfx__ship_json, ship_x.b.msb, SHIP_Y, rotation, 0, 0);
         draw_enemies();
