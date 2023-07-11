@@ -47,9 +47,21 @@ void draw_enemies() {
 
 void run_invaders_game() {
     await_draw_queue();
-    sleep(1);
+
+    text_cursor_x = 16;
+    text_print_width = 128;
+    text_cursor_y = 108;
+    text_use_alt_color = 1;
+    print_text("Loading...");
     flip_pages();
-    
+    text_cursor_x = 16;
+    text_print_width = 128;
+    text_cursor_y = 108;
+    text_use_alt_color = 1;
+    print_text("Loading...");
+    flip_pages();
+    sleep(1);
+
     global_tick = 0;
     bg_x = 0;
     bg_y = 0;
