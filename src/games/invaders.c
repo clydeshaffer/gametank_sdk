@@ -39,8 +39,13 @@ void draw_bullets() {
 
 void draw_enemies() {
     for(i = 0; i < ENEMY_COUNT; ++i) {
-        if(enemy_type[i]) {
-            draw_sprite_frame(&ASSET__gfx__bug_json, enemy_x[i] + enemy_group_x, enemy_y[i], (global_tick >> 2) & 15, 0, 1);
+        switch(enemy_type[i]) {
+            case 1:
+                draw_sprite_frame(&ASSET__gfx__bug_json, enemy_x[i] + enemy_group_x, enemy_y[i], (global_tick >> 2) & 3, 0, 1);
+                break;
+            case 2:
+                draw_sprite_frame(&ASSET__gfx__smolbug_json, enemy_x[i] + enemy_group_x, enemy_y[i], (global_tick >> 1) & 3, 0, 2);
+                break;
         }
     }
 }
@@ -68,7 +73,8 @@ void run_invaders_game() {
 
     load_spritesheet(&ASSET__gfx__ship_bmp, 0);
     load_spritesheet(&ASSET__gfx__bug_bmp, 1);
-    load_big_spritesheet(&ASSET__gfx2__space, 2);
+    load_spritesheet(&ASSET__gfx__smolbug_bmp, 2);
+    load_big_spritesheet(&ASSET__gfx2__space, 3);
     rnd_seed = 234;
 
     rotation = 16;
@@ -77,7 +83,7 @@ void run_invaders_game() {
     ship_vx = 128;
 
     for(i = 0; i < ENEMY_COUNT; ++i) {
-        enemy_type[i] = 1;
+        enemy_type[i] = 1 + (i & 1);
         enemy_x[i] = (i << 4);
         enemy_y[i] = 24 + ((i & 1) * 20);
     }
@@ -86,7 +92,7 @@ void run_invaders_game() {
     while(1) {
         update_inputs();
         bg_y -= global_tick & 1;
-        draw_sprite(0, 0, 127, 127, bg_x, bg_y, 2);
+        draw_sprite(0, 0, 127, 127, bg_x, bg_y, 3);
         await_draw_queue();
 
         if(player1_buttons & INPUT_MASK_LEFT) {
