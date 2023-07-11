@@ -4,6 +4,7 @@
 #include "./common.h"
 #include "feature/text/text.h"
 #include "../gen/assets/gfx.h"
+#include "../gen/assets/gfx2.h"
 #include "random.h"
 #include "music.h"
 
@@ -20,11 +21,25 @@ static char bullet_x[BULLET_COUNT];
 static char bullet_y[BULLET_COUNT];
 static char next_bullet;
 
+#define ENEMY_COUNT 3
+static char enemy_x[ENEMY_COUNT];
+static char enemy_y[ENEMY_COUNT];
+static char enemy_type[ENEMY_COUNT];
+static char bg_x, bg_y;
+
 void draw_bullets() {
     for(i = 0; i < BULLET_COUNT; ++i) {
         if(bullet_y[i]) {
             draw_box_now(bullet_x[i], bullet_y[i], 1, 3, 61);
             bullet_y[i] -= 2;
+        }
+    }
+}
+
+void draw_enemies() {
+    for(i = 0; i < ENEMY_COUNT; ++i) {
+        if(enemy_type[i]) {
+            draw_sprite_frame(&ASSET__gfx__bug_json, enemy_x[i], enemy_y[i], (global_tick >> 2) & 15, 0, 1);
         }
     }
 }
@@ -35,8 +50,12 @@ void run_invaders_game() {
     flip_pages();
     
     global_tick = 0;
+    bg_x = 0;
+    bg_y = 0;
 
     load_spritesheet(&ASSET__gfx__ship_bmp, 0);
+    load_spritesheet(&ASSET__gfx__bug_bmp, 1);
+    load_big_spritesheet(&ASSET__gfx2__space, 2);
     rnd_seed = 234;
 
     rotation = 16;
@@ -44,9 +63,16 @@ void run_invaders_game() {
     ship_x.b.lsb = 0;
     ship_vx = 128;
 
+    for(i = 0; i < ENEMY_COUNT; ++i) {
+        enemy_type[i] = 1;
+        enemy_x[i] = (i << 5) + 32;
+        enemy_y[i] = 32;
+    }
+
     while(1) {
         update_inputs();
-        clear_screen(0);
+        bg_y -= global_tick & 1;
+        draw_sprite(0, 0, 127, 127, bg_x, bg_y, 2);
         await_draw_queue();
 
         if(player1_buttons & INPUT_MASK_LEFT) {
@@ -83,6 +109,7 @@ void run_invaders_game() {
             ship_x.b.lsb = 0;
         }
         draw_sprite_frame(&ASSET__gfx__ship_json, ship_x.b.msb, SHIP_Y, rotation, 0, 0);
+        draw_enemies();
         wait();
 
         draw_bullets();
