@@ -34,6 +34,11 @@ static char bg_x, bg_y;
 static char level_num;
 
 static char enemy_hp_for_type[3] = { 0, 8, 1 };
+static char enemy_hitbox_size[3] = { 0, 16, 8};
+static char attacking_enemy;
+static char attacking_enemy_vy;
+static char attacking_enemy_start_y;
+static char attack_tick_mask;
 
 static void enemy_formation_1() {
     global_tick = 0;
@@ -103,6 +108,11 @@ static void enemy_formation_n(char n) {
             break;
     }
     enemy_group_y = 0 - 64;
+    attacking_enemy = -1;
+    attacking_enemy_vy = 0;
+    if(n > 32) attack_tick_mask = 255;
+    else attack_tick_mask = 128 >> (n >> 2);
+    
 }
 
 static void draw_bullets() {
@@ -151,6 +161,9 @@ static void move_enemies() {
                         --enemy_hp[i];
                         if(enemy_hp[i] == 0) {
                             enemy_type[i] = 0;
+                            if(attacking_enemy == i) {
+                                attacking_enemy = -1;
+                            }
                             --enemy_count;
                         }
                         bullet_y[highest_bullet] = 0;
@@ -164,6 +177,27 @@ static void move_enemies() {
     if(enemy_count == 0) {
         ++level_num;
         enemy_formation_n(level_num);
+    }
+
+    if(attacking_enemy != 255) {
+        enemy_y[attacking_enemy] += attacking_enemy_vy;
+        if(enemy_y[attacking_enemy] < attacking_enemy_start_y) {
+            enemy_y[attacking_enemy] = attacking_enemy_start_y;
+            attacking_enemy = 255;
+        } else if(enemy_y[attacking_enemy] > SHIP_Y) {
+            attacking_enemy_vy = 255;
+            if(delta(ship_x.b.msb, enemy_x[attacking_enemy] + enemy_group_x) < enemy_hitbox_size[enemy_type[attacking_enemy]]) {
+                level_num = 0;
+                enemy_formation_n(level_num);
+            }
+        }
+    } else if((global_tick & attack_tick_mask) && (enemy_count > 0)) { 
+        attacking_enemy = rnd() % MAX_ENEMY_COUNT;
+        attacking_enemy_vy = 2;
+        while(enemy_type[attacking_enemy] == 0) {
+            attacking_enemy = (attacking_enemy+1) % MAX_ENEMY_COUNT;
+        }
+        attacking_enemy_start_y = enemy_y[attacking_enemy];
     }
 }
 
@@ -250,7 +284,7 @@ void run_invaders_game() {
         draw_sprite_frame(&ASSET__gfx__ship_json, ship_x.b.msb, SHIP_Y, rotation, 0, 0);
         draw_enemies();
         await_draw_queue();
-        
+
         draw_bullets();
 
         clear_border(0);
