@@ -25,7 +25,7 @@ void init_dynawave()
 {
     *audio_rate = 0x7F;
 
-    change_rom_bank(0);
+    change_rom_bank(128);
     inflatemem(aram, &DynaWave);
 
     audio_params_index = 0;
