@@ -4,6 +4,8 @@
 char global_tick;
 char game_state;
 char field[256];
+char lives;
+int score;
 
 static char r,c,i;
 
