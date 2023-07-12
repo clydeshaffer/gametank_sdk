@@ -26,12 +26,19 @@ static char next_bullet;
 static char enemy_group_x;
 static char enemy_x[MAX_ENEMY_COUNT];
 static char enemy_y[MAX_ENEMY_COUNT];
+static char enemy_hp[MAX_ENEMY_COUNT];
+static char enemy_count;
 static char enemy_type[MAX_ENEMY_COUNT];
 static char bg_x, bg_y;
 
+static char enemy_hp_for_type[3] = { 0, 8, 1 };
+
 void enemy_formation_1() {
+    global_tick = 0;
+    enemy_count = 12;
     for(i = 0; i < 12; ++i) {
         enemy_type[i] = 2;
+        enemy_hp[i] = enemy_hp_for_type[enemy_type[i]];
         enemy_x[i] = ((i % 6) << 4);
         enemy_y[i] = (i > 5) ? 44 : 24;
     }
@@ -39,8 +46,11 @@ void enemy_formation_1() {
 }
 
 void enemy_formation_2() {
+    global_tick = 0;
+    enemy_count = 5;
     for(i = 0; i < 5; ++i) {
         enemy_type[i] = 1 + (i & 1);
+        enemy_hp[i] = enemy_hp_for_type[enemy_type[i]];
         enemy_x[i] = (i << 4);
         enemy_y[i] = 24 + ((i & 1) * 20);
     }
@@ -48,10 +58,16 @@ void enemy_formation_2() {
 }
 
 void draw_bullets() {
+    highest_bullet = 0;
     for(i = 0; i < BULLET_COUNT; ++i) {
         if(bullet_y[i]) {
             draw_box_now(bullet_x[i], bullet_y[i], 1, 3, 61);
             bullet_y[i] -= 2;
+            if(bullet_y[i]) {
+                if(bullet_y[highest_bullet] == 0) highest_bullet = i;
+                else if(bullet_y[i] < bullet_y[highest_bullet])
+                    highest_bullet = i;
+            }
         }
     }
 }
@@ -83,7 +99,11 @@ void move_enemies() {
             if(enemy_type[i]) {
                 if((bullet_y[highest_bullet] - enemy_y[i]) < 8) {
                     if(delta(enemy_x[i] + enemy_group_x, bullet_x[highest_bullet]) < 8) {
-                        enemy_type[i] = 0;
+                        --enemy_hp[i];
+                        if(enemy_hp[i] == 0) {
+                            enemy_type[i] = 0;
+                            --enemy_count;
+                        }
                         bullet_y[highest_bullet] = 0;
                         highest_bullet = (highest_bullet + 1) % BULLET_COUNT;
                         break;
@@ -91,6 +111,9 @@ void move_enemies() {
                 }
             }
         }
+    }
+    if(enemy_count == 0) {
+        enemy_formation_2();
     }
 }
 
@@ -126,7 +149,7 @@ void run_invaders_game() {
     ship_x.b.lsb = 0;
     ship_vx = 128;
     next_bullet = 0;
-    highest_bullet = 0;
+    highest_bullet = next_bullet - 1;
 
     enemy_formation_1();
 
@@ -152,7 +175,7 @@ void run_invaders_game() {
         if(player1_buttons & ~player1_old_buttons & INPUT_MASK_A)  {
             bullet_x[next_bullet] = ship_x.b.msb;
             bullet_y[next_bullet] = SHIP_Y-BULLET_SPAWN_OFFSET;
-            highest_bullet = next_bullet;
+            highest_bullet = (highest_bullet + 1) % BULLET_COUNT;
             next_bullet = (next_bullet + 1) % BULLET_COUNT;
             do_noise_effect(90, 150, 3);
         }
