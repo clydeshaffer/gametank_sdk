@@ -9,6 +9,11 @@ int score;
 
 static char r,c,i;
 
+char delta(char a, char b) {
+    if(a > b) return a - b;
+    return b - a;
+}
+
 void clear_field() {
     for(i = 0; i < 128; ++i) {
         field[i] = 0;

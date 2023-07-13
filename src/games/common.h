@@ -4,6 +4,7 @@ extern char field[256];
 extern char lives;
 extern int score;
 
+char delta(char a, char b);
 void clear_field();
 void draw_field(char tile_bank);
 

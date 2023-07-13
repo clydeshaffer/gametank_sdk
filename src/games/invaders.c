@@ -163,11 +163,6 @@ static void draw_enemies() {
     }
 }
 
-char delta(char a, char b) {
-    if(a > b) return a - b;
-    return b - a;
-}
-
 static void move_enemies() {
     if(enemy_group_y != 0) ++enemy_group_y;
     if((global_tick & 3) == 3) {
