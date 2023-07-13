@@ -159,75 +159,107 @@ void run_runner_game() {
     load_big_spritesheet(&ASSET__gfx3__redhood, 0);
     load_spritesheet(&ASSET__gfx3__spikeball_bmp, 1);
     load_wide_spritesheet(&ASSET__gfx4__forest, 2);
+    load_spritesheet(&ASSET__gfx4__runner_titles_bmp, 3);
     rnd_seed = 234;
     global_tick = 0;
-
-    anim_state = 0;
-    player_y.b.lsb = 0;
-    player_y.b.msb = 64;
-    anim_frame.i = 0;
-    spike_y = GROUND_Y - 8;
-    spike_x.b.msb = -64;
-    spike_x.b.lsb = 0;
-    scroll_rate.b.msb = START_SCROLL_RATE;
-    scroll_rate.b.lsb = 0;
-    score = 0;
-    lives = 3;
-    play_song(&ASSET__music__badapple_mid, REPEAT_LOOP);
+    game_state == GAME_STATE_TITLE;
+    
     init_texts();
     while(1) {
         update_inputs();
-        bg_scroll.i += scroll_rate.b.msb;
-        if(scroll_rate.b.msb < START_SCROLL_RATE) {
-            --spike_x.b.msb;
-            ++bg_scroll.b.msb;
-        }
 
         draw_sprite(0, 0, 127, 127, bg_scroll.b.msb, 0, 2);
 
-        spike_x.i -= scroll_rate.b.msb;
-        if((spike_x.b.msb > 180) && (spike_x.b.msb < 200)) {
-            spike_y = GROUND_Y - 8 - ((rnd_range(0, 3)) * 10);
-            spike_x.b.msb = 128+32;
-            ++score;
-            update_texts();
-        }
-
-        anim_frame.i += anim_rates[anim_state];
-        ++anim_frame.i;
-        anim_frame.b.msb = anim_frame.b.msb % anim_lengths[anim_state];
-
-        
-        player_physic();
-
-        if(anim_state != ANIM_STATE_HURT) {
-            if(check_collision()) {
-                if(anim_state == ANIM_STATE_JUMP) {
-                    player_vy.i = -player_vy.i;
-                }
-                anim_state = ANIM_STATE_HURT;
-                --lives;
+        if(game_state == GAME_STATE_TITLE) {
+            await_draw_queue();
+            draw_sprite(0, 48, 127, 32, 0, 0, 3);
+            draw_sprite(0, 96, 127, 16, 0, 32, 3);
+            clear_border(0);
+            if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
+                game_state = GAME_STATE_PLAY;
+                play_song(&ASSET__music__badapple_mid, REPEAT_LOOP);
+                anim_state = 0;
+                player_y.b.lsb = 0;
+                player_y.b.msb = 64;
                 anim_frame.i = 0;
-                do_noise_effect(100, -64, 8);
+                spike_y = GROUND_Y - 8;
+                spike_x.b.msb = -64;
+                spike_x.b.lsb = 0;
+                scroll_rate.b.msb = START_SCROLL_RATE;
+                scroll_rate.b.lsb = 0;
+                score = 0;
+                lives = 3;
+                init_texts();
                 update_texts();
             }
+        } else if(game_state == GAME_STATE_PLAY) {
+            bg_scroll.i += scroll_rate.b.msb;
+            if(scroll_rate.b.msb < START_SCROLL_RATE) {
+                --spike_x.b.msb;
+                ++bg_scroll.b.msb;
+            }
+
+            spike_x.i -= scroll_rate.b.msb;
+            if((spike_x.b.msb > 180) && (spike_x.b.msb < 200)) {
+                spike_y = GROUND_Y - 8 - ((rnd_range(0, 3)) * 10);
+                spike_x.b.msb = 128+32;
+                ++score;
+                update_texts();
+            }
+
+            anim_frame.i += anim_rates[anim_state];
+            ++anim_frame.i;
+            anim_frame.b.msb = anim_frame.b.msb % anim_lengths[anim_state];
+
+            
+            player_physic();
+
+            if(anim_state != ANIM_STATE_HURT) {
+                if(check_collision()) {
+                    if(anim_state == ANIM_STATE_JUMP) {
+                        player_vy.i = -player_vy.i;
+                    }
+                    anim_state = ANIM_STATE_HURT;
+                    --lives;
+                    anim_frame.i = 0;
+                    do_noise_effect(100, -64, 8);
+                    update_texts();
+                }
+            } else {
+                if(lives == 0) {
+                        if((anim_frame.b.msb == (ANIM_LENGTH_HURT >> 1)) && (anim_frame.b.lsb & 128)) {
+                            game_state = GAME_STATE_GAMEOVER;
+                            global_tick = 0;
+                            stop_music();
+                        }
+                    }
+            }
+
+            draw_sprite_frame(&ASSET__gfx3__spikeball_json, spike_x.b.msb, spike_y, (global_tick >> 2) & 15, 0, 1 | BANK_CLIP_X);
+            draw_sprite_frame(&ASSET__gfx3__redhood_json, PLAYER_X, player_y.b.msb, anim_offsets[anim_state] + anim_frame.b.msb, SPRITE_FLIP_X, 0);
+            await_draw_queue();
+            clear_border(0);
+            await_draw_queue();
+
+            text_print_width = 128;
+            text_print_line_start = 4;
+            text_cursor_x = 4;
+            text_cursor_y = 8;
+            text_use_alt_color = 1;
+            print_text(lives_text);
+            print_text("\r\n");
+            print_text(score_text);
+        } else if(game_state == GAME_STATE_GAMEOVER) {
+            await_draw_queue();
+            draw_sprite(0, 48, 127, 16, 0, 64, 3);
+            clear_border(0);
+            if(global_tick == 255) {
+                game_state = GAME_STATE_TITLE;
+                lives = 3;
+                score = 0;
+            }
         }
-
-        draw_sprite_frame(&ASSET__gfx3__spikeball_json, spike_x.b.msb, spike_y, (global_tick >> 2) & 15, 0, 1 | BANK_CLIP_X);
-        draw_sprite_frame(&ASSET__gfx3__redhood_json, PLAYER_X, player_y.b.msb, anim_offsets[anim_state] + anim_frame.b.msb, SPRITE_FLIP_X, 0);
         
-        await_draw_queue();
-        clear_border(0);
-        await_draw_queue();
-
-        text_print_width = 128;
-        text_print_line_start = 4;
-        text_cursor_x = 4;
-        text_cursor_y = 8;
-        text_use_alt_color = 1;
-        print_text(lives_text);
-        print_text("\r\n");
-        print_text(score_text);
 
         sleep(1);
         flip_pages();
