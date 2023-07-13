@@ -5,6 +5,7 @@
 #include "feature/text/text.h"
 #include "../gen/assets/gfx3.h"
 #include "../gen/assets/gfx4.h"
+#include "../gen/assets/music.h"
 #include "random.h"
 #include "music.h"
 
@@ -19,7 +20,7 @@ static coordinate player_vy;
 static coordinate anim_frame;
 static coordinate bg_scroll;
 static coordinate scroll_rate;
-static char i;
+static char i,k;
 static char anim_state;
 static char slide_timer;
 
@@ -55,6 +56,42 @@ static const char anim_rates[5] = { 128, 128, 48, 64, 32};
 static coordinate spike_x;
 static char spike_y;
 
+const char start_lives_text[] = "LIVES: |||";
+const char start_score_text[] = "SCORE: ";
+char lives_text[11];
+char score_text[32];
+
+void init_texts() {
+    for(i = 0; i < sizeof(start_lives_text); ++i) {
+        lives_text[i] = start_lives_text[i];        
+    }
+    for(i = 0; i < sizeof(start_score_text); ++i) {
+        score_text[i] = start_score_text[i];
+    }
+}
+
+void update_texts() {
+    lives_text[lives + 7] = 0;
+    if(score) {
+        i = score;
+        k = 1;
+        while(i > 0) {
+            score_text[32-k] = '0' + (i % 10);
+            i /= 10;
+            ++k;
+        }
+        i = 0;
+        while(k > 0) {
+            score_text[6+k] = score_text[32-i];
+            --k;
+            ++i;
+        }
+    } else {
+        score_text[7] = '0';
+        score_text[8] = 0;
+    }
+}
+
 void player_physic() {
     player_y.i += player_vy.i;
     if(player_y.b.msb < GROUND_Y) {
@@ -87,10 +124,12 @@ void player_physic() {
             player_y.i += player_vy.i;
             anim_state = ANIM_STATE_JUMP;
             anim_frame.i = 0;
+            do_noise_effect(48, 64, 10);
         } else if(player1_buttons & ~player1_old_buttons & (INPUT_MASK_B | INPUT_MASK_DOWN)) {
             anim_state = ANIM_STATE_SLIDE;
             anim_frame.i = 0;
             slide_timer = 60;
+            do_noise_effect(72, -4, 15);
         } else {
             anim_state = ANIM_STATE_RUN;
         }
@@ -132,6 +171,10 @@ void run_runner_game() {
     spike_x.b.lsb = 0;
     scroll_rate.b.msb = START_SCROLL_RATE;
     scroll_rate.b.lsb = 0;
+    score = 0;
+    lives = 3;
+    play_song(&ASSET__music__badapple_mid, REPEAT_LOOP);
+    init_texts();
     while(1) {
         update_inputs();
         bg_scroll.i += scroll_rate.b.msb;
@@ -146,6 +189,8 @@ void run_runner_game() {
         if((spike_x.b.msb > 180) && (spike_x.b.msb < 200)) {
             spike_y = GROUND_Y - 8 - ((rnd_range(0, 3)) * 10);
             spike_x.b.msb = 128+32;
+            ++score;
+            update_texts();
         }
 
         anim_frame.i += anim_rates[anim_state];
@@ -161,7 +206,10 @@ void run_runner_game() {
                     player_vy.i = -player_vy.i;
                 }
                 anim_state = ANIM_STATE_HURT;
+                --lives;
                 anim_frame.i = 0;
+                do_noise_effect(100, -64, 8);
+                update_texts();
             }
         }
 
@@ -171,6 +219,15 @@ void run_runner_game() {
         await_draw_queue();
         clear_border(0);
         await_draw_queue();
+
+        text_print_width = 128;
+        text_print_line_start = 4;
+        text_cursor_x = 4;
+        text_cursor_y = 8;
+        text_use_alt_color = 1;
+        print_text(lives_text);
+        print_text("\r\n");
+        print_text(score_text);
 
         sleep(1);
         flip_pages();

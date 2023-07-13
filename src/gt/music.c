@@ -137,13 +137,13 @@ void tick_music() {
             if(noteMask & 4) {     
                 n = *(music_cursor++);
                 if(n > 0) {
-                    set_note(2, n);
-                    audio_amplitudes[2] = 4;
-                    push_audio_param(AMPLITUDE+2, 64);
-                    push_audio_param(PITCHBEND+2, -16);
+                    //set_note(2, n);
+                    //audio_amplitudes[2] = 4;
+                    //push_audio_param(AMPLITUDE+2, 64);
+                    //push_audio_param(PITCHBEND+2, -16);
                 } else {
-                    audio_amplitudes[2] = 0;
-                    push_audio_param(AMPLITUDE+2, 0);
+                    //audio_amplitudes[2] = 0;
+                    //push_audio_param(AMPLITUDE+2, 0);
                 }
             }
             if(noteMask & 8) {     
@@ -170,6 +170,8 @@ void tick_music() {
                         delay_counter = *(music_cursor++);
                     }   
                 }
+            } else {
+                delay_counter -= (delay_counter >> 2);
             }
         }
     }

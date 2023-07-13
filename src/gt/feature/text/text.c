@@ -40,7 +40,7 @@ void print_text(char* text) {
     }
     while(*text != 0) {
         text_tmp = *text + text_use_alt_color;
-        switch(text_tmp) {
+        switch(*text) {
             case ' ':
                 text_cursor_x += TEXT_CHAR_WIDTH;
                 break;
