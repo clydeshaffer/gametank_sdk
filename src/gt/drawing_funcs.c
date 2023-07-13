@@ -31,6 +31,10 @@ void init_graphics() {
     *dma_flags = flagsMirror;
     banksMirror = bankflip;
     *bank_reg = banksMirror;
+    queue_count = 0;
+    queue_start = 0;
+    queue_end = 0;
+    queue_pending = 0;
 }
 
 void load_spritesheet(char* spriteData, char srcBank, char ramBank) {
@@ -144,6 +148,7 @@ void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x
     pushRect();
 
     if(queue_pending == 0) {
+        queue_pending = 1;
         next_draw_queue();
     }
     asm("CLI");
@@ -258,6 +263,7 @@ void draw_sprite_now(char x, char y, char w, char h, char gx, char gy, char ramB
     if(y + h >= 128) {
         h = 128 - y;
     }
+    vram[START] = 0;
     vram[VX] = x;
     vram[VY] = y;
     vram[GX] = gx;
@@ -283,88 +289,4 @@ void draw_fade(unsigned char opacity) {
     banksMirror = oldBanks;
     *dma_flags = flagsMirror;
     *bank_reg = banksMirror;
-}
-
-void printnum(int num) {
-    vram[VX] = cursorX;
-    vram[VY] = cursorY;
-    vram[GY] = SPRITE_ROW_0_F;
-    vram[WIDTH] = SPRITE_CHAR_W;
-    vram[HEIGHT] = SPRITE_CHAR_H;
-    if(num == 0) {
-        vram[GX] = 0;
-        vram[START] = 1;
-        wait();
-    } else {
-        while(num != 0) {
-            vram[GX] = (num % 10) << 3;
-            vram[START] = 1;
-            wait();
-            cursorX -= 8;
-            num = num / 10;
-            vram[VX] = cursorX;
-        }
-    }
-}
-
-void print_hex_num(char num) {
-    vram[VX] = cursorX;
-    vram[VY] = cursorY;
-    vram[GY] = SPRITE_ROW_0_F;
-    vram[WIDTH] = SPRITE_CHAR_W;
-    vram[HEIGHT] = SPRITE_CHAR_H;
-
-    vram[GX] = (num & 0xF0) >> 1;
-    vram[START] = 1;
-    wait();
-    cursorX += 8;
-    vram[VX] = cursorX;
-    vram[GX] = (num & 0x0F) << 3;
-    vram[START] = 1;
-    wait();
-    cursorX += 8;
-}
-
-void print(char* str) {
-    flagsMirror &= ~DMA_COLORFILL_ENABLE;
-    *dma_flags = flagsMirror;
-    vram[WIDTH] = SPRITE_CHAR_W;
-    vram[HEIGHT] = SPRITE_CHAR_H;
-    while(*str != 0) {
-        if(*str >= '0' && *str <= '9') {
-            vram[GX] = (*str - '0') << 3;
-            vram[GY] = SPRITE_ROW_0_F;
-        } else if(*str >= 'a' && *str <= 'f') {
-            vram[GX] = ((*str - 'a') << 3) + 0x50;
-            vram[GY] = SPRITE_ROW_0_F;
-        } else if(*str >= 'g' && *str <= 'v') {
-            vram[GX] = (*str - 'g') << 3;
-            vram[GY] = SPRITE_ROW_G_V;
-        } else if(*str >= 'w' && *str <= 'z') {
-            vram[GX] = (*str - 'w') << 3;
-            vram[GY] = SPRITE_ROW_W_Z;
-        } else {
-            vram[GX] = SPRITE_CHAR_BLANK_X;
-            vram[GY] = SPRITE_CHAR_BLANK_Y;
-        }
-        if(*str == '\n') {
-            cursorX = 0;
-            cursorY += 8;
-        } else {
-            vram[VX] = cursorX;
-            vram[VY] = cursorY;
-            vram[START] = 1;
-            wait();
-            cursorX += 8;
-        }
-        str++;
-        if(cursorX >= 128) {
-            cursorX = 0;
-            cursorY += 8;
-        }
-        if(cursorY >= 128) {
-            cursorX = 0;
-            cursorY = 0;
-        }
-    }
 }
