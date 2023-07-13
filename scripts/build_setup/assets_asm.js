@@ -1,5 +1,5 @@
 const fs = require('fs');
-
+const BMPUtil = require('./bmp');
 const srcGenDir = './src/gen/assets';
 const assetsDir = 'assets';
 
@@ -20,11 +20,30 @@ function transformFilename(filename) {
 }
 
 function filenameToSymbolName(dirName, fileName) {
-    return '_ASSET__' + dirName + '__' + fileName.replace('.', '_');
+    return '_ASSET__' + dirName + '__' + fileName.replace(/\.|\-/g, '_');
+}
+
+function sliceLargeBitmaps(dir) {
+    return (filename) => {
+        const ext = filename.split('.').slice(-1)[0];
+        const nameOnly = filename.split('.').slice(0, -1).join('.');
+        if(ext === 'bmp') {
+            let fileCount = 1;
+            const fullPath = dir + '/' + filename;
+            const dims = BMPUtil.getBmpFileDimensions(fullPath);
+            if(dims.width > 128) fileCount *= 2;
+            if(dims.height > 128) fileCount *= 2;
+            if(fileCount > 1) {
+                return [...Array(fileCount).keys()].map((num) => (num === 0) ? filename : nameOnly + '_' + num + '.bmp');
+            }
+        }
+        return [filename];
+    }
 }
 
 function generateAssetsAssemblyFile(dir) {
-    const nameList = fs.readdirSync(dir);
+    const nameList = fs.readdirSync(dir).flatMap(sliceLargeBitmaps(dir));
+    console.log(nameList);
     const path = dir.split('/');
     const dirName = path[path.length - 1];
 
@@ -48,7 +67,7 @@ function generateAssetsAssemblyFile(dir) {
 
 function generateAssetsHeaderFile(dir, bankNumber) {
 
-    const nameList = fs.readdirSync(dir);
+    const nameList = fs.readdirSync(dir).flatMap(sliceLargeBitmaps(dir));
     const path = dir.split('/');
     const dirName = path[path.length - 1];
 

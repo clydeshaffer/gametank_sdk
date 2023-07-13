@@ -15,6 +15,7 @@ ODIR = build
 PORT = COM3
 
 BMPSRC := $(shell find assets -name "*.bmp")
+$(info bmpsrc is $(BMPSRC))
 MIDSRC := $(shell find assets -name "*.mid")
 JSONSRC := $(shell find assets -name "*.json")
 ASSETLISTS := $(shell find src/gen/assets -name "*.s.asset")
@@ -23,6 +24,9 @@ ASSETOBJS = $(filter-out $(ASSETLISTS),$(patsubst src/%,$(ODIR)/%,$(ASSETLISTS:s
 BMPOBJS = $(patsubst %,$(ODIR)/%,$(BMPSRC:bmp=gtg.deflate))
 MIDOBJS = $(patsubst %,$(ODIR)/%,$(MIDSRC:mid=gtm2))
 JSONOBJS = $(patsubst %,$(ODIR)/%,$(JSONSRC:json=gsi))
+
+BINSRC = $(shell find assets -name "*.bin")
+BINOBJS = $(patsubst %,$(ODIR)/%,$(BINSRC))
 
 CFLAGS = -t none -Osr --cpu 65c02 --codesize 500 --static-locals -I src/gt
 AFLAGS = --cpu 65C02 --bin-include-dir lib --bin-include-dir $(ODIR)/assets
@@ -51,24 +55,33 @@ $(BANKS): $(ASSETOBJS) $(AOBJS) $(COBJS) $(LLIBS) gametank-2M.cfg
 	mkdir -p $(@D)
 	$(LN) $(LFLAGS) $(ASSETOBJS) $(AOBJS) $(COBJS) -o bin/$(TARGET) $(LLIBS)
 
+.PRECIOUS: $(ODIR)/assets/%.gtg
 $(ODIR)/assets/%.gtg: assets/%.bmp
 	mkdir -p $(@D)
 	cd scripts/converters ;\
-	node sprite_convert.js ../../$< ../../$@
+	OUTSPRITES=$$(node sprite_convert.js ../../$< ../../$@);\
+	zopfli --deflate $$OUTSPRITES
 
+.PRECIOUS: $(ODIR)/assets/%.gtm2
 $(ODIR)/assets/%.gtm2: assets/%.mid
 	mkdir -p $(@D)
 	cd scripts/converters ;\
 	node midiconvert.js ../../$< ../../$@
 
+.PRECIOUS: $(ODIR)/assets/%.deflate
 $(ODIR)/assets/%.deflate: $(ODIR)/assets/%
 	mkdir -p $(@D)
 	zopfli --deflate $<
 
+.PRECIOUS: $(ODIR)/assets/%.gsi
 $(ODIR)/assets/%.gsi: assets/%.json
 	mkdir -p $(@D)
 	cd scripts/converters ;\
 	node sprite_metadata.js ../../$< ../../$@
+
+$(ODIR)/assets/%.bin: assets/%.bin
+	mkdir -p $(@D)
+	cp $< $@
 
 $(ODIR)/assets/audio_fw.bin.deflate: $(ODIR)/assets/audio_fw.bin
 	zopfli --deflate $<
@@ -78,7 +91,7 @@ $(ODIR)/assets/audio_fw.bin: src/gt/audio_fw.asm gametank-acp.cfg
 	$(AS) --cpu 65C02 src/gt/audio_fw.asm -o $(ODIR)/assets/audio_fw.o
 	$(LN) -C gametank-acp.cfg $(ODIR)/assets/audio_fw.o -o $(ODIR)/assets/audio_fw.bin
 
-$(ODIR)/gen/assets/%.o: src/gen/assets/%.s.asset $(BMPOBJS) $(JSONOBJS) $(AUDIO_FW) $(MIDOBJS)
+$(ODIR)/gen/assets/%.o: src/gen/assets/%.s.asset $(BMPOBJS) $(JSONOBJS) $(AUDIO_FW) $(MIDOBJS) $(BINOBJS)
 	mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
@@ -120,5 +133,9 @@ flash: $(BANKS)
 emulate: bin/$(TARGET)
 	$(EMUPATH)/bin/$(OS)/GameTankEmulator bin/$(TARGET)
 
-import:
+scripts/node_modules:
+	cd scripts/build_setup ;\
+	npm install
+
+import: scripts/node_modules
 	node ./scripts/build_setup/import_assets.js

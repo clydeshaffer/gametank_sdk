@@ -50,6 +50,9 @@ _init:    LDX     #$FF                 ; Initialize stack pointer to $01FF
 viaWakeup:
 	inx
 	bne viaWakeup
+
+	LDA #127
+	STA VIA+IER ;disable VIA IRQs
 	
 	LDA #40
 	STA BankReg
@@ -61,7 +64,7 @@ viaWakeup:
 	STA VIA+DDRA
     LDA #$FF
     STA VIA+ORAr
-	lda #$00
+	lda #$80
 	sta _romBankMirror
 	jsr ShiftHighBits
 
@@ -104,6 +107,19 @@ _exit:    JSR     donelib              ; Run destructors
 ShiftHighBits:
 	STA $0
 	LDA #$FF
+	STA VIA+ORAr
+
+	LDA $0
+	ROR
+	ROR
+	ROR
+	ROR
+	ROR
+	ROR
+	AND #2
+	ORA #%00000100
+	STA VIA+ORAr
+	ORA #1
 	STA VIA+ORAr
 
 	LDA $0
