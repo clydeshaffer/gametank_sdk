@@ -40,7 +40,7 @@ int main () {
           if(game_select > 0) --game_select;
         } else if(player1_buttons & ~player1_old_buttons & INPUT_MASK_DOWN) {
           if(game_select < 4) ++game_select;
-        } else if(player1_buttons & ~player1_old_buttons & INPUT_MASK_A) {
+        } else if(player1_buttons & ~player1_old_buttons & (INPUT_MASK_A | INPUT_MASK_START)) {
           if(game_select == 0) run_snake_game();
           else if(game_select == 1) run_invaders_game();
           else if(game_select == 2) run_runner_game();

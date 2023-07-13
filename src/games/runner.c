@@ -153,8 +153,20 @@ static char check_collision() {
 
 void run_runner_game() {
     await_draw_queue();
-    sleep(1);
+
+    text_cursor_x = 16;
+    text_print_width = 128;
+    text_cursor_y = 108;
+    text_use_alt_color = 1;
+    print_text("Loading...");
     flip_pages();
+    text_cursor_x = 16;
+    text_print_width = 128;
+    text_cursor_y = 108;
+    text_use_alt_color = 1;
+    print_text("Loading...");
+    flip_pages();
+    sleep(1);
     
     load_big_spritesheet(&ASSET__gfx3__redhood, 0);
     load_spritesheet(&ASSET__gfx3__spikeball_bmp, 1);
@@ -166,6 +178,7 @@ void run_runner_game() {
     
     init_texts();
     while(1) {
+        PROFILER_START(0);
         update_inputs();
 
         draw_sprite(0, 0, 127, 127, bg_scroll.b.msb, 0, 2);
@@ -237,14 +250,14 @@ void run_runner_game() {
 
             draw_sprite_frame(&ASSET__gfx3__spikeball_json, spike_x.b.msb, spike_y, (global_tick >> 2) & 15, 0, 1 | BANK_CLIP_X);
             draw_sprite_frame(&ASSET__gfx3__redhood_json, PLAYER_X, player_y.b.msb, anim_offsets[anim_state] + anim_frame.b.msb, SPRITE_FLIP_X, 0);
-            await_draw_queue();
+            wait();
             clear_border(0);
             await_draw_queue();
 
             text_print_width = 128;
             text_print_line_start = 4;
             text_cursor_x = 4;
-            text_cursor_y = 8;
+            text_cursor_y = 12;
             text_use_alt_color = 1;
             print_text(lives_text);
             print_text("\r\n");
@@ -260,7 +273,7 @@ void run_runner_game() {
             }
         }
         
-
+        PROFILER_END(0);
         sleep(1);
         flip_pages();
         ++global_tick;

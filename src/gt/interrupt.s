@@ -84,6 +84,7 @@ finish_irq:
         ;make sure DMA mode is set to input these params
         LDA _flagsMirror
         ORA #$01
+        STZ DMA_Start
 
         LDY _queue_start
 

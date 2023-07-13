@@ -50,6 +50,9 @@ _init:    LDX     #$FF                 ; Initialize stack pointer to $01FF
 viaWakeup:
 	inx
 	bne viaWakeup
+
+	LDA #127
+	STA VIA+IER ;disable VIA IRQs
 	
 	LDA #40
 	STA BankReg
