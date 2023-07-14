@@ -148,7 +148,6 @@ void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x
     pushRect();
 
     if(queue_pending == 0) {
-        queue_pending = 1;
         next_draw_queue();
     }
     asm("CLI");
@@ -221,7 +220,6 @@ void await_draw_queue() {
     }
     while(queue_end != queue_start) {
         next_draw_queue();
-        asm ("CLI");
         wait();
     }
     vram[START] = 0;
