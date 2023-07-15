@@ -146,11 +146,11 @@ void run_bee_game() {
     while(1) {
         update_inputs();
         draw_sprite(0, 0, 127, 127, 0, 0, 1);
-        clear_border(0);
 
         if(game_state == STATE_TITLE) {
             draw_sprite(0, 32, 127, 24, 0, 0, 2);
             draw_sprite(0, 72, 127, 9, 0, 32, 2);
+            clear_border(0);
             if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
                 game_state = STATE_PLAY;
                 init_round();
@@ -165,7 +165,7 @@ void run_bee_game() {
             draw_sprite_frame(&ASSET__gfx5__bees_json, 32, 16, 6, 0, 0);
             draw_sprite_frame(&ASSET__gfx5__bees_json, 32, 25, 7, 0, 0);
             draw_box(44, 12, nectar_load >> 2, 8, (nectar_load == 255) ? 60 : 93);
-
+            clear_border(0);
 
             if(bee_alive) {
                 if(player1_buttons & INPUT_MASK_LEFT) {
@@ -264,6 +264,7 @@ void run_bee_game() {
             print_text(score_text);
         } else if(game_state == STATE_GAMEOVER) {
             draw_sprite(0, 64, 127, 16, 0, 48, 2);
+            clear_border(0);
             --state_timer;
             if(!state_timer) {
                 game_state = STATE_TITLE;

@@ -250,7 +250,7 @@ void run_runner_game() {
 
             draw_sprite_frame(&ASSET__gfx3__spikeball_json, spike_x.b.msb, spike_y, (global_tick >> 2) & 15, 0, 1 | BANK_CLIP_X);
             draw_sprite_frame(&ASSET__gfx3__redhood_json, PLAYER_X, player_y.b.msb, anim_offsets[anim_state] + anim_frame.b.msb, SPRITE_FLIP_X, 0);
-            wait();
+            if(queue_pending) wait();
             clear_border(0);
             await_draw_queue();
 
