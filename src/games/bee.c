@@ -148,6 +148,7 @@ void run_bee_game() {
         draw_sprite(0, 0, 127, 127, 0, 0, 1);
 
         if(game_state == STATE_TITLE) {
+            rnd();
             draw_sprite(0, 32, 127, 24, 0, 0, 2);
             draw_sprite(0, 72, 127, 9, 0, 32, 2);
             clear_border(0);
@@ -160,7 +161,7 @@ void run_bee_game() {
             draw_sprite_frame(&ASSET__gfx5__bees_json, HIVE_X, HIVE_Y, HIVE_FRAME, 0, 0);
 
             if(bee_alive)
-                draw_sprite_frame(&ASSET__gfx5__bees_json, bee_x, bee_y, ((global_tick&2) >> 1), bee_flip, BANK_CLIP_X | BANK_CLIP_Y);
+                draw_sprite_frame(&ASSET__gfx5__bees_json, bee_x, bee_y, ((global_tick&2) >> 1) & !played_eat_sound, bee_flip, BANK_CLIP_X | BANK_CLIP_Y);
             draw_sprite_frame(&ASSET__gfx5__bees_json, bird_x, bird_y, BIRD_FRAME + ((global_tick&4) >> 2), bird_flip, BANK_CLIP_X | BANK_CLIP_Y);
             draw_sprite_frame(&ASSET__gfx5__bees_json, 32, 16, 6, 0, 0);
             draw_sprite_frame(&ASSET__gfx5__bees_json, 32, 25, 7, 0, 0);
@@ -207,6 +208,7 @@ void run_bee_game() {
                         played_eat_sound = 0;
                     }
                 } else {
+                    played_eat_sound = 0;
                     if(bee_near_hive()) {
                         nectar_load = 0;
                         ++score;

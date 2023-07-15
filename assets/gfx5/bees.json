@@ -1,19 +1,19 @@
 { "frames": [
    {
     "filename": "bees 0.aseprite",
-    "frame": { "x": 111, "y": 8, "w": 13, "h": 15 },
+    "frame": { "x": 96, "y": 16, "w": 13, "h": 14 },
     "rotated": false,
     "trimmed": true,
-    "spriteSourceSize": { "x": 18, "y": 16, "w": 13, "h": 15 },
+    "spriteSourceSize": { "x": 18, "y": 17, "w": 13, "h": 14 },
     "sourceSize": { "w": 48, "h": 48 },
     "duration": 32
    },
    {
     "filename": "bees 1.aseprite",
-    "frame": { "x": 96, "y": 16, "w": 13, "h": 14 },
+    "frame": { "x": 111, "y": 8, "w": 13, "h": 15 },
     "rotated": false,
     "trimmed": true,
-    "spriteSourceSize": { "x": 18, "y": 17, "w": 13, "h": 14 },
+    "spriteSourceSize": { "x": 18, "y": 16, "w": 13, "h": 15 },
     "sourceSize": { "w": 48, "h": 48 },
     "duration": 32
    },
@@ -80,7 +80,7 @@
   "size": { "w": 128, "h": 31 },
   "scale": "1",
   "frameTags": [
-   { "name": "bigbee", "from": 0, "to": 1, "direction": "forward", "color": "#000000ff" },
+   { "name": "bigbee", "from": 0, "to": 0, "direction": "forward", "color": "#000000ff" },
    { "name": "bird", "from": 3, "to": 4, "direction": "forward", "color": "#000000ff" }
   ],
   "layers": [

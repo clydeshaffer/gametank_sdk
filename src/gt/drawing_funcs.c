@@ -152,6 +152,7 @@ void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x
         next_draw_queue();
     }
     asm("CLI");
+    if(queue_pending) wait();
 }
 
 void draw_sprite_rect() {
