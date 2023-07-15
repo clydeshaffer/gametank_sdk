@@ -188,6 +188,14 @@ void do_noise_effect(char note, char bend, char duration) {
     flush_audio_params();
 }
 
+void do_tone_effect(char channel, char note, char bend, char duration) {
+    set_note(channel, note);
+    push_audio_param(PITCHBEND+channel, bend);
+    audio_amplitudes[channel] = duration;
+    push_audio_param(AMPLITUDE+channel, 255);
+    flush_audio_params();
+}
+
 void stop_music() {
     music_cursor = 0;
     audio_amplitudes[0] = 0;

@@ -3,6 +3,7 @@
 
 char global_tick;
 char game_state;
+char state_timer;
 char field[256];
 char lives;
 int score;

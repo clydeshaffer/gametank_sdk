@@ -1,5 +1,6 @@
 extern char global_tick;
 extern char game_state;
+extern char state_timer;
 extern char field[256];
 extern char lives;
 extern int score;

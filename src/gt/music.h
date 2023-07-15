@@ -13,6 +13,8 @@ void tick_music();
 
 void do_noise_effect(char note, char bend, char duration);
 
+void do_tone_effect(char channel, char note, char bend, char duration);
+
 void stop_music();
 
 void pause_music();

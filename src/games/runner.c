@@ -61,7 +61,7 @@ const char start_score_text[] = "SCORE: ";
 char lives_text[11];
 char score_text[32];
 
-void init_texts() {
+static void init_texts() {
     for(i = 0; i < sizeof(start_lives_text); ++i) {
         lives_text[i] = start_lives_text[i];        
     }
@@ -70,7 +70,7 @@ void init_texts() {
     }
 }
 
-void update_texts() {
+static void update_texts() {
     lives_text[lives + 7] = 0;
     if(score) {
         i = score;

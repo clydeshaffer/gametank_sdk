@@ -1,0 +1,93 @@
+{ "frames": [
+   {
+    "filename": "bees 0.aseprite",
+    "frame": { "x": 111, "y": 8, "w": 13, "h": 15 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 18, "y": 16, "w": 13, "h": 15 },
+    "sourceSize": { "w": 48, "h": 48 },
+    "duration": 32
+   },
+   {
+    "filename": "bees 1.aseprite",
+    "frame": { "x": 96, "y": 16, "w": 13, "h": 14 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 18, "y": 17, "w": 13, "h": 14 },
+    "sourceSize": { "w": 48, "h": 48 },
+    "duration": 32
+   },
+   {
+    "filename": "bees 2.aseprite",
+    "frame": { "x": 70, "y": 0, "w": 13, "h": 26 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 18, "y": 16, "w": 13, "h": 26 },
+    "sourceSize": { "w": 48, "h": 48 },
+    "duration": 32
+   },
+   {
+    "filename": "bees 3.aseprite",
+    "frame": { "x": 0, "y": 0, "w": 35, "h": 26 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 7, "y": 9, "w": 35, "h": 26 },
+    "sourceSize": { "w": 48, "h": 48 },
+    "duration": 32
+   },
+   {
+    "filename": "bees 4.aseprite",
+    "frame": { "x": 35, "y": 0, "w": 35, "h": 25 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 7, "y": 12, "w": 35, "h": 25 },
+    "sourceSize": { "w": 48, "h": 48 },
+    "duration": 32
+   },
+   {
+    "filename": "bees 5.aseprite",
+    "frame": { "x": 83, "y": 16, "w": 13, "h": 15 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 17, "y": 17, "w": 13, "h": 15 },
+    "sourceSize": { "w": 48, "h": 48 },
+    "duration": 32
+   },
+   {
+    "filename": "bees 6.aseprite",
+    "frame": { "x": 83, "y": 0, "w": 33, "h": 8 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 0, "y": 20, "w": 33, "h": 8 },
+    "sourceSize": { "w": 48, "h": 48 },
+    "duration": 32
+   },
+   {
+    "filename": "bees 7.aseprite",
+    "frame": { "x": 83, "y": 8, "w": 28, "h": 8 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 5, "y": 20, "w": 28, "h": 8 },
+    "sourceSize": { "w": 48, "h": 48 },
+    "duration": 32
+   }
+ ],
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.3-rc4-x64",
+  "image": "bees.bmp",
+  "format": "I8",
+  "size": { "w": 128, "h": 31 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "bigbee", "from": 0, "to": 1, "direction": "forward", "color": "#000000ff" },
+   { "name": "bird", "from": 3, "to": 4, "direction": "forward", "color": "#000000ff" }
+  ],
+  "layers": [
+   { "name": "Layer 1", "opacity": 255, "blendMode": "normal" },
+   { "name": "Layer 2", "opacity": 255, "blendMode": "normal" }
+  ],
+  "slices": [
+  ]
+ }
+}
