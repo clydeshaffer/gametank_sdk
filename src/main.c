@@ -9,6 +9,7 @@
 #include "games/invaders.h"
 #include "games/runner.h"
 #include "games/bee.h"
+#include "games/penguins.h"
 #include "gen/assets/gfx.h"
 
 static char game_select;
@@ -46,6 +47,7 @@ int main () {
           else if(game_select == 1) run_invaders_game();
           else if(game_select == 2) run_runner_game();
           else if(game_select == 3) run_bee_game();
+          else if(game_select == 4) run_penguins_game();
         }
 
         await_draw_queue();
@@ -54,7 +56,7 @@ int main () {
         text_cursor_y = 72;
         text_print_line_start = 32;
         text_print_width = 96;
-        print_text("Snake\n\rInvaders\n\rRed's Run\n\rHoney Hunt\n\rTBD");
+        print_text("Snake\n\rInvaders\n\rRed's Run\n\rHoney Hunt\n\r2 Penguins");
 
         text_cursor_x = 24;
         text_cursor_y = 72 + (game_select << 3);

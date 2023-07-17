@@ -7,6 +7,7 @@ char state_timer;
 char field[256];
 char lives;
 int score;
+char field_offset_x, field_offset_y;
 
 static char r,c,i;
 
@@ -16,6 +17,8 @@ char delta(char a, char b) {
 }
 
 void clear_field() {
+    field_offset_x = 0;
+    field_offset_y = 0;
     for(i = 0; i < 128; ++i) {
         field[i] = 0;
         field[i | 128] = 0;
@@ -29,9 +32,10 @@ void draw_field(char tile_bank) {
     *bank_reg = banksMirror;
     vram[WIDTH] = 8;
     vram[HEIGHT] = 8;
-    for(r = 0; r < 128; r+=8) {
+    for(r = field_offset_y; r < 128; r+=8) {
         vram[VY] = r;
-        for(c = 0; c < 128; c+=8) {
+        i = (r << 1);
+        for(c = field_offset_x; c < 128; c+=8) {
             if(field[i]) {
                 vram[VX] = c;
                 vram[GX] = (field[i] & 0x0F) << 3;

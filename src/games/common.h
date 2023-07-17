@@ -4,6 +4,7 @@ extern char state_timer;
 extern char field[256];
 extern char lives;
 extern int score;
+extern char field_offset_x, field_offset_y;
 
 char delta(char a, char b);
 void clear_field();

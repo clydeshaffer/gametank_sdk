@@ -172,6 +172,23 @@ void draw_sprite_rect() {
     asm("CLI");
 }
 
+void draw_sprite_tile() {
+    if(queue_count >= QUEUE_MAX) {
+        asm("CLI");
+        wait();
+    }
+
+    asm("SEI");
+    rect.b |= bankflip;
+    queue_flags_param = 0;
+    pushRect();
+
+    if(queue_pending == 0) {
+        next_draw_queue();
+    }
+    asm("CLI");
+}
+
 void draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h, unsigned char c) {
     if(x > 127) {
         return;
