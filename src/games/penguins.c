@@ -145,6 +145,13 @@ void run_penguins_game() {
             try_move_penguin(0, 0, 1);
             try_move_penguin(1, 0, 1);
         }
+
+        if(((penguin_x[0] >> 3) == (penguin_x[1] >> 3)) &&
+            ((penguin_y[0] >> 3) == (penguin_y[1] >> 3)) &&
+            (((penguin_x[0] - MAZE_OFFSET_X_PIX) >> 3) == 7) &&
+            (((penguin_y[0]) >> 3) == MAZE_OFFSET_ROW)) {
+                field[71] = 128;
+            }
         
         draw_field(0);
         draw_sprite_now(penguin_x[0], penguin_y[0], 8, 8, 8, 8, 0);
