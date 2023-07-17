@@ -21,11 +21,20 @@ static char i;
 #define LEVEL_LEFT_SIDE 0
 #define LEVEL_RIGHT_SIDE 8
 
+#define PENGUINS_GY 8
+#define FACE_UP 0
+#define FACE_DOWN 8
+#define FACE_RIGHT 16
+#define FACE_LEFT 24
+#define PINK_PENGUIN 32
+
 static char r,c;
 
 static char penguin_x[2];
 static char penguin_y[2];
 static char penguin_status[2];
+static char penguin_gx[2];
+static char penguin_gy[2];
 
 static char half_levels[HALF_LEVEL_BYTES] = {
     00,00,00,00,00,00,00,
@@ -54,6 +63,10 @@ static void init_penguins() {
     penguin_x[1] = MAZE_OFFSET_X_PIX + (8 * 8);
     penguin_y[0] = (MAZE_OFFSET_ROW + 9) * 8;
     penguin_y[1] = penguin_y[0];
+    penguin_gx[0] = FACE_DOWN;
+    penguin_gx[1] = FACE_DOWN + PINK_PENGUIN;
+    penguin_gy[0] = 0;
+    penguin_gy[1] = 0;
 }
 
 static void try_move_penguin(char pid, char dx, char dy) {
@@ -130,18 +143,34 @@ void run_penguins_game() {
         await_draw_queue();
 
         if(player1_buttons & INPUT_MASK_LEFT) {
+            penguin_gx[0] = FACE_LEFT;
+            penguin_gx[1] = FACE_RIGHT + PINK_PENGUIN;
+            penguin_gy[0] = global_tick & 24;
+            penguin_gy[1] = global_tick & 24;
             try_move_penguin(0, -1, 0);
             try_move_penguin(1, 1, 0);
         }
         if(player1_buttons & INPUT_MASK_RIGHT) {
+            penguin_gx[0] = FACE_RIGHT;
+            penguin_gx[1] = FACE_LEFT + PINK_PENGUIN;
+            penguin_gy[0] = global_tick & 24;
+            penguin_gy[1] = global_tick & 24;
             try_move_penguin(0, 1, 0);
             try_move_penguin(1, -1, 0);
         }
         if(player1_buttons & INPUT_MASK_UP) {
+            penguin_gx[0] = FACE_UP;
+            penguin_gx[1] = FACE_UP + PINK_PENGUIN;
+            penguin_gy[0] = global_tick & 24;
+            penguin_gy[1] = global_tick & 24;
             try_move_penguin(0, 0, -1);
             try_move_penguin(1, 0, -1);
         }
         if(player1_buttons & INPUT_MASK_DOWN) {
+            penguin_gx[0] = FACE_DOWN;
+            penguin_gx[1] = FACE_DOWN + PINK_PENGUIN;
+            penguin_gy[0] = global_tick & 24;
+            penguin_gy[1] = global_tick & 24;
             try_move_penguin(0, 0, 1);
             try_move_penguin(1, 0, 1);
         }
@@ -151,12 +180,14 @@ void run_penguins_game() {
             (((penguin_x[0] - MAZE_OFFSET_X_PIX) >> 3) == 7) &&
             (((penguin_y[0]) >> 3) == MAZE_OFFSET_ROW)) {
                 field[71] = 128;
+                penguin_gy[0] = 40;
+                penguin_gy[1] = 40;
             }
         
         draw_field(0);
-        draw_sprite_now(penguin_x[0], penguin_y[0], 8, 8, 8, 8, 0);
+        draw_sprite_now(penguin_x[0], penguin_y[0], 8, 8, penguin_gx[0], penguin_gy[0], 0);
         wait();
-        draw_sprite_now(penguin_x[1], penguin_y[1], 8, 8, 40, 8, 0);
+        draw_sprite_now(penguin_x[1], penguin_y[1], 8, 8, penguin_gx[1], penguin_gy[1], 0);
         wait();
         PROFILER_END(0);
         sleep(1);
