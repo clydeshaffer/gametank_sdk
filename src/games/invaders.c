@@ -31,7 +31,6 @@ static char enemy_hp[MAX_ENEMY_COUNT];
 static char enemy_count;
 static char enemy_type[MAX_ENEMY_COUNT];
 static char bg_x, bg_y;
-static char level_num;
 
 #define ENEMY_EXPLOSION_FRAMES 9
 

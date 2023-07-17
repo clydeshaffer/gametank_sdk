@@ -5,6 +5,7 @@ extern char field[256];
 extern char lives;
 extern int score;
 extern char field_offset_x, field_offset_y;
+extern char level_num;
 
 char delta(char a, char b);
 void clear_field();

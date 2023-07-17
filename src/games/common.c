@@ -8,6 +8,7 @@ char field[256];
 char lives;
 int score;
 char field_offset_x, field_offset_y;
+char level_num;
 
 static char r,c,i;
 

@@ -7,19 +7,10 @@
 #include "../gen/assets/music.h"
 #include "random.h"
 #include "music.h"
+#include "./penguin_levels.h"
 
 static char i;
 
-#define MAZE_OFFSET_X_PIX 4
-#define MAZE_OFFSET_ROW 4
-
-#define HALF_LEVEL_WIDTH 7
-#define HALF_LEVEL_HEIGHT 10
-#define HALF_LEVEL_COUNT 1
-#define HALF_LEVEL_BYTES HALF_LEVEL_WIDTH*HALF_LEVEL_HEIGHT*HALF_LEVEL_COUNT
-
-#define LEVEL_LEFT_SIDE 0
-#define LEVEL_RIGHT_SIDE 8
 
 #define PENGUINS_GY 8
 #define FACE_UP 0
@@ -35,28 +26,6 @@ static char penguin_y[2];
 static char penguin_status[2];
 static char penguin_gx[2];
 static char penguin_gy[2];
-
-static char half_levels[HALF_LEVEL_BYTES] = {
-    00,00,00,00,00,00,00,
-    00,15,00,15,00,15,00,
-    15,15,15,15,15,15,00,
-    00,00,00,00,00,00,00,
-    00,15,15,15,15,15,15,
-    00,00,00,00,00,00,00,
-    15,15,15,15,15,15,00,
-    00,00,00,00,00,00,00,
-    00,15,15,15,15,15,15,
-    00,00,00,00,00,00,00
-};
-
-static void load_half_level(char level_num, char side) {
-    i = level_num * (HALF_LEVEL_WIDTH * HALF_LEVEL_HEIGHT);
-    for(r = 0; r < HALF_LEVEL_HEIGHT; ++r) {
-        for(c = 0; c < HALF_LEVEL_WIDTH; ++c) {
-            field[((r+4) << 4) + c + side] = half_levels[i++];
-        }
-    }
-}
 
 static void init_penguins() {
     penguin_x[0] = MAZE_OFFSET_X_PIX + (6 * 8);
@@ -95,6 +64,27 @@ static void try_move_penguin(char pid, char dx, char dy) {
     penguin_y[pid] -= dy;
 }
 
+static void init_field() {
+    clear_field();
+    field_offset_x = 4;
+    load_level_num();
+
+    r = 55;
+    field[r-1] = 208;
+    field[r] = 209;
+    field[r+1] = 210;
+    r += 16;
+    field[r] = 129;
+    r += 16;
+    for(i = 0; i < 9; ++i) {
+        field[r] = 11;
+        r += 16;
+    }
+    field[r-1] = 192;
+    field[r] = 193;
+    field[r+1] = 194;
+}
+
 void run_penguins_game() {
     await_draw_queue();
     flip_pages();
@@ -104,25 +94,8 @@ void run_penguins_game() {
 
     rnd_seed = 234;
     global_tick = 0;
-    clear_field();
-    field_offset_x = 4;
-    load_half_level(0, LEVEL_LEFT_SIDE);
-    load_half_level(0, LEVEL_RIGHT_SIDE);
-
-    global_tick = 55;
-    field[global_tick-1] = 208;
-    field[global_tick] = 209;
-    field[global_tick+1] = 210;
-    global_tick += 16;
-    field[global_tick] = 129;
-    global_tick += 16;
-    for(i = 0; i < 9; ++i) {
-        field[global_tick] = 15;
-        global_tick += 16;
-    }
-    field[global_tick-1] = 192;
-    field[global_tick] = 193;
-    field[global_tick+1] = 194;
+    level_num = 1;
+    init_field();
 
     init_penguins();
 
@@ -182,6 +155,9 @@ void run_penguins_game() {
                 field[71] = 128;
                 penguin_gy[0] = 40;
                 penguin_gy[1] = 40;
+                ++level_num;
+                init_field();
+                init_penguins();
             }
         
         draw_field(0);
