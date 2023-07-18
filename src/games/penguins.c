@@ -67,7 +67,7 @@ static void try_move_penguin(char pid, char dx, char dy) {
 static void init_field() {
     clear_field();
     field_offset_x = 4;
-    load_level_num();
+    
 
     r = 55;
     field[r-1] = 208;
@@ -77,12 +77,13 @@ static void init_field() {
     field[r] = 129;
     r += 16;
     for(i = 0; i < 9; ++i) {
-        field[r] = 11;
+        field[r] = 11 + ((level_num & 7) << 5);
         r += 16;
     }
     field[r-1] = 192;
     field[r] = 193;
     field[r+1] = 194;
+    load_level_num();
 }
 
 void run_penguins_game() {
@@ -160,6 +161,12 @@ void run_penguins_game() {
                 init_penguins();
             }
         
+        if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
+            ++level_num;
+            init_field();
+            init_penguins();
+        }
+
         draw_field(0);
         draw_sprite_now(penguin_x[0], penguin_y[0], 8, 8, penguin_gx[0], penguin_gy[0], 0);
         wait();
