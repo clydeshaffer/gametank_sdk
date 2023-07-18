@@ -95,32 +95,50 @@ static void load_half_level(char* enc, char offset, char side, char tilenum) {
 #define LEVEL_LEFT_SIDE 0
 #define LEVEL_RIGHT_SIDE 8
 
+static char is_bonus_stage() {
+    return ((level_num + 2) % 5) == 0;
+}
+
 void load_level_num() {
     change_rom_bank(0xFE);
 
     tile = 11 + ((level_num & 7) << 5);
-
     load_default_layout(LEVEL_LEFT_SIDE, tile);
     load_default_layout(LEVEL_RIGHT_SIDE, tile);
 
-    load_half_level(
-        half_level_enc,
-        half_level_offsets[left_half_order[level_num & 15]],
-        LEVEL_LEFT_SIDE,
-        tile);
-    load_half_level(
-        half_level_enc,
-        half_level_offsets[0xF & (((level_num) & 0xF) + ((level_num) >> 4))],
-        LEVEL_RIGHT_SIDE,
-        tile);
-    load_half_level(
-        web_enc,
-        web_offsets[left_half_order[level_num & 15]],
-        LEVEL_LEFT_SIDE,
-        162);
-    load_half_level(
-        web_enc,
-        web_offsets[0xF & (((level_num) & 0xF) + ((level_num) >> 4))],
-        LEVEL_RIGHT_SIDE,
-        162);
+    if(is_bonus_stage()) {
+        
+        load_half_level(
+            web_enc,
+            web_offsets[left_half_order[level_num & 15]],
+            LEVEL_LEFT_SIDE,
+            128);
+        load_half_level(
+            web_enc,
+            web_offsets[0xF & (((level_num) & 0xF) + ((level_num) >> 4))],
+            LEVEL_RIGHT_SIDE,
+            128);
+    } else {
+        load_half_level(
+            half_level_enc,
+            half_level_offsets[left_half_order[level_num & 15]],
+            LEVEL_LEFT_SIDE,
+            tile);
+        load_half_level(
+            half_level_enc,
+            half_level_offsets[0xF & (((level_num) & 0xF) + ((level_num) >> 4))],
+            LEVEL_RIGHT_SIDE,
+            tile);
+        load_half_level(
+            web_enc,
+            web_offsets[left_half_order[level_num & 15]],
+            LEVEL_LEFT_SIDE,
+            162);
+        load_half_level(
+            web_enc,
+            web_offsets[0xF & (((level_num) & 0xF) + ((level_num) >> 4))],
+            LEVEL_RIGHT_SIDE,
+            162);
+    }
+    
 }
