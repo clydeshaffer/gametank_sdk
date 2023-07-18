@@ -27,6 +27,7 @@ unsigned char paused_delay;
 unsigned char music_mode = REPEAT_NONE;
 unsigned char repeat_resume_pending = 0;
 unsigned char music_bank = 0;
+static char song_status;
 
 void init_music() {
     music_cursor = 0;
@@ -76,8 +77,9 @@ void unpause_music() {
     paused_cursor = 0;
 }
 
-void tick_music() {
+char tick_music() {
     unsigned char n, noteMask;
+    song_status = SONG_STATUS_NOCHANGE;
     change_rom_bank(music_bank);
     if(audio_amplitudes[0] > 0) {
         audio_amplitudes[0]--;
@@ -168,7 +170,10 @@ void tick_music() {
                     music_cursor = repeat_point;
                     if(music_cursor) {
                         delay_counter = *(music_cursor++);
-                    }   
+                        song_status = SONG_STATUS_LOOPED;
+                    } else {
+                        song_status = SONG_STATUS_ENDED;
+                    }
                 }
             } else {
                 delay_counter -= (delay_counter >> 2);
@@ -178,6 +183,7 @@ void tick_music() {
 
 
     flush_audio_params();
+    return song_status;
 }
 
 void do_noise_effect(char note, char bend, char duration) {

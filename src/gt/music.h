@@ -5,11 +5,15 @@
 #define REPEAT_LOOP 1
 #define REPEAT_RESUME 2
 
+#define SONG_STATUS_NOCHANGE 0
+#define SONG_STATUS_ENDED 1
+#define SONG_STATUS_LOOPED 2
+
 void init_music();
 
 void play_song(const unsigned char* song, char bank_num, char loop);
 
-void tick_music();
+char tick_music();
 
 void do_noise_effect(char note, char bend, char duration);
 
