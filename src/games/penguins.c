@@ -170,6 +170,7 @@ void run_penguins_game() {
                     penguin_gy[0] = 40;
                     penguin_gy[1] = 40;
                     game_state = GAME_STATE_LEVEL_END;
+                    stop_music();
                     play_song(&ASSET__music__odetojoy_mid, REPEAT_NONE);
                 }
             
