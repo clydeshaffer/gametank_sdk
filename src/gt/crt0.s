@@ -17,6 +17,7 @@
 .export _SwitchRomBank
 
 .export _DynaWave
+.export _SineaWave
 
 .PC02
 
@@ -193,4 +194,6 @@ ShiftHighBits:
 
 	.segment "COMMON"
 _DynaWave:
+	.incbin "build/assets/audio_fw_classic.bin.deflate"
+_SineaWave:
     .incbin "build/assets/audio_fw.bin.deflate"

@@ -15,6 +15,8 @@
 
 void init_dynawave();
 
+void init_dynawave_with_fw(char fw_num);
+
 void push_audio_param(char param, char value);
 
 void flush_audio_params();

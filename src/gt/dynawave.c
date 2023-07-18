@@ -15,18 +15,23 @@ char pitch_table[216] = {
     0x4C, 0xA4, 0x51, 0x32, 0x56, 0x06, 0x5B, 0x24, 0x60, 0x8F, 0x66, 0x4D, 0x6C, 0x62, 0x72, 0xD4, 0x79, 0xA8, 0x80, 0xE4, 0x88, 0x8E, 0x90, 0xAD};
 
 extern const unsigned char* DynaWave;
+extern const unsigned char* SineaWave;
 
 char audio_params_index = 0;
 char *wavetable_page;
 
 void wait();
 
-void init_dynawave()
+void init_dynawave_with_fw(char fw_num)
 {
     *audio_rate = 0x7F;
 
     change_rom_bank(128);
-    inflatemem(aram, &DynaWave);
+    if(fw_num == 0) {
+        inflatemem(aram, &DynaWave);
+    } else {
+        inflatemem(aram, &SineaWave);
+    }
 
     audio_params_index = 0;
     AUDIO_PARAM_INPUT_BUFFER[0] = 0;
@@ -37,6 +42,10 @@ void init_dynawave()
     }
     wavetable_page = 0x3000;
     wavetable_page += *WAVE_TABLE_LOCATION;
+}
+
+void init_dynawave() {
+    init_dynawave_with_fw(0);
 }
 
 void push_audio_param(char param, char value) {

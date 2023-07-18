@@ -8,6 +8,7 @@
 #include "random.h"
 #include "music.h"
 #include "./penguin_levels.h"
+#include "dynawave.h"
 
 static char i;
 
@@ -18,6 +19,13 @@ static char i;
 #define FACE_RIGHT 16
 #define FACE_LEFT 24
 #define PINK_PENGUIN 32
+
+#define GAME_STATE_TITLE 0
+#define GAME_STATE_PLAYING 1
+#define GAME_STATE_LEVEL_START 2
+#define GAME_STATE_LEVEL_END 3
+#define GAME_STATE_FAIL 4
+#define GAME_STATE_GAMEOVER 5
 
 static char r,c;
 
@@ -87,6 +95,7 @@ static void init_field() {
 }
 
 void run_penguins_game() {
+    init_dynawave_with_fw(0);
     await_draw_queue();
     flip_pages();
     sleep(1);
@@ -99,6 +108,9 @@ void run_penguins_game() {
     init_field();
 
     init_penguins();
+
+    game_state = GAME_STATE_LEVEL_START;
+    play_song(&ASSET__music__peng_intro_mid, REPEAT_NONE);
 
     while(1) {
         PROFILER_START(0);
@@ -116,55 +128,56 @@ void run_penguins_game() {
 
         await_draw_queue();
 
-        if(player1_buttons & INPUT_MASK_LEFT) {
-            penguin_gx[0] = FACE_LEFT;
-            penguin_gx[1] = FACE_RIGHT + PINK_PENGUIN;
-            penguin_gy[0] = global_tick & 24;
-            penguin_gy[1] = global_tick & 24;
-            try_move_penguin(0, -1, 0);
-            try_move_penguin(1, 1, 0);
-        }
-        if(player1_buttons & INPUT_MASK_RIGHT) {
-            penguin_gx[0] = FACE_RIGHT;
-            penguin_gx[1] = FACE_LEFT + PINK_PENGUIN;
-            penguin_gy[0] = global_tick & 24;
-            penguin_gy[1] = global_tick & 24;
-            try_move_penguin(0, 1, 0);
-            try_move_penguin(1, -1, 0);
-        }
-        if(player1_buttons & INPUT_MASK_UP) {
-            penguin_gx[0] = FACE_UP;
-            penguin_gx[1] = FACE_UP + PINK_PENGUIN;
-            penguin_gy[0] = global_tick & 24;
-            penguin_gy[1] = global_tick & 24;
-            try_move_penguin(0, 0, -1);
-            try_move_penguin(1, 0, -1);
-        }
-        if(player1_buttons & INPUT_MASK_DOWN) {
-            penguin_gx[0] = FACE_DOWN;
-            penguin_gx[1] = FACE_DOWN + PINK_PENGUIN;
-            penguin_gy[0] = global_tick & 24;
-            penguin_gy[1] = global_tick & 24;
-            try_move_penguin(0, 0, 1);
-            try_move_penguin(1, 0, 1);
-        }
+        if(game_state == GAME_STATE_PLAYING) {
+            if(player1_buttons & INPUT_MASK_LEFT) {
+                penguin_gx[0] = FACE_LEFT;
+                penguin_gx[1] = FACE_RIGHT + PINK_PENGUIN;
+                penguin_gy[0] = global_tick & 24;
+                penguin_gy[1] = global_tick & 24;
+                try_move_penguin(0, -1, 0);
+                try_move_penguin(1, 1, 0);
+            }
+            if(player1_buttons & INPUT_MASK_RIGHT) {
+                penguin_gx[0] = FACE_RIGHT;
+                penguin_gx[1] = FACE_LEFT + PINK_PENGUIN;
+                penguin_gy[0] = global_tick & 24;
+                penguin_gy[1] = global_tick & 24;
+                try_move_penguin(0, 1, 0);
+                try_move_penguin(1, -1, 0);
+            }
+            if(player1_buttons & INPUT_MASK_UP) {
+                penguin_gx[0] = FACE_UP;
+                penguin_gx[1] = FACE_UP + PINK_PENGUIN;
+                penguin_gy[0] = global_tick & 24;
+                penguin_gy[1] = global_tick & 24;
+                try_move_penguin(0, 0, -1);
+                try_move_penguin(1, 0, -1);
+            }
+            if(player1_buttons & INPUT_MASK_DOWN) {
+                penguin_gx[0] = FACE_DOWN;
+                penguin_gx[1] = FACE_DOWN + PINK_PENGUIN;
+                penguin_gy[0] = global_tick & 24;
+                penguin_gy[1] = global_tick & 24;
+                try_move_penguin(0, 0, 1);
+                try_move_penguin(1, 0, 1);
+            }
 
-        if(((penguin_x[0] >> 3) == (penguin_x[1] >> 3)) &&
-            ((penguin_y[0] >> 3) == (penguin_y[1] >> 3)) &&
-            (((penguin_x[0] - MAZE_OFFSET_X_PIX) >> 3) == 7) &&
-            (((penguin_y[0]) >> 3) == MAZE_OFFSET_ROW)) {
-                field[71] = 128;
-                penguin_gy[0] = 40;
-                penguin_gy[1] = 40;
+            if(((penguin_x[0] >> 3) == (penguin_x[1] >> 3)) &&
+                ((penguin_y[0] >> 3) == (penguin_y[1] >> 3)) &&
+                (((penguin_x[0] - MAZE_OFFSET_X_PIX) >> 3) == 7) &&
+                (((penguin_y[0]) >> 3) == MAZE_OFFSET_ROW)) {
+                    field[71] = 128;
+                    penguin_gy[0] = 40;
+                    penguin_gy[1] = 40;
+                    game_state = GAME_STATE_LEVEL_END;
+                    play_song(&ASSET__music__odetojoy_mid, REPEAT_NONE);
+                }
+            
+            if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
                 ++level_num;
                 init_field();
                 init_penguins();
             }
-        
-        if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
-            ++level_num;
-            init_field();
-            init_penguins();
         }
 
         draw_field(0);
@@ -176,6 +189,17 @@ void run_penguins_game() {
         sleep(1);
         flip_pages();
         ++global_tick;
-        tick_music();
+        if(tick_music() == SONG_STATUS_ENDED) {
+            if(game_state == GAME_STATE_LEVEL_END) {
+                ++level_num;
+                init_field();
+                init_penguins();
+                game_state = GAME_STATE_LEVEL_START;
+                play_song(&ASSET__music__peng_intro_mid, REPEAT_NONE);
+            } else if(game_state == GAME_STATE_LEVEL_START) {
+                game_state = GAME_STATE_PLAYING;
+                play_song(&ASSET__music__peng_loop_mid, REPEAT_LOOP);
+            }
+        }
     }
 }

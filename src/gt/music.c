@@ -176,7 +176,7 @@ char tick_music() {
                     }
                 }
             } else {
-                delay_counter -= (delay_counter >> 2);
+                //delay_counter -= (delay_counter >> 2);
             }
         }
     }

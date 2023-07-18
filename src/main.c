@@ -17,7 +17,7 @@ static char game_select;
 int main () {
 
     init_graphics();
-    init_dynawave();
+    init_dynawave_with_fw(1);
     init_music();
 
     load_spritesheet(&ASSET__gfx__main_menu_bmp, 0);
