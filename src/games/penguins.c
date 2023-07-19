@@ -30,6 +30,9 @@ static char i;
 
 static char r,c;
 
+#define PENGUIN_STATUS_NORMAL 0
+#define PENGUIN_STATUS_STUCK 1
+
 static char penguin_x[2];
 static char penguin_y[2];
 static char penguin_status[2];
@@ -46,9 +49,14 @@ static void init_penguins() {
     penguin_gx[1] = FACE_DOWN + PINK_PENGUIN;
     penguin_gy[0] = 0;
     penguin_gy[1] = 0;
+    penguin_status[0] = PENGUIN_STATUS_NORMAL;
+    penguin_status[1] = PENGUIN_STATUS_NORMAL;
 }
 
 static void try_move_penguin(char pid, char dx, char dy) {
+    if(penguin_status[pid] == PENGUIN_STATUS_STUCK) {
+        return;
+    }
     penguin_x[pid] += dx;
     penguin_y[pid] += dy;
     if((penguin_x[pid] != 3) &&
@@ -64,6 +72,12 @@ static void try_move_penguin(char pid, char dx, char dy) {
                 if(!(field[(r << 4) + c] & 8)) {
                     c = (penguin_x[pid] - MAZE_OFFSET_X_PIX) >> 3;
                     if(!(field[(r << 4) + c] & 8)) {
+                        c = (penguin_x[pid] + 4 - MAZE_OFFSET_X_PIX) >> 3;
+                        r = (((penguin_y[pid] + 4) >> 3));
+                        i = field[(r << 4) + c];
+                        if(i == TILE_WEB) {
+                            penguin_status[pid] = PENGUIN_STATUS_STUCK;
+                        }
                         return;
                     }
                 }
@@ -107,6 +121,7 @@ void run_penguins_game() {
 
     load_spritesheet(&ASSET__gfx6__penguins_bmp, 0);
     load_spritesheet(&ASSET__gfx6__peng_title_bmp, 1);
+    load_spritesheet(&ASSET__gfx6__peng_end_bmp, 2);
 
     rnd_seed = 234;
     global_tick = 0;
@@ -175,6 +190,10 @@ void run_penguins_game() {
                 game_state = GAME_STATE_LEVEL_START;
                 play_song(&ASSET__music__peng_intro_mid, REPEAT_NONE);
             }
+        } else if(game_state == GAME_STATE_GAMEOVER) {
+            clear_border(0);
+            await_draw_queue();
+            draw_sprite_now(0, 0, 127, 127, 0, 0, 2);
         } else {
             //Top
             draw_tile(4, 24, 120, 8, 96, 0, 0);
@@ -242,6 +261,24 @@ void run_penguins_game() {
                 }
             }
 
+            if(penguin_status[0] == PENGUIN_STATUS_STUCK) {
+                penguin_gx[0] = 8;
+                penguin_gy[0] = 40 + (global_tick & 8);
+            }
+
+            if(penguin_status[1] == PENGUIN_STATUS_STUCK) {
+                penguin_gx[1] = 8 + PINK_PENGUIN;
+                penguin_gy[1] = 40 + (global_tick & 8);
+
+                if(game_state != GAME_STATE_FAIL) {
+                    if(penguin_status[0] == penguin_status[1]) {
+                        game_state = GAME_STATE_FAIL;
+                        stop_music();
+                        play_song(&ASSET__music__peng_oops_mid, REPEAT_NONE);
+                    }
+                }
+            }
+
             draw_field(0);
             draw_sprite_now(penguin_x[0], penguin_y[0], 8, 8, penguin_gx[0], penguin_gy[0], 0);
             wait();
@@ -262,6 +299,19 @@ void run_penguins_game() {
             } else if(game_state == GAME_STATE_LEVEL_START) {
                 game_state = GAME_STATE_PLAYING;
                 play_song(&ASSET__music__peng_loop_mid, REPEAT_LOOP);
+            } else if(game_state == GAME_STATE_FAIL) {
+                --lives;
+                if(lives) {
+                    init_field();
+                    init_penguins();
+                    game_state = GAME_STATE_LEVEL_INTRO;
+                    global_tick = 0;
+                } else {
+                    game_state = GAME_STATE_GAMEOVER;
+                    play_song(&ASSET__music__peng_gameover_mid, REPEAT_NONE);
+                }
+            } else if(game_state == GAME_STATE_GAMEOVER) {
+                game_state = GAME_STATE_TITLE;
             }
         }
     }

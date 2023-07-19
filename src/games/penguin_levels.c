@@ -103,11 +103,7 @@ static char is_bonus_stage() {
     return ((level_num + 2) % 5) == 0;
 }
 
-#pragma codeseg(pop)
-
-void load_level_num() {
-    change_rom_bank(0xFE);
-
+static void _load_level_num() {
     tile = 11 + ((level_num & 7) << 5);
     load_default_layout(LEVEL_LEFT_SIDE, tile);
     load_default_layout(LEVEL_RIGHT_SIDE, tile);
@@ -118,12 +114,12 @@ void load_level_num() {
             web_enc,
             web_offsets[left_half_order[level_num & 15]],
             LEVEL_LEFT_SIDE,
-            128);
+            TILE_HEART);
         load_half_level(
             web_enc,
             web_offsets[0xF & (((level_num) & 0xF) + ((level_num) >> 4))],
             LEVEL_RIGHT_SIDE,
-            128);
+            TILE_HEART);
     } else {
         load_half_level(
             half_level_enc,
@@ -139,12 +135,19 @@ void load_level_num() {
             web_enc,
             web_offsets[left_half_order[level_num & 15]],
             LEVEL_LEFT_SIDE,
-            162);
+            TILE_WEB);
         load_half_level(
             web_enc,
             web_offsets[0xF & (((level_num) & 0xF) + ((level_num) >> 4))],
             LEVEL_RIGHT_SIDE,
-            162);
+            TILE_WEB);
     }
     
+}
+
+#pragma codeseg(pop)
+
+void load_level_num() {
+    change_rom_bank(0xFE);
+    _load_level_num();
 }
