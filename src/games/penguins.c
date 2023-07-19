@@ -138,6 +138,8 @@ void run_penguins_game() {
             clear_border(0);
             await_draw_queue();
             draw_sprite_now(0, 0, 127, 127, 0, 0, 1);
+            wait();
+            draw_sprite_now(48, 72 + (ctrl_penguin << 4), 8, 8, FACE_DOWN + (ctrl_penguin << 5), 0, 0);
              if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
                 level_num = 1;
                 init_field();
@@ -145,6 +147,12 @@ void run_penguins_game() {
                 game_state = GAME_STATE_LEVEL_INTRO;
                 global_tick = 0;
                 lives = 3;
+            }
+            if(player1_buttons & ~player1_old_buttons & INPUT_MASK_DOWN) {
+                ctrl_penguin = 1;
+            }
+            if(player1_buttons & ~player1_old_buttons & INPUT_MASK_UP) {
+                ctrl_penguin = 0;
             }
         } else if(game_state == GAME_STATE_LEVEL_INTRO) {
             clear_border(0);    
