@@ -383,15 +383,6 @@ void run_penguins_game() {
             await_draw_queue();
             draw_sprite_now(0, 0, 127, 127, 0, 0, 2);
         } else {
-            //Top
-            draw_tile(4, 24, 120, 8, 96, 0, 0);
-            //Bottom
-            draw_tile(4, SCREEN_HEIGHT-16, 120, 16, 96, 0, 0);
-            //Left
-            draw_tile(0, 24, 4, 104, 96, 0, 0);
-            //Right
-            draw_tile(SCREEN_WIDTH-4, 24, 4, 104, 96, 0, 0);
-
             if(game_state == GAME_STATE_PLAYING) {
                 if(player1_buttons & INPUT_MASK_LEFT) {
                     penguin_gx[ctrl_penguin] = FACE_LEFT;
@@ -511,6 +502,22 @@ void run_penguins_game() {
             update_field_texts();
 
             await_draw_queue();
+            while(queue_pending) {
+                wait();
+            }
+
+             //Top
+            draw_tiles_now(4, 24, 120, 8, 96, 0, 0);
+            wait();
+            //Bottom
+            draw_tiles_now(4, SCREEN_HEIGHT-16, 120, 16, 96, 0, 0);
+            wait();
+            //Left
+            draw_tiles_now(0, 24, 4, 104, 96, 0, 0);
+            wait();
+            //Right
+            draw_tiles_now(SCREEN_WIDTH-4, 24, 4, 104, 96, 0, 0);
+            wait();
 
             draw_field(0);
             draw_sprite_now(penguin_x[0], penguin_y[0], 8, 8, penguin_gx[0], penguin_gy[0], 0);

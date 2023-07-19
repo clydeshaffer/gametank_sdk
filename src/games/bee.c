@@ -7,6 +7,7 @@
 #include "../gen/assets/music.h"
 #include "random.h"
 #include "music.h"
+#include "dynawave.h"
 
 #define HIVE_X 32
 #define HIVE_Y 96
@@ -111,7 +112,7 @@ static void init_round() {
 }
 
 void run_bee_game() {
-
+    init_dynawave_with_fw(1);
     await_draw_queue();
     flip_pages();
     sleep(1);
@@ -135,6 +136,7 @@ void run_bee_game() {
             clear_border(0);
             if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
                 game_state = STATE_PLAY;
+                //play_song(&ASSET__music__bees_mid, REPEAT_LOOP);
                 init_round();
             }
         } else if(game_state == STATE_PLAY) {
@@ -209,6 +211,7 @@ void run_bee_game() {
                 } else {
                     game_state = STATE_GAMEOVER;
                     state_timer = 255;
+                    stop_music();
                 }
             }
 
@@ -234,7 +237,7 @@ void run_bee_game() {
                 ++bird_timer;
                 if(!bird_timer) {
                     bird_vy = 1;
-                    do_tone_effect(1, 100, -20, 32);
+                    do_tone_effect(3, 100, -20, 32);
                 }
             }
 

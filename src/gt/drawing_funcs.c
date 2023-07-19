@@ -233,13 +233,16 @@ void draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h
 }
 
 void await_draw_queue() {
-    asm ("SEI");
+    asm ("CLI");
     if(queue_pending != 0) {
         wait();
     }
     while(queue_end != queue_start) {
         next_draw_queue();
         asm ("CLI");
+        wait();
+    }
+    if(queue_pending) {
         wait();
     }
     vram[START] = 0;
@@ -273,6 +276,26 @@ void draw_box_now(char x, char y, char w, char h, char c) {
 
 void draw_sprite_now(char x, char y, char w, char h, char gx, char gy, char ramBank) {
     *dma_flags = (flagsMirror | DMA_GCARRY) & ~(DMA_COLORFILL_ENABLE | DMA_OPAQUE);
+    banksMirror = bankflip | ramBank;
+    *bank_reg = banksMirror;
+    if(x + w >= 128) {
+        w = 128 - x;
+    }
+    if(y + h >= 128) {
+        h = 128 - y;
+    }
+    vram[START] = 0;
+    vram[VX] = x;
+    vram[VY] = y;
+    vram[GX] = gx;
+    vram[GY] = gy;
+    vram[WIDTH] = w;
+    vram[HEIGHT] = h;
+    vram[START] = 1;
+}
+
+void draw_tiles_now(char x, char y, char w, char h, char gx, char gy, char ramBank) {
+    *dma_flags = (flagsMirror) & ~(DMA_COLORFILL_ENABLE | DMA_OPAQUE);
     banksMirror = bankflip | ramBank;
     *bank_reg = banksMirror;
     if(x + w >= 128) {

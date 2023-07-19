@@ -59,7 +59,6 @@ _irq_int:
         PHX                    ; Save X register contents to stack
         PHA
         PHY
-
         ;make sure DMA isn't running then compare head and tail of queue
         ;to determine whether there is more to process
         STZ DMA_Start

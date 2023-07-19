@@ -7,6 +7,7 @@
 #include "random.h"
 #include "music.h"
 #include "banking.h"
+#include "../gen/assets/music2.h"
 
 #define SNAKE_STATE_TITLE 0
 #define SNAKE_STATE_RUNNING 1
@@ -161,6 +162,7 @@ void run_snake_game() {
                 }
                 if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
                     game_state = SNAKE_STATE_RUNNING;
+                    //play_song(&ASSET__music2__lems_mid, REPEAT_LOOP);
                 }
                 break;
             case SNAKE_STATE_RUNNING:
@@ -182,6 +184,7 @@ void run_snake_game() {
                     if(iterate_snake()) {
                         game_state = SNAKE_STATE_DYING;
                         snake_head_dir = (snake_head_dir + 32) & 0x30;
+                        stop_music();
                     }
                 }
 
