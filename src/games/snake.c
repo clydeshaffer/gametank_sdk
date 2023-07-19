@@ -6,6 +6,7 @@
 #include "../gen/assets/gfx.h"
 #include "random.h"
 #include "music.h"
+#include "banking.h"
 
 #define SNAKE_STATE_TITLE 0
 #define SNAKE_STATE_RUNNING 1
@@ -33,7 +34,9 @@ void rnd_egg() {
     field[i] = SNAKE_TILE_EGG;
 }
 
-void init_snake_game() {
+#pragma codeseg(push, "PROG0")
+
+void _init_snake_game() {
     game_state = SNAKE_STATE_TITLE;
     global_tick = 0;
     snake_head_pos = 136;
@@ -62,7 +65,7 @@ void init_snake_game() {
     rnd_egg();
 }
 
-char iterate_snake() {
+char _iterate_snake() {
     i = snake_head_dir;
     if((dir_buffer != 255) && ((dir_buffer & 16) != (snake_head_dir & 16))) {
         field[snake_head_pos] = 8 + dir_buffer + ((snake_head_dir & 32) >> 5);
@@ -95,7 +98,8 @@ char iterate_snake() {
 
 static const char corner_reverse_dirs[8] = {DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT, DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT};
 
-char skeletize_snake() {
+
+char _skeletize_snake() {
     if(snake_head_pos == snake_tail_pos) {
         if(field[snake_head_pos] & 128) {
             return 1;
@@ -113,6 +117,22 @@ char skeletize_snake() {
         snake_head_dir = i << 4;
     }
     return 0;
+}
+#pragma codeseg(pop)
+
+void init_snake_game() {
+    change_rom_bank(0xFE);
+    _init_snake_game();
+}
+
+char iterate_snake() {
+    change_rom_bank(0xFE);
+    return _iterate_snake();
+}
+
+char skeletize_snake() {
+    change_rom_bank(0xFE);
+    return _skeletize_snake();
 }
 
 void run_snake_game() {

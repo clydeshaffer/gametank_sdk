@@ -32,6 +32,9 @@ static char r,c;
 
 #define PENGUIN_STATUS_NORMAL 0
 #define PENGUIN_STATUS_STUCK 1
+#define PENGUIN_STATUS_RAY 2
+
+#define PENGUIN_GY_RAY 32
 
 static char penguin_x[2];
 static char penguin_y[2];
@@ -39,6 +42,8 @@ static char penguin_status[2];
 static char penguin_gx[2];
 static char penguin_gy[2];
 static char ctrl_penguin;
+static char last_dx[2];
+static char last_dy[2];
 
 static void init_penguins() {
     penguin_x[0] = MAZE_OFFSET_X_PIX + (6 * 8);
@@ -53,8 +58,34 @@ static void init_penguins() {
     penguin_status[1] = PENGUIN_STATUS_NORMAL;
 }
 
+static void try_scan_ray(char pid) {
+    c = last_dx[pid] + ((penguin_x[pid] + 4 - MAZE_OFFSET_X_PIX) >> 3);
+    r = last_dy[pid] + (((penguin_y[pid] + 4) >> 3));
+    i = field[(r << 4) + c];
+    if(i == TILE_WEB) {
+        field[(r << 4) + c] = 0;
+    }
+}
+
 static void try_move_penguin(char pid, char dx, char dy) {
+    if(dx | dy) {
+        last_dx[pid] = dx;
+        last_dy[pid] = dy;
+    }
     if(penguin_status[pid] == PENGUIN_STATUS_STUCK) {
+        c = (penguin_x[pid] + 4 - MAZE_OFFSET_X_PIX) >> 3;
+        r = (((penguin_y[pid] + 4) >> 3));
+        i = field[(r << 4) + c];
+        if(i == TILE_WEB) {
+            return;
+        }
+        penguin_status[pid] = PENGUIN_STATUS_NORMAL;
+        penguin_gy[pid] -= 40;
+    }
+    if(penguin_status[pid] == PENGUIN_STATUS_RAY) {
+        return;
+    }
+    if(!(dx | dy)) {
         return;
     }
     penguin_x[pid] += dx;
@@ -77,6 +108,9 @@ static void try_move_penguin(char pid, char dx, char dy) {
                         i = field[(r << 4) + c];
                         if(i == TILE_WEB) {
                             penguin_status[pid] = PENGUIN_STATUS_STUCK;
+                        } else if(i == TILE_HEART) {
+                            field[(r << 4) + c] = 0;
+                            ++score;
                         }
                         return;
                     }
@@ -242,6 +276,28 @@ void run_penguins_game() {
                     try_move_penguin(1, 0, 1);
                 }
 
+                if(player1_buttons & INPUT_MASK_A) {
+                    if(penguin_status[0] != PENGUIN_STATUS_STUCK) {
+                        try_scan_ray(0);
+                        penguin_status[0] = PENGUIN_STATUS_RAY;
+                        penguin_gy[0] = PENGUIN_GY_RAY;
+                    }
+                    if(penguin_status[1] != PENGUIN_STATUS_STUCK) {
+                        try_scan_ray(1);
+                        penguin_status[1] = PENGUIN_STATUS_RAY;
+                        penguin_gy[1] = PENGUIN_GY_RAY;
+                    }
+                } else {
+                    if(penguin_status[0] == PENGUIN_STATUS_RAY) {
+                        penguin_status[0] = PENGUIN_STATUS_NORMAL;
+                        penguin_gy[0] -= PENGUIN_GY_RAY;
+                    }
+                    if(penguin_status[1] == PENGUIN_STATUS_RAY) {
+                        penguin_status[1] = PENGUIN_STATUS_NORMAL;
+                        penguin_gy[1] -= PENGUIN_GY_RAY;
+                    }
+                }
+
                 if(((penguin_x[0] >> 3) == (penguin_x[1] >> 3)) &&
                     ((penguin_y[0] >> 3) == (penguin_y[1] >> 3)) &&
                     (((penguin_x[0] - MAZE_OFFSET_X_PIX) >> 3) == 7) &&
@@ -264,12 +320,13 @@ void run_penguins_game() {
             if(penguin_status[0] == PENGUIN_STATUS_STUCK) {
                 penguin_gx[0] = 8;
                 penguin_gy[0] = 40 + (global_tick & 8);
+                try_move_penguin(0, 0, 0);
             }
 
             if(penguin_status[1] == PENGUIN_STATUS_STUCK) {
                 penguin_gx[1] = 8 + PINK_PENGUIN;
                 penguin_gy[1] = 40 + (global_tick & 8);
-
+                try_move_penguin(1, 0, 0);
                 if(game_state != GAME_STATE_FAIL) {
                     if(penguin_status[0] == penguin_status[1]) {
                         game_state = GAME_STATE_FAIL;
@@ -284,6 +341,14 @@ void run_penguins_game() {
             wait();
             draw_sprite_now(penguin_x[1], penguin_y[1], 8, 8, penguin_gx[1], penguin_gy[1], 0);
             wait();
+            if(penguin_status[0] == PENGUIN_STATUS_RAY) {
+                draw_sprite_now(penguin_x[0] + (last_dx[0] << 3), penguin_y[0] + (last_dy[0] << 3), 8, 8, penguin_gx[0], 56, 0);
+                wait();
+            }
+            if(penguin_status[1] == PENGUIN_STATUS_RAY) {
+                draw_sprite_now(penguin_x[1] + (last_dx[1] << 3), penguin_y[1] + (last_dy[1] << 3), 8, 8, penguin_gx[1], 56, 0);
+                wait();
+            }
         }
         PROFILER_END(0);
         sleep(1);

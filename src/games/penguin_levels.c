@@ -120,6 +120,7 @@ static void _load_level_num() {
             web_offsets[0xF & (((level_num) & 0xF) + ((level_num) >> 4))],
             LEVEL_RIGHT_SIDE,
             TILE_HEART);
+        field[0xD6] = TILE_WEB;
     } else {
         load_half_level(
             half_level_enc,
