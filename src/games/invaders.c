@@ -7,6 +7,7 @@
 #include "../gen/assets/gfx2.h"
 #include "random.h"
 #include "music.h"
+#include "banking.h"
 
 static char rotation;
 
@@ -162,6 +163,8 @@ static void draw_enemies() {
     }
 }
 
+#pragma codeseg(push, "PROG0")
+
 static void move_enemies() {
     if(enemy_group_y != 0) ++enemy_group_y;
     if((global_tick & 3) == 3) {
@@ -220,6 +223,8 @@ static void move_enemies() {
     }
     
 }
+
+#pragma codeseg(pop)
 
 static void init_player() {
     rotation = 16;
@@ -345,6 +350,7 @@ void run_invaders_game() {
             }
         }
 
+        change_rom_bank(0xFE);
         move_enemies();
 
         draw_enemies();

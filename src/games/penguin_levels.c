@@ -99,11 +99,11 @@ static void load_half_level(char* enc, char offset, char side, char tilenum) {
 #define LEVEL_LEFT_SIDE 0
 #define LEVEL_RIGHT_SIDE 8
 
-static char is_bonus_stage() {
+char is_bonus_stage() {
     return ((level_num + 2) % 5) == 0;
 }
 
-static void _load_level_num() {
+static void _load_level_num(char peng_sel) {
     tile = 11 + ((level_num & 7) << 5);
     load_default_layout(LEVEL_LEFT_SIDE, tile);
     load_default_layout(LEVEL_RIGHT_SIDE, tile);
@@ -120,7 +120,7 @@ static void _load_level_num() {
             web_offsets[0xF & (((level_num) & 0xF) + ((level_num) >> 4))],
             LEVEL_RIGHT_SIDE,
             TILE_HEART);
-        field[0xD6] = TILE_WEB;
+        field[0xD6 + ((1 - peng_sel) << 1)] = TILE_WEB;
     } else {
         load_half_level(
             half_level_enc,
@@ -148,7 +148,7 @@ static void _load_level_num() {
 
 #pragma codeseg(pop)
 
-void load_level_num() {
+void load_level_num(char peng_sel) {
     change_rom_bank(0xFE);
-    _load_level_num();
+    _load_level_num(peng_sel);
 }

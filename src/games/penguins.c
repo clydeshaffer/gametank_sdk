@@ -9,7 +9,7 @@
 #include "music.h"
 #include "./penguin_levels.h"
 #include "dynawave.h"
-
+#include "banking.h"
 static char i;
 
 
@@ -45,6 +45,13 @@ static char ctrl_penguin;
 static char last_dx[2];
 static char last_dy[2];
 
+#define MAX_SPIDERS 4
+static char spider_x[MAX_SPIDERS];
+static char spider_y[MAX_SPIDERS];
+static char spider_state[MAX_SPIDERS];
+static char spider_dirs_x[5] = { 0, 1, 0, -1, 0};
+static char spider_dirs_y[5] = { 0, 0, 1, 0, -1};
+
 static void init_penguins() {
     penguin_x[0] = MAZE_OFFSET_X_PIX + (6 * 8);
     penguin_x[1] = MAZE_OFFSET_X_PIX + (8 * 8);
@@ -64,10 +71,22 @@ static void try_scan_ray(char pid) {
     i = field[(r << 4) + c];
     if(i == TILE_WEB) {
         field[(r << 4) + c] = 0;
+        do_noise_effect(30,100,3);
+    }
+    for(i = 0; i < MAX_SPIDERS; ++i) {
+        if(spider_state[i]) {
+            if(c == ((spider_x[i] + 4 - MAZE_OFFSET_X_PIX) >> 3)) {
+                if(r == ((spider_y[i] + 4 - MAZE_OFFSET_X_PIX) >> 3)) {
+                    spider_state[i] = 0;
+                    do_noise_effect(80,-10,6);
+                }
+            }
+        }
     }
 }
 
-static void try_move_penguin(char pid, char dx, char dy) {
+#pragma codeseg(push, "PROG0")
+static void _try_move_penguin(char pid, char dx, char dy) {
     if(dx | dy) {
         last_dx[pid] = dx;
         last_dy[pid] = dy;
@@ -122,6 +141,95 @@ static void try_move_penguin(char pid, char dx, char dy) {
     penguin_y[pid] -= dy;
 }
 
+static void _move_spiders() {
+    char wall_count;
+    i = global_tick % MAX_SPIDERS;
+    if(spider_state[i]) {
+        
+        if(!(((spider_x[i] - MAZE_OFFSET_X_PIX) | spider_y[i]) & 7)) {
+            c = (spider_x[i] + 4 - MAZE_OFFSET_X_PIX) >> 3;
+            r = (((spider_y[i] + 4) >> 3));
+            wall_count = (field[((r + 1) << 4) + c + 0] & 8) +
+            (field[((r + 0) << 4) + c + 1] & 8) +
+            (field[((r - 1) << 4) + c + 0] & 8) +
+            (field[((r + 0) << 4) + c - 1] & 8);
+
+            if(c == 0) wall_count += 8;
+            if(c == 14) wall_count += 8;
+            if(r == 4) wall_count += 8;
+            if(r == 13) wall_count += 8;
+            if(wall_count < 16) spider_state[i] = (rnd()&3)+1;
+        }
+
+        spider_x[i] += spider_dirs_x[spider_state[i]];
+        spider_y[i] += spider_dirs_y[spider_state[i]];
+
+        if((spider_x[i] != 3) &&
+            (spider_x[i] != 117) &&
+            (spider_y[i] != 31) &&
+            (spider_y[i] != 105)) {
+            c = (spider_x[i] - MAZE_OFFSET_X_PIX) >> 3;
+            r = (((spider_y[i]) >> 3));
+            if(!(field[(r << 4) + c] & 8)) {
+                c = (spider_x[i] + 7 - MAZE_OFFSET_X_PIX) >> 3;
+                if(!(field[(r << 4) + c] & 8)) {
+                    r = (((spider_y[i] + 7) >> 3));
+                    if(!(field[(r << 4) + c] & 8)) {
+                        c = (spider_x[i] - MAZE_OFFSET_X_PIX) >> 3;
+                        if(!(field[(r << 4) + c] & 8)) {                   
+
+                            c = (spider_x[i] + 4 - MAZE_OFFSET_X_PIX) >> 3;
+                            r = (((spider_y[i] + 4) >> 3));
+
+                            if(c == ((penguin_x[0] + 4 - MAZE_OFFSET_X_PIX) >> 3)) {
+                                if(r == ((penguin_y[0] + 4 - MAZE_OFFSET_X_PIX) >> 3)) {
+                                    penguin_status[0] = PENGUIN_STATUS_STUCK;
+                                    penguin_gx[0] = 8;
+                                    penguin_gy[0] = 40 + (global_tick & 8);
+                                    if(game_state != GAME_STATE_FAIL) {
+                                        game_state = GAME_STATE_FAIL;
+                                        stop_music();
+                                        play_song(&ASSET__music__peng_oops_mid, REPEAT_NONE);
+                                    }
+                                }
+                            } else if(c == ((penguin_x[1] + 4 - MAZE_OFFSET_X_PIX) >> 3)) {
+                                if(r == ((penguin_y[1] + 4 - MAZE_OFFSET_X_PIX) >> 3)) {
+                                    penguin_status[1] = PENGUIN_STATUS_STUCK;
+                                    penguin_gx[1] = 8 + PINK_PENGUIN;
+                                    penguin_gy[1] = 40 + (global_tick & 8);
+                                    if(game_state != GAME_STATE_FAIL) {
+                                        game_state = GAME_STATE_FAIL;
+                                        stop_music();
+                                        play_song(&ASSET__music__peng_oops_mid, REPEAT_NONE);
+                                    }
+                                }
+                            }
+
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+        spider_x[i] -= spider_dirs_x[spider_state[i]];
+        spider_y[i] -= spider_dirs_y[spider_state[i]];
+        spider_state[i] = (rnd()&3)+1;
+    }
+        
+}
+#pragma codeseg(pop)
+
+static void try_move_penguin(char pid, char dx, char dy) {
+    change_rom_bank(0xFE);
+    _try_move_penguin(pid, dx, dy);
+}
+
+static void move_spiders() {
+    change_rom_bank(0xFE);
+    _move_spiders();
+}
+
+
 static void init_field() {
     clear_field();
     field_offset_x = 4;
@@ -141,7 +249,22 @@ static void init_field() {
     field[r-1] = 192;
     field[r] = 193;
     field[r+1] = 194;
-    load_level_num();
+    load_level_num(ctrl_penguin);
+    if(is_bonus_stage()) {
+        for(i = 0; i < MAX_SPIDERS; ++i) {
+            spider_state[i] = 0;
+        }    
+    } else {
+        for(i = 0; i < MAX_SPIDERS; ++i) {
+            if((1 << i) & level_num) {
+                spider_state[i] = 1;
+                spider_y[i] = 32;
+                spider_x[i] = 4 + (i << 5);
+            } else {
+                spider_state[i] = 0;
+            }
+        }
+    }
 }
 
 static char level_num_text[12];
@@ -320,14 +443,20 @@ void run_penguins_game() {
             if(penguin_status[0] == PENGUIN_STATUS_STUCK) {
                 penguin_gx[0] = 8;
                 penguin_gy[0] = 40 + (global_tick & 8);
-                try_move_penguin(0, 0, 0);
+                last_dx[0] = 0;
+                last_dy[0] = 1;
+                if(game_state != GAME_STATE_FAIL) {
+                    try_move_penguin(0, 0, 0);
+                }
             }
 
             if(penguin_status[1] == PENGUIN_STATUS_STUCK) {
                 penguin_gx[1] = 8 + PINK_PENGUIN;
                 penguin_gy[1] = 40 + (global_tick & 8);
-                try_move_penguin(1, 0, 0);
+                last_dx[1] = 0;
+                last_dy[1] = 1;
                 if(game_state != GAME_STATE_FAIL) {
+                    try_move_penguin(1, 0, 0);
                     if(penguin_status[0] == penguin_status[1]) {
                         game_state = GAME_STATE_FAIL;
                         stop_music();
@@ -335,6 +464,9 @@ void run_penguins_game() {
                     }
                 }
             }
+
+            if(game_state == GAME_STATE_PLAYING)
+                move_spiders();
 
             draw_field(0);
             draw_sprite_now(penguin_x[0], penguin_y[0], 8, 8, penguin_gx[0], penguin_gy[0], 0);
@@ -348,6 +480,13 @@ void run_penguins_game() {
             if(penguin_status[1] == PENGUIN_STATUS_RAY) {
                 draw_sprite_now(penguin_x[1] + (last_dx[1] << 3), penguin_y[1] + (last_dy[1] << 3), 8, 8, penguin_gx[1], 56, 0);
                 wait();
+            }
+
+            for(i = 0; i < MAX_SPIDERS; ++i) {
+                if(spider_state[i]) {
+                    draw_sprite_now(spider_x[i] & 127, spider_y[i] & 127, 8, 8, global_tick & 8, 80, 0);
+                    wait();
+                }
             }
         }
         PROFILER_END(0);

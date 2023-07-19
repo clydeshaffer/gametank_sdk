@@ -11,6 +11,7 @@
 #define TILE_WEB 162
 #define TILE_HEART 128
 
-void load_level_num();
+void load_level_num(char peng_sel);
+char is_bonus_stage();
 
 #endif
