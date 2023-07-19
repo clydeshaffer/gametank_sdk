@@ -6,7 +6,7 @@ char game_state;
 char state_timer;
 char field[256];
 char lives;
-int score;
+unsigned int score;
 char field_offset_x, field_offset_y;
 char level_num;
 

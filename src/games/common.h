@@ -3,7 +3,7 @@ extern char game_state;
 extern char state_timer;
 extern char field[256];
 extern char lives;
-extern int score;
+extern unsigned int score;
 extern char field_offset_x, field_offset_y;
 extern char level_num;
 

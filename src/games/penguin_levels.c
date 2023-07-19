@@ -66,7 +66,9 @@ static const char left_half_order[16] = {0x0F,0x00,0x04,0x08,0x0C,0x01,0x05,0x09
 
 #pragma rodataseg(pop)
 
-
+char is_bonus_stage() {
+    return ((level_num + 2) % 5) == 0;
+}
 
 #pragma codeseg(push, "PROG0")
 
@@ -98,10 +100,6 @@ static void load_half_level(char* enc, char offset, char side, char tilenum) {
 
 #define LEVEL_LEFT_SIDE 0
 #define LEVEL_RIGHT_SIDE 8
-
-char is_bonus_stage() {
-    return ((level_num + 2) % 5) == 0;
-}
 
 static void _load_level_num(char peng_sel) {
     tile = 11 + ((level_num & 7) << 5);

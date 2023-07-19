@@ -44,6 +44,7 @@ static char penguin_gy[2];
 static char ctrl_penguin;
 static char last_dx[2];
 static char last_dy[2];
+static int countdown;
 
 #define MAX_SPIDERS 4
 static char spider_x[MAX_SPIDERS];
@@ -72,6 +73,7 @@ static void try_scan_ray(char pid) {
     if(i == TILE_WEB) {
         field[(r << 4) + c] = 0;
         do_noise_effect(30,100,3);
+        score += 1;
     }
     for(i = 0; i < MAX_SPIDERS; ++i) {
         if(spider_state[i]) {
@@ -79,6 +81,7 @@ static void try_scan_ray(char pid) {
                 if(r == ((spider_y[i] + 4 - MAZE_OFFSET_X_PIX) >> 3)) {
                     spider_state[i] = 0;
                     do_noise_effect(80,-10,6);
+                    score += 5;
                 }
             }
         }
@@ -129,7 +132,7 @@ static void _try_move_penguin(char pid, char dx, char dy) {
                             penguin_status[pid] = PENGUIN_STATUS_STUCK;
                         } else if(i == TILE_HEART) {
                             field[(r << 4) + c] = 0;
-                            ++score;
+                            score += 10;
                         }
                         return;
                     }
@@ -217,6 +220,28 @@ static void _move_spiders() {
     }
         
 }
+
+static const char top_row[16] = {
+        224, 225, 226, 240, 240, 240, 240, 227, 228, 0, 0, 0, 229, 0, 0, 0
+};
+
+static void _print_num_tiles(char c, int num) {
+    while(num > 0) {
+        field[32 + c] = 240 + (num % 10);
+        num /= 10;
+        --c;
+    }
+}
+
+static void _update_field_texts() {
+    for(i = 0; i < 16; ++i) {
+        field[i+32] = top_row[i];
+    }
+    _print_num_tiles(6, score);
+    _print_num_tiles(11, countdown/10);
+    _print_num_tiles(14, level_num);
+}
+
 #pragma codeseg(pop)
 
 static void try_move_penguin(char pid, char dx, char dy) {
@@ -229,6 +254,10 @@ static void move_spiders() {
     _move_spiders();
 }
 
+static void update_field_texts() {
+    change_rom_bank(0xFE);
+    _update_field_texts();
+}
 
 static void init_field() {
     clear_field();
@@ -265,6 +294,8 @@ static void init_field() {
             }
         }
     }
+    countdown = 3600;
+    update_field_texts();
 }
 
 static char level_num_text[12];
@@ -360,8 +391,6 @@ void run_penguins_game() {
             draw_tile(0, 24, 4, 104, 96, 0, 0);
             //Right
             draw_tile(SCREEN_WIDTH-4, 24, 4, 104, 96, 0, 0);
-
-            await_draw_queue();
 
             if(game_state == GAME_STATE_PLAYING) {
                 if(player1_buttons & INPUT_MASK_LEFT) {
@@ -465,8 +494,23 @@ void run_penguins_game() {
                 }
             }
 
-            if(game_state == GAME_STATE_PLAYING)
+            if(game_state == GAME_STATE_PLAYING) {
                 move_spiders();
+                --countdown;
+                if(!countdown) {
+                    penguin_gx[0] = 8;
+                    penguin_gy[0] = 40 + (global_tick & 8);
+                    penguin_gx[1] = 8 + PINK_PENGUIN;
+                    penguin_gy[1] = 40 + (global_tick & 8);
+                    game_state = GAME_STATE_FAIL;
+                    stop_music();
+                    play_song(&ASSET__music__peng_oops_mid, REPEAT_NONE);
+                }
+            }
+
+            update_field_texts();
+
+            await_draw_queue();
 
             draw_field(0);
             draw_sprite_now(penguin_x[0], penguin_y[0], 8, 8, penguin_gx[0], penguin_gy[0], 0);
@@ -504,7 +548,11 @@ void run_penguins_game() {
                 game_state = GAME_STATE_PLAYING;
                 play_song(&ASSET__music__peng_loop_mid, REPEAT_LOOP);
             } else if(game_state == GAME_STATE_FAIL) {
-                --lives;
+                if(is_bonus_stage()) {
+                    ++level_num;
+                } else {
+                    --lives;
+                }
                 if(lives) {
                     init_field();
                     init_penguins();
