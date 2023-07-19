@@ -92,25 +92,6 @@ static void init_texts() {
     score_text[1] = 0;
 }
 
-static void update_texts() {
-    if(score) {
-        i = score;
-        k = 1;
-        while(i > 0) {
-            score_text[32-k] = '0' + (i % 10);
-            i /= 10;
-            ++k;
-        }
-        for(i = 0; i < (k-1); ++i) {
-            score_text[i] = score_text[31-i];
-        }
-        score_text[k] = 0;
-    } else {
-        score_text[7] = '0';
-        score_text[8] = 0;
-    }
-}
-
 static void init_round() {
     bird_timer = 0;
     place_flowers();
@@ -212,7 +193,7 @@ void run_bee_game() {
                     if(bee_near_hive()) {
                         nectar_load = 0;
                         ++score;
-                        update_texts();
+                        num_to_str(score, score_text, 32);
                         do_tone_effect(3, 60, 10, 32);
                     }
                 }

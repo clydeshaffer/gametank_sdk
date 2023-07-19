@@ -3,13 +3,15 @@
 #include "gametank.h"
 #include "drawing_funcs.h"
 #include "../../../gen/assets/font.h"
+#include "banking.h"
 
 
 #define TEXT_CHAR_WIDTH 8
 #define TEXT_CHAR_HEIGHT 8
 #define TEXT_LINE_HEIGHT 8
 
-char font_slot;
+static char font_slot;
+static char i, k;
 char text_cursor_x, text_cursor_y;
 char text_print_width, text_print_line_start;
 char text_use_alt_color;
@@ -67,4 +69,30 @@ void print_text(char* text) {
         
         ++text;
     }
+}
+
+#pragma codeseg(push, "PROG0")
+static void _num_to_str(int num, char* buf, char len) {
+    if(num) {
+        i = num;
+        k = 1;
+        while(i > 0) {
+            buf[len-k] = '0' + (i % 10);
+            i /= 10;
+            ++k;
+        }
+        for(i = 0; i < (k-1); ++i) {
+            buf[i] = buf[(len-1)-i];
+        }
+        buf[k] = 0;
+    } else {
+        buf[0] = '0';
+        buf[1] = 0;
+    }
+}
+#pragma codeseg(pop)
+
+void num_to_str(int num, char* buf, char len) {
+    change_rom_bank(0xFE);
+    _num_to_str(num, buf, len);
 }
