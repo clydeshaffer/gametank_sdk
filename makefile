@@ -1,6 +1,6 @@
-CC = ../cc65/bin/cc65
-AS = ../cc65/bin/ca65
-LN = ../cc65/bin/ld65
+CC = cc65
+AS = ca65
+LN = ld65
 
 #set this for your output ROM file name
 TARGET=game.gtr
