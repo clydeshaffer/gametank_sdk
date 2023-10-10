@@ -1,6 +1,6 @@
-CC = cc65
-AS = ca65
-LN = ld65
+CC = ../cc65/bin/cc65
+AS = ../cc65/bin/ca65
+LN = ../cc65/bin/ld65
 
 #set this for your output ROM file name
 TARGET=game.gtr
@@ -14,18 +14,18 @@ ODIR = build
 
 PORT = COM3
 
-BMPSRC := $(shell find assets -name "*.bmp")
+BMPSRC := $(shell /bin/find assets -name "*.bmp")
 $(info bmpsrc is $(BMPSRC))
-MIDSRC := $(shell find assets -name "*.mid")
-JSONSRC := $(shell find assets -name "*.json")
-ASSETLISTS := $(shell find src/gen/assets -name "*.s.asset")
+MIDSRC := $(shell /bin/find assets -name "*.mid")
+JSONSRC := $(shell /bin/find assets -name "*.json")
+ASSETLISTS := $(shell /bin/find src/gen/assets -name "*.s.asset")
 ASSETOBJS = $(filter-out $(ASSETLISTS),$(patsubst src/%,$(ODIR)/%,$(ASSETLISTS:s.asset=o)))
 
 BMPOBJS = $(patsubst %,$(ODIR)/%,$(BMPSRC:bmp=gtg.deflate))
 MIDOBJS = $(patsubst %,$(ODIR)/%,$(MIDSRC:mid=gtm2))
 JSONOBJS = $(patsubst %,$(ODIR)/%,$(JSONSRC:json=gsi))
 
-BINSRC = $(shell find assets -name "*.bin")
+BINSRC = $(shell /bin/find assets -name "*.bin")
 BINOBJS = $(patsubst %,$(ODIR)/%,$(BINSRC))
 
 CFLAGS = -t none -Osr --cpu 65c02 --codesize 500 --static-locals -I src/gt
@@ -33,10 +33,10 @@ AFLAGS = --cpu 65C02 --bin-include-dir lib --bin-include-dir $(ODIR)/assets
 LFLAGS = -C gametank-2M.cfg -m $(ODIR)/out.map -vm
 LLIBS = lib/gametank.lib
 
-C_SRCS := $(shell find src -name "*.c")
+C_SRCS := $(shell /bin/find src -name "*.c")
 COBJS = $(patsubst src/%,$(ODIR)/%,$(C_SRCS:c=o))
 
-A_SRCS := $(shell find src -name "*.s")
+A_SRCS := $(shell /bin/find src -name "*.s")
 AOBJS = $(filter-out $(ASSETLISTS),$(patsubst src/%,$(ODIR)/%,$(A_SRCS:s=o)))
 
 _AUDIO_FW = audio_fw.bin.deflate
@@ -59,8 +59,8 @@ $(BANKS): $(ASSETOBJS) $(AOBJS) $(COBJS) $(LLIBS) gametank-2M.cfg
 $(ODIR)/assets/%.gtg: assets/%.bmp
 	mkdir -p $(@D)
 	cd scripts/converters ;\
-	OUTSPRITES=$$(node sprite_convert.js ../../$< ../../$@);\
-	zopfli --deflate $$OUTSPRITES
+	OUTSPRITES:=$(shell cd scripts/converters && node sprite_convert.js ../../$< ../../$@);\
+	zopfli --deflate $(OUTSPRITES)
 
 .PRECIOUS: $(ODIR)/assets/%.gtm2
 $(ODIR)/assets/%.gtm2: assets/%.mid
