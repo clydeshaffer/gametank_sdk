@@ -52,80 +52,88 @@ bin/$(TARGET): $(BANKS)
 $(info ASSETOBJS is $(ASSETOBJS))
 
 $(BANKS): $(ASSETOBJS) $(AOBJS) $(COBJS) $(LLIBS) gametank-2M.cfg
-	mkdir -p $(@D)
+	@mkdir -p $(@D)
 	$(LN) $(LFLAGS) $(ASSETOBJS) $(AOBJS) $(COBJS) -o bin/$(TARGET) $(LLIBS)
 
 .PRECIOUS: $(ODIR)/assets/%.gtg
-$(ODIR)/assets/%.gtg: assets/%.bmp
-	mkdir -p $(@D)
+$(ODIR)/assets/%.gtg: assets/%.bmp | node_modules
+	@mkdir -p $(@D)
 	cd scripts/converters ;\
 	OUTSPRITES:=$(shell cd scripts/converters && node sprite_convert.js ../../$< ../../$@);\
 	zopfli --deflate $(OUTSPRITES)
 
 .PRECIOUS: $(ODIR)/assets/%.gtm2
-$(ODIR)/assets/%.gtm2: assets/%.mid
-	mkdir -p $(@D)
+$(ODIR)/assets/%.gtm2: import assets/%.mid | node_modules
+	@mkdir -p $(@D)
 	cd scripts/converters ;\
 	node midiconvert.js ../../$< ../../$@
 
 .PRECIOUS: $(ODIR)/assets/%.deflate
 $(ODIR)/assets/%.deflate: $(ODIR)/assets/%
-	mkdir -p $(@D)
+	@mkdir -p $(@D)
 	zopfli --deflate $<
 
 .PRECIOUS: $(ODIR)/assets/%.gsi
-$(ODIR)/assets/%.gsi: assets/%.json
-	mkdir -p $(@D)
+$(ODIR)/assets/%.gsi: assets/%.json | node_modules
+	@mkdir -p $(@D)
 	cd scripts/converters ;\
 	node sprite_metadata.js ../../$< ../../$@
 
 $(ODIR)/assets/%.bin: assets/%.bin
-	mkdir -p $(@D)
+	@mkdir -p $(@D)
 	cp $< $@
 
 $(ODIR)/assets/audio_fw.bin.deflate: $(ODIR)/assets/audio_fw.bin
 	zopfli --deflate $<
 
 $(ODIR)/assets/audio_fw.bin: src/gt/audio_fw.asm gametank-acp.cfg
-	mkdir -p $(@D)
+	@mkdir -p $(@D)
 	$(AS) --cpu 65C02 src/gt/audio_fw.asm -o $(ODIR)/assets/audio_fw.o
 	$(LN) -C gametank-acp.cfg $(ODIR)/assets/audio_fw.o -o $(ODIR)/assets/audio_fw.bin
 
 $(ODIR)/gen/assets/%.o: src/gen/assets/%.s.asset $(BMPOBJS) $(JSONOBJS) $(AUDIO_FW) $(MIDOBJS) $(BINOBJS)
-	mkdir -p $(@D)
+	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
 $(ODIR)/%.si: src/%.c src/%.h
-	mkdir -p $(@D)
+	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $<
 
 $(ODIR)/%.si: src/%.c
-	mkdir -p $(@D)
+	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $<
 
 $(ODIR)/%.o: $(ODIR)/%.si
-	mkdir -p $(@D)
+	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
 $(ODIR)/%.o: src/%.s
-	mkdir -p $(@D)
+	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
 $(ODIR)/gt/crt0.o: src/gt/crt0.s build/assets/audio_fw.bin.deflate
-	mkdir -p $(@D)
+	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
-gametank-2M.cfg:
-	node ./scripts/build_setup/import_assets.js
+gametank-2M.cfg: import
+
+src/gen/assets/%: import
+
+scripts/%/node_modules:
+	cd scripts/$* ;\
+	npm install
 
 dummy%:
 	@:
 
-.PHONY: clean flash emulate import
+.PHONY: clean clean-node flash emulate import node_modules
 
 clean:
 	rm -rf $(ODIR)/*
 	rm -rf bin/*
+
+clean-node:
+	rm -rf scripts/*/node_modules
 
 flash: $(BANKS)
 	$(FLASHTOOL)/bin/GTFO -p $(PORT) bin/$(TARGET).bank*
@@ -133,9 +141,7 @@ flash: $(BANKS)
 emulate: bin/$(TARGET)
 	$(EMUPATH)/bin/$(OS)/GameTankEmulator bin/$(TARGET)
 
-scripts/node_modules:
-	cd scripts/build_setup ;\
-	npm install
+node_modules: scripts/build_setup/node_modules scripts/converters/node_modules
 
-import: scripts/node_modules
+import: node_modules
 	node ./scripts/build_setup/import_assets.js
