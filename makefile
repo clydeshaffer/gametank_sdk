@@ -56,14 +56,14 @@ $(BANKS): $(ASSETOBJS) $(AOBJS) $(COBJS) $(LLIBS) gametank-2M.cfg
 	$(LN) $(LFLAGS) $(ASSETOBJS) $(AOBJS) $(COBJS) -o bin/$(TARGET) $(LLIBS)
 
 .PRECIOUS: $(ODIR)/assets/%.gtg
-$(ODIR)/assets/%.gtg: assets/%.bmp
+$(ODIR)/assets/%.gtg: assets/%.bmp | node_modules
 	mkdir -p $(@D)
 	cd scripts/converters ;\
 	OUTSPRITES:=$(shell cd scripts/converters && node sprite_convert.js ../../$< ../../$@);\
 	zopfli --deflate $(OUTSPRITES)
 
 .PRECIOUS: $(ODIR)/assets/%.gtm2
-$(ODIR)/assets/%.gtm2: assets/%.mid
+$(ODIR)/assets/%.gtm2: import assets/%.mid | node_modules
 	mkdir -p $(@D)
 	cd scripts/converters ;\
 	node midiconvert.js ../../$< ../../$@
@@ -74,7 +74,7 @@ $(ODIR)/assets/%.deflate: $(ODIR)/assets/%
 	zopfli --deflate $<
 
 .PRECIOUS: $(ODIR)/assets/%.gsi
-$(ODIR)/assets/%.gsi: assets/%.json
+$(ODIR)/assets/%.gsi: assets/%.json | node_modules
 	mkdir -p $(@D)
 	cd scripts/converters ;\
 	node sprite_metadata.js ../../$< ../../$@
@@ -115,17 +115,25 @@ $(ODIR)/gt/crt0.o: src/gt/crt0.s build/assets/audio_fw.bin.deflate
 	mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
-gametank-2M.cfg:
-	node ./scripts/build_setup/import_assets.js
+gametank-2M.cfg: import
+
+src/gen/assets/%: import
+
+scripts/%/node_modules:
+	cd scripts/$* ;\
+	npm install
 
 dummy%:
 	@:
 
-.PHONY: clean flash emulate import
+.PHONY: clean clean-node flash emulate import node_modules
 
 clean:
 	rm -rf $(ODIR)/*
 	rm -rf bin/*
+
+clean-node:
+	rm -rf scripts/*/node_modules
 
 flash: $(BANKS)
 	$(FLASHTOOL)/bin/GTFO -p $(PORT) bin/$(TARGET).bank*
@@ -133,9 +141,7 @@ flash: $(BANKS)
 emulate: bin/$(TARGET)
 	$(EMUPATH)/bin/$(OS)/GameTankEmulator bin/$(TARGET)
 
-scripts/node_modules:
-	cd scripts/build_setup ;\
-	npm install
+node_modules: scripts/build_setup/node_modules scripts/converters/node_modules
 
-import: scripts/node_modules
+import: node_modules
 	node ./scripts/build_setup/import_assets.js
