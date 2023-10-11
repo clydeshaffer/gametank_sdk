@@ -1,6 +1,15 @@
+ifndef OS
+	OS=$(shell uname)
+endif
+
 CC = cc65
 AS = ca65
 LN = ld65
+ifeq ($(OS), Windows_NT)
+	FIND = /bin/find
+else
+	FIND = find
+endif
 
 #set this for your output ROM file name
 TARGET=game.gtr
@@ -14,18 +23,18 @@ ODIR = build
 
 PORT = COM3
 
-BMPSRC := $(shell /bin/find assets -name "*.bmp")
+BMPSRC := $(shell $(FIND) assets -name "*.bmp")
 $(info bmpsrc is $(BMPSRC))
-MIDSRC := $(shell /bin/find assets -name "*.mid")
-JSONSRC := $(shell /bin/find assets -name "*.json")
-ASSETLISTS := $(shell /bin/find src/gen/assets -name "*.s.asset")
+MIDSRC := $(shell $(FIND) assets -name "*.mid")
+JSONSRC := $(shell $(FIND) assets -name "*.json")
+ASSETLISTS := $(shell $(FIND) src/gen/assets -name "*.s.asset")
 ASSETOBJS = $(filter-out $(ASSETLISTS),$(patsubst src/%,$(ODIR)/%,$(ASSETLISTS:s.asset=o)))
 
 BMPOBJS = $(patsubst %,$(ODIR)/%,$(BMPSRC:bmp=gtg.deflate))
 MIDOBJS = $(patsubst %,$(ODIR)/%,$(MIDSRC:mid=gtm2))
 JSONOBJS = $(patsubst %,$(ODIR)/%,$(JSONSRC:json=gsi))
 
-BINSRC = $(shell /bin/find assets -name "*.bin")
+BINSRC = $(shell $(FIND) assets -name "*.bin")
 BINOBJS = $(patsubst %,$(ODIR)/%,$(BINSRC))
 
 CFLAGS = -t none -Osr --cpu 65c02 --codesize 500 --static-locals -I src/gt
@@ -33,10 +42,10 @@ AFLAGS = --cpu 65C02 --bin-include-dir lib --bin-include-dir $(ODIR)/assets
 LFLAGS = -C gametank-2M.cfg -m $(ODIR)/out.map -vm
 LLIBS = lib/gametank.lib
 
-C_SRCS := $(shell /bin/find src -name "*.c")
+C_SRCS := $(shell $(FIND) src -name "*.c")
 COBJS = $(patsubst src/%,$(ODIR)/%,$(C_SRCS:c=o))
 
-A_SRCS := $(shell /bin/find src -name "*.s")
+A_SRCS := $(shell $(FIND) src -name "*.s")
 AOBJS = $(filter-out $(ASSETLISTS),$(patsubst src/%,$(ODIR)/%,$(A_SRCS:s=o)))
 
 _AUDIO_FW = audio_fw.bin.deflate
