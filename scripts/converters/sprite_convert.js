@@ -80,6 +80,7 @@ let spriteSheet = BMP.BMPBitmap.fromFile(inFileName);
 let outSheets = splitImage(spriteSheet);
 if(outSheets.length == 1) {
     saveHeadless(flipV(outSheets[0]), outFileName);
+    console.log(outFileName);
 } else {
     var sheetNameTuples = outSheets.map((os, index) => {
         const nameNoExt = outFileName.split('.').slice(0, -1).join('.');
