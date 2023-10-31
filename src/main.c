@@ -23,29 +23,44 @@ char player_x, player_y;
 char offset_x, offset_y;
 char move_x, move_y;
 char pushing_box;
+char pulling_box;
 
 #define BARREL_TILE 252
 #define BARREL_GOAL_TILE 253
 #define GOAL_TILE 16
 #define PLAYER_START 32
 #define PLAYER_GOAL_START 24
-char field[256];
+#define FIELD_SIZE 256
+char field[FIELD_SIZE];
 char field_original[256];
+char undo_buffer[256];
+char undo_moves_remaining;
+char current_undo_slot;
 char c,r,i;
 char* next_level;
 char* current_level;
-char goals_remaining;
+
+#define MOVE_MASK 3
+
+enum move_direction {
+    move_left = 0,
+    move_right = 1,
+    move_up = 2,
+    move_down = 3,
+};
+
+enum was_barrel_pushed {
+    barrel_wasnt_pushed = 0,
+    barrel_was_pushed = 4,
+};
 
 void scan_level() {
     i = 0;
-    goals_remaining = 0;
     do {
         field_original[i] = field[i];
         if((field[i] == PLAYER_START) || (field[i] == PLAYER_GOAL_START)) {
             player_x = i & 15;
             player_y = i >> 4;
-        } else if(field[i] == GOAL_TILE) {
-            ++goals_remaining;
         }
         ++i;
     } while(i);
@@ -62,6 +77,11 @@ void init_player() {
     anim_flip = 0;
     anim_dir = 0;
     pushing_box = 0;
+    pulling_box = 0;
+
+    // Undo related
+    current_undo_slot = 0;
+    undo_moves_remaining = 0;
 }
 
 void load_next_level() {
@@ -96,6 +116,39 @@ void draw_field() {
     }
 }
 
+void move_barrel_off_of(char i) {
+    if(field[i] == BARREL_GOAL_TILE) {
+        field[i] = GOAL_TILE;
+    } else if((field_original[i] == BARREL_TILE)) {
+        field[i] = 0;
+    } else {
+        field[i] = field_original[i];
+    }
+}
+
+void undo_buffer_set(char move) {
+    // The undo buffer is a bit of a ring buffer that can hold 256 entries
+    // We always increment the current undo slot (allowing it to wrap and
+    // overwrite old entries) but we cap the undo moves remaining at 255
+    // as to not allow undoing moves which have been overwritten
+    current_undo_slot++;
+    if (undo_moves_remaining < 255)
+        undo_moves_remaining++;
+
+    undo_buffer[current_undo_slot] = move;
+}
+
+// Returns 0xFF if the undo buffer is empty
+char undo_buffer_get() {
+    if (!undo_moves_remaining) {
+        return 0xFF;
+    }
+    current_undo_slot--;
+    undo_moves_remaining--;
+
+    return undo_buffer[current_undo_slot + 1];
+}
+
 int main () {
 
     init_graphics();
@@ -124,6 +177,7 @@ int main () {
 
     play_song(&ASSET__mid__yeeee_mid, REPEAT_NONE);
 
+    // Start menu
     while(!(player1_buttons & INPUT_MASK_START)) {
         clear_screen(243);
         draw_sprite(0,0,127,127,0,0,2);
@@ -148,7 +202,11 @@ int main () {
 
     stop_music();
 
-    while (1) {                                     //  Run forever
+    // Main game loop, run forever
+    while (1) {
+        char attempted_move_dir = 0;
+        char attempt_undo = 0;
+
         clear_screen(243);
         if(anim_timer) {
             anim_frame = 2 + ((anim_timer & 4) >> 2);
@@ -157,6 +215,7 @@ int main () {
                 offset_y += move_y;
                 --anim_timer;
             }
+            // Have we just now finished our animation?
             if(!anim_timer) {
                 player_x += move_x;
                 player_y += move_y;
@@ -164,12 +223,22 @@ int main () {
                     i = (player_x + move_x) | ((player_y + move_y) << 4);
                     if(field[i] == GOAL_TILE) {
                         field[i] = BARREL_GOAL_TILE;
-                        --goals_remaining;
                     }
                     else {
                         field[i] = BARREL_TILE;
                     }
                     pushing_box = 0;
+                }
+                // TODO lazy copy and paste
+                if(pulling_box) {
+                    i = (player_x - move_x) | ((player_y - move_y) << 4);
+                    if(field[i] == GOAL_TILE) {
+                        field[i] = BARREL_GOAL_TILE;
+                    }
+                    else {
+                        field[i] = BARREL_TILE;
+                    }
+                    pulling_box = 0;
                 }
                 move_x = 0;
                 move_y = 0;
@@ -185,65 +254,95 @@ int main () {
 
         update_inputs();
 
-       
-
         if(anim_timer == 0) {
             if(player1_buttons & INPUT_MASK_LEFT) {
+                attempted_move_dir = move_left;
                 move_x = 0xFF;
                 anim_timer = ANIM_TIME;
                 anim_dir = 0;
                 anim_flip = 0;
             }
             else if(player1_buttons & INPUT_MASK_RIGHT) {
+                attempted_move_dir = move_right;
                 move_x = 1;
                 anim_timer = ANIM_TIME;
                 anim_dir = 0;
                 anim_flip = SPRITE_FLIP_X;
             }
             else if(player1_buttons & INPUT_MASK_UP) {
+                attempted_move_dir = move_up;
                 move_y = 0xFF;
                 anim_timer = ANIM_TIME;
                 anim_dir = 48;
                 anim_flip = 0;
             }
             else if(player1_buttons & INPUT_MASK_DOWN) {
+                attempted_move_dir = move_down;
                 move_y = 1;
                 anim_timer = ANIM_TIME;
                 anim_dir = 24;
                 anim_flip = 0;
             }
+            else if(player1_buttons & INPUT_MASK_C) {
+                anim_timer = ANIM_TIME;
+            }
 
             if(anim_timer == ANIM_TIME) {
-                i = (player_x + move_x) | ((player_y + move_y) << 4);
-                if(field[i] & 128) {
-                    if((field[i] == BARREL_TILE) || (field[i] == BARREL_GOAL_TILE)) {
-                        c = (player_x + move_x + move_x) | ((player_y + move_y + move_y) << 4);
-                        if(field[c] & 128) {
+                if(player1_buttons & INPUT_MASK_C) {
+                    char last_move = undo_buffer_get();
+                    if (last_move != 0xFF) {
+                        // Reverse movement direction
+                        if ((last_move & MOVE_MASK) == move_left) {
+                            move_x = 1;
+                        }
+                        else if ((last_move & MOVE_MASK) == move_right) {
+                            move_x = 0xFF;
+                        }
+                        else if ((last_move & MOVE_MASK) == move_up) {
+                            move_y = 1;
+                        }
+                        else if ((last_move & MOVE_MASK) == move_down) {
+                            move_y = 0xFF;
+                        }
+
+                        // If the barrel was moved take care of that
+                        if (last_move & barrel_was_pushed) {
+                            i = (player_x - move_x) | ((player_y - move_y) << 4);
+                            move_barrel_off_of(i);
+                            pulling_box = 1;
+                        }
+                    }
+                }
+                else {
+                    i = (player_x + move_x) | ((player_y + move_y) << 4);
+                    if(field[i] & 128) {
+                        // Attempting to push a barrel
+                        if((field[i] == BARREL_TILE) || (field[i] == BARREL_GOAL_TILE)) {
+                            // Target tile for barrel
+                            c = (player_x + move_x + move_x) | ((player_y + move_y + move_y) << 4);
+                            if(field[c] & 128) {
+                                // Attempting to push a barrel into a wall or another barrel
+                                move_x = 0;
+                                move_y = 0;
+                                anim_timer = 0;
+                            } else {
+                                // Move and push barrel
+                                undo_buffer_set(attempted_move_dir | barrel_was_pushed);
+                                pushing_box = 1;
+                                do_noise_effect(64, 0xFF, ANIM_TIME);
+                                move_barrel_off_of(i);
+                            }
+                        } else {
+                            // Attempting to move into a wall
                             move_x = 0;
                             move_y = 0;
                             anim_timer = 0;
-                        } else {
-                            pushing_box = 1;
-                            do_noise_effect(64, 0xFF, ANIM_TIME);
-                            if(field[i] == BARREL_GOAL_TILE) {
-                                field[i] = GOAL_TILE;
-                                ++goals_remaining;
-                            } else {
-                                if((field_original[i] == BARREL_TILE)
-                                || (field_original[i] == BARREL_GOAL_TILE)) {
-                                    field[i] = 0;
-                                } else {
-                                    field[i] = field_original[i];
-                                }
-                            }
                         }
                     } else {
-                        move_x = 0;
-                        move_y = 0;
-                        anim_timer = 0;
+                        // Simple move
+                        undo_buffer_set(attempted_move_dir | barrel_wasnt_pushed);
+                        do_noise_effect(80,0,1);
                     }
-                } else {
-                    do_noise_effect(80,0,1);
                 }
             }
         }
@@ -254,9 +353,19 @@ int main () {
         }
         draw_field();
 
-        if(goals_remaining == 0) {
-            load_next_level();
-            play_song(&ASSET__mid__solve_mid, REPEAT_NONE);
+        // Check for level completion
+        // I made this slower so that I didn't have to keep track of how many
+        // goals were remaining lol
+        for (i = 0; i < FIELD_SIZE; i++) {
+            // If we find any GOAL_TILEs the level isn't solved
+            // Otherwise they would be BARREL_GOAL_TILEs
+            if (field[i] == GOAL_TILE) break;
+            // We've finished looking for GOAL_TILEs and haven't found any
+            // The level is complete!
+            if (i == FIELD_SIZE - 1) {
+                load_next_level();
+                play_song(&ASSET__mid__solve_mid, REPEAT_NONE);
+            }
         }
 
         if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
@@ -269,6 +378,12 @@ int main () {
             draw_sprite_now((player_x << 3) + offset_x + (move_x << 3) - DEFAULT_OFFSET,
                 (player_y << 3) + offset_y + (move_y << 3) - DEFAULT_OFFSET, 8, 8, 16, 24, 1);
         }
+
+        if(pulling_box) {
+            draw_sprite_now((player_x << 3) + offset_x - (move_x << 3) - DEFAULT_OFFSET,
+                (player_y << 3) + offset_y - (move_y << 3) - DEFAULT_OFFSET, 8, 8, 16, 24, 1);
+        }
+
         clear_border(0);
         draw_sprite_frame(&ASSET__gfx__tinychars_json,
         (player_x << 3) + offset_x,
