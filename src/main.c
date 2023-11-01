@@ -32,8 +32,9 @@ char pulling_box;
 #define PLAYER_GOAL_START 24
 #define FIELD_SIZE 256
 char field[FIELD_SIZE];
-char field_original[256];
+char field_original[FIELD_SIZE];
 char undo_buffer[256];
+char attempted_move_dir;
 char undo_moves_remaining;
 char current_undo_slot;
 char c,r,i;
@@ -126,7 +127,7 @@ void move_barrel_off_of(char i) {
     }
 }
 
-void undo_buffer_set(char move) {
+void undo_buffer_push(char move) {
     // The undo buffer is a bit of a ring buffer that can hold 256 entries
     // We always increment the current undo slot (allowing it to wrap and
     // overwrite old entries) but we cap the undo moves remaining at 255
@@ -139,7 +140,7 @@ void undo_buffer_set(char move) {
 }
 
 // Returns 0xFF if the undo buffer is empty
-char undo_buffer_get() {
+char undo_buffer_pop() {
     if (!undo_moves_remaining) {
         return 0xFF;
     }
@@ -172,9 +173,6 @@ void main_menu_loop() {
 }
 
 void game_loop() {
-    char attempted_move_dir = 0;
-    char attempt_undo = 0;
-
     clear_screen(243);
     if(anim_timer) {
         anim_frame = 2 + ((anim_timer & 4) >> 2);
@@ -252,7 +250,7 @@ void game_loop() {
 
         if(anim_timer == ANIM_TIME) {
             if(player1_buttons & INPUT_MASK_C) {
-                char last_move = undo_buffer_get();
+                char last_move = undo_buffer_pop();
                 if (last_move != 0xFF) {
                     // Reverse movement direction
                     if ((last_move & MOVE_MASK) == move_left)
@@ -285,7 +283,7 @@ void game_loop() {
                             anim_timer = 0;
                         } else {
                             // Move and push barrel
-                            undo_buffer_set(attempted_move_dir | barrel_was_pushed);
+                            undo_buffer_push(attempted_move_dir | barrel_was_pushed);
                             pushing_box = 1;
                             do_noise_effect(64, 0xFF, ANIM_TIME);
                             move_barrel_off_of(i);
@@ -298,7 +296,7 @@ void game_loop() {
                     }
                 } else {
                     // Simple move
-                    undo_buffer_set(attempted_move_dir | barrel_wasnt_pushed);
+                    undo_buffer_push(attempted_move_dir | barrel_wasnt_pushed);
                     do_noise_effect(80,0,1);
                 }
             }
