@@ -41,6 +41,10 @@ char c,r,i;
 char* next_level;
 char* current_level;
 
+short kcode_list[22];
+char kcode_pos = 0;
+char noclip = 0;
+
 #define MOVE_MASK 3
 
 enum move_direction {
@@ -172,7 +176,54 @@ void main_menu_loop() {
     }
 }
 
+// NOTE I know this is bad but just hacking it out for now lol
+void init_kcode() {
+    kcode_list[0] = 0;
+    kcode_list[1] = INPUT_MASK_UP;
+    kcode_list[2] = 0;
+    kcode_list[3] = INPUT_MASK_UP;
+    kcode_list[4] = 0;
+    kcode_list[5] = INPUT_MASK_DOWN;
+    kcode_list[6] = 0;
+    kcode_list[7] = INPUT_MASK_DOWN;
+    kcode_list[8] = 0;
+    kcode_list[9] = INPUT_MASK_LEFT;
+    kcode_list[10] = 0;
+    kcode_list[11] = INPUT_MASK_RIGHT;
+    kcode_list[12] = 0;
+    kcode_list[13] = INPUT_MASK_LEFT;
+    kcode_list[14] = 0;
+    kcode_list[15] = INPUT_MASK_RIGHT;
+    kcode_list[16] = 0;
+    kcode_list[17] = INPUT_MASK_B;
+    kcode_list[18] = 0;
+    kcode_list[19] = INPUT_MASK_A;
+    kcode_list[20] = 0;
+    kcode_list[21] = INPUT_MASK_START;
+}
+
+char exec_kcode() {
+    if (player1_buttons == kcode_list[kcode_pos+1]) {
+        if (player1_buttons == INPUT_MASK_START) {
+            // The start is the last btn in the chain
+            // If we've gotten here we're ready to get funky
+            kcode_pos = 0;
+            noclip = 1;
+            play_song(&ASSET__mid__yeeee_mid, REPEAT_NONE);
+            return 1;
+        }
+        kcode_pos++;
+    } else if (player1_buttons != kcode_list[kcode_pos]) {
+        kcode_pos = 0;
+    }
+
+    return 0;
+}
+
 void game_loop() {
+    update_inputs();
+    if (exec_kcode()) return;
+
     clear_screen(243);
     if(anim_timer) {
         anim_frame = 2 + ((anim_timer & 4) >> 2);
@@ -216,8 +267,6 @@ void game_loop() {
     }
     anim_frame += anim_dir;
     anim_frame += player_select << 2;
-
-    update_inputs();
 
     if(anim_timer == 0) {
         if(player1_buttons & INPUT_MASK_LEFT) {
@@ -278,9 +327,15 @@ void game_loop() {
                         c = (player_x + move_x + move_x) | ((player_y + move_y + move_y) << 4);
                         if(field[c] & 128) {
                             // Attempting to push a barrel into a wall or another barrel
-                            move_x = 0;
-                            move_y = 0;
-                            anim_timer = 0;
+                            if (!noclip) {
+                                move_x = 0;
+                                move_y = 0;
+                                anim_timer = 0;
+                            } else {
+                                undo_buffer_push(attempted_move_dir | barrel_wasnt_pushed);
+                                // TODO might be fun to have different sfx for cheated moves
+                                do_noise_effect(80,0,1);
+                            }
                         } else {
                             // Move and push barrel
                             undo_buffer_push(attempted_move_dir | barrel_was_pushed);
@@ -290,9 +345,15 @@ void game_loop() {
                         }
                     } else {
                         // Attempting to move into a wall
-                        move_x = 0;
-                        move_y = 0;
-                        anim_timer = 0;
+                        if (!noclip) {
+                            move_x = 0;
+                            move_y = 0;
+                            anim_timer = 0;
+                        } else {
+                            undo_buffer_push(attempted_move_dir | barrel_wasnt_pushed);
+                            // TODO might be fun to have different sfx for cheated moves
+                            do_noise_effect(80,0,1);
+                        }
                     }
                 } else {
                     // Simple move
@@ -358,6 +419,7 @@ int main () {
     init_graphics();
     init_dynawave();
     init_music();
+    init_kcode();
 
     flip_pages();
     clear_border(0);
