@@ -269,7 +269,11 @@ void game_loop() {
     anim_frame += player_select << 2;
 
     if(anim_timer == 0) {
-        if(player1_buttons & INPUT_MASK_LEFT) {
+        if(player1_buttons & INPUT_MASK_C) {
+            anim_timer = ANIM_TIME;
+            move_x = 0;
+            move_y = 0;
+        } else if(player1_buttons & INPUT_MASK_LEFT) {
             attempted_move_dir = move_left;
             move_x = 0xFF;
             anim_timer = ANIM_TIME;
@@ -293,8 +297,6 @@ void game_loop() {
             anim_timer = ANIM_TIME;
             anim_dir = 24;
             anim_flip = 0;
-        } else if(player1_buttons & INPUT_MASK_C) {
-            anim_timer = ANIM_TIME;
         }
 
         if(anim_timer == ANIM_TIME) {
