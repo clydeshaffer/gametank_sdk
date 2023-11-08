@@ -102,7 +102,10 @@ function convertLevel(levelNum, level) {
     ...Array.from(range(heightDiff - topPad)).map(() => " ".repeat(16)),
   ].join("");
 
-  const levelWithNumber = writeLevelNumber(paddedLevel, levelNum.toString());
+  const levelWithNumber = writeLevelNumber(
+    paddedLevel,
+    (levelNum + 1).toString()
+  );
 
   for (const [ix, c] of Array.from(levelWithNumber).entries()) {
     levelBuf.writeUint8(getTileFromChar(c), ix);
