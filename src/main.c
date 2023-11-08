@@ -30,6 +30,7 @@ char pulling_box;
 #define GOAL_TILE 16
 #define PLAYER_START 32
 #define PLAYER_GOAL_START 24
+
 #define FIELD_SIZE 256
 char field[FIELD_SIZE];
 char field_original[FIELD_SIZE];
@@ -41,9 +42,34 @@ char c,r,i;
 char* next_level;
 char* current_level;
 
-short kcode_list[22];
 char kcode_pos = 0;
 char noclip = 0;
+
+
+const short kcode_list[] = {
+    0,
+    INPUT_MASK_UP,
+    0,
+    INPUT_MASK_UP,
+    0,
+    INPUT_MASK_DOWN,
+    0,
+    INPUT_MASK_DOWN,
+    0,
+    INPUT_MASK_LEFT,
+    0,
+    INPUT_MASK_RIGHT,
+    0,
+    INPUT_MASK_LEFT,
+    0,
+    INPUT_MASK_RIGHT,
+    0,
+    INPUT_MASK_B,
+    0,
+    INPUT_MASK_A,
+    0,
+    INPUT_MASK_START,
+};
 
 #define MOVE_MASK 3
 
@@ -174,32 +200,6 @@ void main_menu_loop() {
     if(player1_buttons & ~player1_old_buttons & INPUT_MASK_RIGHT) {
         player_select = (player_select+1)%6;
     }
-}
-
-// NOTE I know this is bad but just hacking it out for now lol
-void init_kcode() {
-    kcode_list[0] = 0;
-    kcode_list[1] = INPUT_MASK_UP;
-    kcode_list[2] = 0;
-    kcode_list[3] = INPUT_MASK_UP;
-    kcode_list[4] = 0;
-    kcode_list[5] = INPUT_MASK_DOWN;
-    kcode_list[6] = 0;
-    kcode_list[7] = INPUT_MASK_DOWN;
-    kcode_list[8] = 0;
-    kcode_list[9] = INPUT_MASK_LEFT;
-    kcode_list[10] = 0;
-    kcode_list[11] = INPUT_MASK_RIGHT;
-    kcode_list[12] = 0;
-    kcode_list[13] = INPUT_MASK_LEFT;
-    kcode_list[14] = 0;
-    kcode_list[15] = INPUT_MASK_RIGHT;
-    kcode_list[16] = 0;
-    kcode_list[17] = INPUT_MASK_B;
-    kcode_list[18] = 0;
-    kcode_list[19] = INPUT_MASK_A;
-    kcode_list[20] = 0;
-    kcode_list[21] = INPUT_MASK_START;
 }
 
 char exec_kcode() {
@@ -421,7 +421,6 @@ int main () {
     init_graphics();
     init_dynawave();
     init_music();
-    init_kcode();
 
     flip_pages();
     clear_border(0);
