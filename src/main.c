@@ -362,8 +362,7 @@ void game_loop() {
                                 anim_timer = 0;
                             } else {
                                 undo_buffer_push(attempted_move_dir | barrel_wasnt_pushed);
-                                // TODO might be fun to have different sfx for cheated moves
-                                do_noise_effect(80,0,1);
+                                do_noise_effect(120,2,2);
                             }
                         } else {
                             // Move and push barrel
@@ -380,8 +379,7 @@ void game_loop() {
                             anim_timer = 0;
                         } else {
                             undo_buffer_push(attempted_move_dir | barrel_wasnt_pushed);
-                            // TODO might be fun to have different sfx for cheated moves
-                            do_noise_effect(80,0,1);
+                            do_noise_effect(120,2,2);
                         }
                     }
                 } else {
