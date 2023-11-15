@@ -104,6 +104,7 @@ void scan_level() {
 }
 
 void randomize_grass() {
+    set_rnd_seed(current_level);
     i = 0;
     do {
         if(field[i] == 0) {
