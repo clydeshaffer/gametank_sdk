@@ -346,6 +346,8 @@ void game_loop() {
                         move_barrel_off_of(i);
                         pulling_box = 1;
                     }
+
+                    do_noise_effect(40, 0xFF, ANIM_TIME);
                 }
             } else {
                 i = (player_x + move_x) | ((player_y + move_y) << 4);
