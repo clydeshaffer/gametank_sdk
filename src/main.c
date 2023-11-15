@@ -24,6 +24,7 @@ char offset_x, offset_y;
 char move_x, move_y;
 char pushing_box;
 char pulling_box;
+char pushing_box_pos;
 
 #define BARREL_TILE 252
 #define BARREL_GOAL_TILE 253
@@ -372,21 +373,6 @@ void game_loop() {
     }
     draw_field();
 
-    // Check for level completion
-    // I made this slower so that I didn't have to keep track of how many
-    // goals were remaining lol
-    for (i = 0; i < FIELD_SIZE; i++) {
-        // If we find any GOAL_TILEs the level isn't solved
-        // Otherwise they would be BARREL_GOAL_TILEs
-        if (field[i] == GOAL_TILE) break;
-        // We've finished looking for GOAL_TILEs and haven't found any
-        // The level is complete!
-        if (i == FIELD_SIZE - 1) {
-            load_next_level();
-            play_song(&ASSET__mid__solve_mid, REPEAT_NONE);
-        }
-    }
-
     if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
         next_level = current_level;
         load_next_level();
@@ -394,6 +380,7 @@ void game_loop() {
     }
 
     if(pushing_box) {
+        pushing_box_pos = (player_x + move_x) | ((player_y + move_y) << 4);
         draw_sprite_now((player_x << 3) + offset_x + (move_x << 3) - DEFAULT_OFFSET,
             (player_y << 3) + offset_y + (move_y << 3) - DEFAULT_OFFSET, 8, 8, 16, 24, 1);
     }
@@ -401,6 +388,21 @@ void game_loop() {
     if(pulling_box) {
         draw_sprite_now((player_x << 3) + offset_x - (move_x << 3) - DEFAULT_OFFSET,
             (player_y << 3) + offset_y - (move_y << 3) - DEFAULT_OFFSET, 8, 8, 16, 24, 1);
+    }
+
+    // Check for level completion
+    // I made this slower so that I didn't have to keep track of how many
+    // goals were remaining lol
+    for (i = 0; i < FIELD_SIZE; i++) {
+        // If we find any GOAL_TILEs the level isn't solved
+        // Otherwise they would be BARREL_GOAL_TILEs
+        if (field[i] == GOAL_TILE && !(pushing_box && (pushing_box_pos == i))) break;
+        // We've finished looking for GOAL_TILEs and haven't found any
+        // The level is complete!
+        if (i == FIELD_SIZE - 1) {
+            load_next_level();
+            play_song(&ASSET__mid__solve_mid, REPEAT_NONE);
+        }
     }
 
     clear_border(0);
