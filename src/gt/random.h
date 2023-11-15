@@ -6,6 +6,7 @@
 #define RANDOM_H
 
 int rnd();
+int weak_rnd();
 
 int rnd_range(int low, int high);
 

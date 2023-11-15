@@ -15,6 +15,7 @@ const CHAR_7 = 175;
 const CHAR_8 = 184;
 const CHAR_9 = 185;
 
+const TILE_GRASS = 0;
 const PLAYER_START = 32;
 const PLAYER_GOAL_START = 24;
 const TILE_GOAL = 16;
@@ -77,10 +78,7 @@ const getTileFromChar = (c) => {
     case "9":
       return CHAR_9;
     case " ":
-      // Random foliage
-      // TODO the rands here make builds non-reproduceable lol
-      // Consider replacing with a prng, e.g. Wichmann-Hill, to seed consistently
-      return Math.random() > 0.75 ? Math.floor(Math.random() * 5) + 64 : 0;
+      return TILE_GRASS;
     default:
       throw new Error(`unexpected tile: ${c}`);
   }

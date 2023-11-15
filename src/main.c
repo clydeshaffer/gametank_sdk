@@ -7,6 +7,7 @@
 #include "banking.h"
 #include "gen/assets/mid.h"
 #include "dynawave.h"
+#include "random.h"
 #include "music.h"
 
 #define DEFAULT_OFFSET 4
@@ -45,6 +46,8 @@ char* current_level;
 
 char kcode_pos = 0;
 char noclip = 0;
+
+char rand;
 
 
 const short kcode_list[] = {
@@ -89,10 +92,31 @@ enum was_barrel_pushed {
 void scan_level() {
     i = 0;
     do {
-        field_original[i] = field[i];
         if((field[i] == PLAYER_START) || (field[i] == PLAYER_GOAL_START)) {
             player_x = i & 15;
             player_y = i >> 4;
+            // NOTE this does change the behavior if a level previously had multiple starts
+            // Should have a sort of lint for that sort of level though
+            return;
+        }
+        ++i;
+    } while(i);
+}
+
+void randomize_grass() {
+    i = 0;
+    do {
+        if(field[i] == 0) {
+            // NOTE using this bc it's much faster and we don't care all that much
+            rand = (char)weak_rnd();
+            // Are the low two bits set of the top nibble clear?
+            // This should happen ~25% of the time
+            // If so let's decorate the grass
+            if ((rand & 0x30) == 0) {
+                rand %= 5;
+                field[i] = 64 + rand;
+                field_original[i] = 64 + rand;
+            }
         }
         ++i;
     } while(i);
@@ -124,6 +148,7 @@ void load_next_level() {
     next_level += 1;
     init_player();
     scan_level();
+    randomize_grass();
 }
 
 void draw_field() {
