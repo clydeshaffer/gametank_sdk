@@ -146,7 +146,9 @@ function truncateLevels(levels, maxSize) {
 
 fs.readFile(inFileName, function (_err, data) {
   parser.parseString(data, (_xmlErr, jsonObj) => {
-    const levels = jsonObj.SokobanLevels.LevelCollection[0].Level;
+    const levels = jsonObj.SokobanLevels.LevelCollection.flatMap(
+      (col) => col.Level
+    );
 
     const convertedLevels = Array.from(
       levels
