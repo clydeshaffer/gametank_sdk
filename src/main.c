@@ -13,6 +13,17 @@
 #define DEFAULT_OFFSET 4
 #define ANIM_TIME 8
 
+// TILES
+#define BARREL_TILE 252
+#define BARREL_GOAL_TILE 253
+#define GOAL_TILE 16
+#define PLAYER_START 32
+#define PLAYER_GOAL_START 24
+
+#define FIELD_SIZE 256
+#define UNDO_BUFFER_SIZE 256
+#define MAX_UNDO_MOVES (UNDO_BUFFER_SIZE * 2)
+
 char tick = 0;
 
 char anim_timer;
@@ -27,19 +38,12 @@ char pushing_box;
 char pulling_box;
 char pushing_box_pos;
 
-#define BARREL_TILE 252
-#define BARREL_GOAL_TILE 253
-#define GOAL_TILE 16
-#define PLAYER_START 32
-#define PLAYER_GOAL_START 24
-
-#define FIELD_SIZE 256
 char field[FIELD_SIZE];
 char field_original[FIELD_SIZE];
-char undo_buffer[256];
+char undo_buffer[UNDO_BUFFER_SIZE];
 char attempted_move_dir;
-char undo_moves_remaining;
-char current_undo_slot;
+short undo_moves_remaining;
+short current_undo_slot;
 char c,r,i;
 char* next_level;
 char* current_level;
@@ -189,22 +193,48 @@ void undo_buffer_push(char move) {
     // We always increment the current undo slot (allowing it to wrap and
     // overwrite old entries) but we cap the undo moves remaining at 255
     // as to not allow undoing moves which have been overwritten
-    current_undo_slot++;
-    if (undo_moves_remaining < 255)
-        undo_moves_remaining++;
+    char index = (char)(current_undo_slot >> 1);
 
-    undo_buffer[current_undo_slot] = move;
+    if (current_undo_slot & 1) {
+        char value = undo_buffer[index];
+        undo_buffer[index] = value | (move << 4);
+    } else {
+        undo_buffer[index] = move;
+    }
+
+    current_undo_slot++;
+    if (current_undo_slot >= MAX_UNDO_MOVES)
+        current_undo_slot -= MAX_UNDO_MOVES;
+
+    if (undo_moves_remaining < MAX_UNDO_MOVES)
+        undo_moves_remaining++;
 }
 
 // Returns 0xFF if the undo buffer is empty
 char undo_buffer_pop() {
+    char value;
+
     if (!undo_moves_remaining) {
         return 0xFF;
     }
-    current_undo_slot--;
+
     undo_moves_remaining--;
 
-    return undo_buffer[current_undo_slot + 1];
+    if (current_undo_slot == 0)
+        current_undo_slot = MAX_UNDO_MOVES - 1;
+    else
+        current_undo_slot--;
+
+    // The parity of current_undo_slot tells us which nibble to check
+    if (current_undo_slot & 1) {
+        value = undo_buffer[current_undo_slot >> 1] & 0xF0;
+        value >>= 4;
+    } else {
+        value = undo_buffer[current_undo_slot >> 1] & 0x0F;
+    }
+
+
+    return value;
 }
 
 void main_menu_loop() {
