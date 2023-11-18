@@ -13,15 +13,10 @@ void reset_undo() {
 }
 
 void undo_buffer_push(char move) {
-    // The undo buffer is a bit of a ring buffer that can hold 256 entries
-    // We always increment the current undo slot (allowing it to wrap and
-    // overwrite old entries) but we cap the undo moves remaining at 255
-    // as to not allow undoing moves which have been overwritten
     char index = (char)(current_undo_slot >> 1);
 
     if (current_undo_slot & 1) {
-        char value = undo_buffer[index];
-        undo_buffer[index] = value | (move << 4);
+        undo_buffer[index] = undo_buffer[index] | (move << 4);
     } else {
         undo_buffer[index] = move;
     }
@@ -43,6 +38,9 @@ char undo_buffer_pop() {
 
     undo_moves_remaining--;
 
+    // Unfortunate branch here, would rather write something like
+    // current_undo_slot &= MAX_UNDO_MOVES - 1;
+    // but the compiler seems to struggle with bitwise ops on values larger than chars?
     if (current_undo_slot == 0)
         current_undo_slot = MAX_UNDO_MOVES - 1;
     else
