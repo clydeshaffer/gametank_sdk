@@ -10,6 +10,15 @@ int xorshift16(int x) {
 
 int rnd_seed = 234;
 
+void set_rnd_seed(int seed) {
+    rnd_seed = seed;
+}
+
+int weak_rnd() {
+    rnd_seed = xorshift16(rnd_seed);
+    return rnd_seed;
+}
+
 int rnd() {
     rnd_seed = xorshift16(rnd_seed);
     rnd_seed = xorshift16(rnd_seed);

@@ -1683,4 +1683,21 @@ were interesting but too easy to include in my regular sets.
       <L>#####       #### ####   ######</L>
     </Level>
   </LevelCollection>
+  <LevelCollection Copyright="Nick Girardo" MaxWidth="16" MaxHeight="13">
+    <Level Id="666" Width="16" Height="13">
+      <L> ############## </L>
+      <L>#              #</L>
+      <L># .....  ..... #</L>
+      <L># .      .     #</L>
+      <L># .  @   .     #</L>
+      <L># .      .     #</L>
+      <L># .      .     #</L>
+      <L># . ***  . *** #</L>
+      <L># .   *  .   * #</L>
+      <L># .   *  .   * #</L>
+      <L># ....*  ....* #</L>
+      <L>#              #</L>
+      <L> ############## </L>
+    </Level>
+  </LevelCollection>
 </SokobanLevels>
