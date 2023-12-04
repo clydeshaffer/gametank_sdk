@@ -12,6 +12,8 @@ src/main.c contains the code that will run after the console powers on
 
 * cc65 https://cc65.github.io/
 
+  * recommended to use a snapshot build or build from source as their last tagged release and apt package are outdated
+
 * NodeJS https://nodejs.org/
 
 * Zopfli https://github.com/google/zopfli
