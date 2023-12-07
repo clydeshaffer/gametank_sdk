@@ -57,7 +57,7 @@ void draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h
 
 void next_draw_queue();
 void await_draw_queue();
-
+void await_drawing();
 
 void clear_border(char c);
 void clear_screen(char c);
