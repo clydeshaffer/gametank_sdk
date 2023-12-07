@@ -70,4 +70,7 @@ void wait ();
 void nop5();
 void nop10();
 
+#define PROFILER_START(x) via[ORB] = 0x80; via[ORB] = x;
+#define PROFILER_END(x) via[ORB] = 0x80; via[ORB] = x | 0x40;
+
 #endif
