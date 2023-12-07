@@ -108,7 +108,7 @@ void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x
     change_rom_bank(sprite_table_bank);
     while(queue_count >= QUEUE_MAX) {
         asm("CLI");
-        wait();
+        await_drawing();
     }
     asm("SEI");
     queue_flags_param = DMA_GCARRY;
@@ -154,7 +154,7 @@ void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x
 void draw_sprite_rect() {
     if(queue_count >= QUEUE_MAX) {
         asm("CLI");
-        wait();
+        await_drawing();
     }
 
     asm("SEI");
@@ -183,7 +183,7 @@ void draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h
     }
     while(queue_count >= QUEUE_MAX) {
         asm("CLI");
-        wait();
+        await_drawing();
     }
     if(x + w >= 128) {
         w = 128 - x;
@@ -214,12 +214,12 @@ void draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h
 void await_draw_queue() {
     asm ("SEI");
     if(queue_pending != 0) {
-        wait();
+        await_drawing();
     }
     while(queue_end != queue_start) {
         next_draw_queue();
         asm ("CLI");
-        wait();
+        await_drawing();
     }
     vram[START] = 0;
     queue_pending = 0;
