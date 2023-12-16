@@ -7,6 +7,7 @@
 #include "banking.h"
 
 char cursorX, cursorY;
+char draw_busy;
 
 void sleep(int frames) {
     int i;
@@ -26,6 +27,7 @@ void flip_pages() {
 
 void init_graphics() {
     frameflip = 0;
+    draw_busy = 0;
     flagsMirror = DMA_NMI | DMA_ENABLE | DMA_IRQ;
     bankflip = BANK_SECOND_FRAMEBUFFER;
     *dma_flags = flagsMirror;
@@ -106,7 +108,7 @@ void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x
     change_rom_bank(sprite_table_bank);
     while(queue_count >= QUEUE_MAX) {
         asm("CLI");
-        wait();
+        await_drawing();
     }
     asm("SEI");
     queue_flags_param = DMA_GCARRY;
@@ -152,7 +154,7 @@ void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x
 void draw_sprite_rect() {
     if(queue_count >= QUEUE_MAX) {
         asm("CLI");
-        wait();
+        await_drawing();
     }
 
     asm("SEI");
@@ -181,7 +183,7 @@ void draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h
     }
     while(queue_count >= QUEUE_MAX) {
         asm("CLI");
-        wait();
+        await_drawing();
     }
     if(x + w >= 128) {
         w = 128 - x;
@@ -212,16 +214,24 @@ void draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h
 void await_draw_queue() {
     asm ("SEI");
     if(queue_pending != 0) {
-        wait();
+        await_drawing();
     }
     while(queue_end != queue_start) {
         next_draw_queue();
         asm ("CLI");
-        wait();
+        await_drawing();
     }
     vram[START] = 0;
     queue_pending = 0;
     asm ("CLI");
+}
+
+void await_drawing() {
+    asm ("CLI");
+    while (draw_busy)
+    {
+        wait();
+    }
 }
 
 void clear_border(char c) {
@@ -244,6 +254,7 @@ void draw_box_now(char x, char y, char w, char h, char c) {
     vram[WIDTH] = w;
     vram[HEIGHT] = h;
     vram[COLOR] = ~c;
+    draw_busy = 1;
     vram[START] = 1;
     *dma_flags = flagsMirror;
 }
@@ -264,6 +275,7 @@ void draw_sprite_now(char x, char y, char w, char h, char gx, char gy, char ramB
     vram[GY] = gy;
     vram[WIDTH] = w;
     vram[HEIGHT] = h;
+    draw_busy = 1;
     vram[START] = 1;
 }
 
@@ -293,11 +305,13 @@ void printnum(int num) {
     vram[HEIGHT] = SPRITE_CHAR_H;
     if(num == 0) {
         vram[GX] = 0;
+        draw_busy = 1;
         vram[START] = 1;
         wait();
     } else {
         while(num != 0) {
             vram[GX] = (num % 10) << 3;
+            draw_busy = 1;
             vram[START] = 1;
             wait();
             cursorX -= 8;
@@ -315,11 +329,13 @@ void print_hex_num(char num) {
     vram[HEIGHT] = SPRITE_CHAR_H;
 
     vram[GX] = (num & 0xF0) >> 1;
+    draw_busy = 1;
     vram[START] = 1;
     wait();
     cursorX += 8;
     vram[VX] = cursorX;
     vram[GX] = (num & 0x0F) << 3;
+    draw_busy = 1;
     vram[START] = 1;
     wait();
     cursorX += 8;
@@ -353,6 +369,7 @@ void print(char* str) {
         } else {
             vram[VX] = cursorX;
             vram[VY] = cursorY;
+            draw_busy = 1;
             vram[START] = 1;
             wait();
             cursorX += 8;
