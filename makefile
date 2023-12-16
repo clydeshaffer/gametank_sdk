@@ -132,7 +132,7 @@ flash: $(BANKS)
 	$(FLASHTOOL)/bin/GTFO -p $(PORT) bin/$(TARGET).bank*
 
 emulate: bin/$(TARGET)
-	$(EMUPATH)/bin/$(OS)/GameTankEmulator bin/$(TARGET)
+	$(EMUPATH)/build/GameTankEmulator bin/$(TARGET)
 
 scripts/node_modules:
 	cd scripts/build_setup ;\
