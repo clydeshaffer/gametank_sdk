@@ -12,6 +12,8 @@ int main () {
 
     init_graphics();
     load_spritesheet(&ASSET__masks__firemask_bmp, 8);
+    load_spritesheet(&ASSET__masks__noise_bmp, 0);
+    load_spritesheet(&ASSET__masks__noise_bmp, 16);
 
     flip_pages();
     clear_border(0);
@@ -21,38 +23,6 @@ int main () {
     clear_border(0);
     clear_screen(1);
     await_draw_queue();
-
-    vram[GX] = 0;
-    vram[GY] = 0;
-    vram[WIDTH] = 1;
-    vram[HEIGHT] = 1;
-    vram[START] = 1;
-    *dma_flags = 0;
-    for(row = 0; row < 128; row++) {
-        for(col = 0; col < 16; ++col) {
-            vram[col + ((row & 0x7F) << 7)] = 1;
-        }
-        for(col = 112; col < 128; ++col) {
-            vram[col + ((row & 0x7F) << 7)] = 1;
-        }
-    }
-
-    *dma_flags = flagsMirror;
-
-    vram[GX] = 0;
-    vram[GY] = 200;
-    vram[WIDTH] = 1;
-    vram[HEIGHT] = 1;
-    vram[START] = 1;
-    *dma_flags = 0;
-    for(row = 0; row < 128; row++) {
-        for(col = 0; col < 16; ++col) {
-            vram[col + ((row & 0x7F) << 7)] = 1;
-        }
-        for(col = 112; col < 128; ++col) {
-            vram[col + ((row & 0x7F) << 7)] = 1;
-        }
-    }
 
     *dma_flags = flagsMirror;
 
@@ -82,8 +52,8 @@ int main () {
             vram[col + ((row & 0x7F) << 7)] &= 0b00011111;
             vram[col + ((row & 0x7F) << 7)] |= 48;
 
-            vram[col + (((row2+(col&15)) & 0x7F) << 7)] &= 0b00011111;
-            vram[col + (((row2+(col&15)) & 0x7F) << 7)] |= 112;
+            vram[col + (((row2+(col&31)) & 0x7F) << 7)] &= 0b00011111;
+            vram[col + (((row2+(col&31)) & 0x7F) << 7)] |= 112;
         }
         *dma_flags = flagsMirror;
         vram[GX] = 0;
@@ -93,8 +63,8 @@ int main () {
         vram[START] = 1;
         *dma_flags = 0;
         for(col = 16; col < 112; ++col) {
-            vram[col + (((row2+(col&15)) & 0x7F) << 7)] &= 0b00011111;
-            vram[col + (((row2+(col&15)) & 0x7F) << 7)] |= 112;
+            vram[col + (((row2+(col&31)) & 0x7F) << 7)] &= 0b00011111;
+            vram[col + (((row2+(col&31)) & 0x7F) << 7)] |= 112;
         }
         *dma_flags = flagsMirror;
         
