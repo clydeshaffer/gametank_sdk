@@ -61,13 +61,13 @@ IRQ:
     STA FreqsH+0
 
 AddCH1:
-    LDA WaveStatesH+0
-	ROL ;2
-	LDA #$FF ;2
-	ADC #$00 ;2
-	AND Amplitudes+0 ;3
-	CLC ;2
-	ADC AccBuf ;3
+    LDX WaveStatesH+0
+	LDA Organ, x
+	LSR
+	LSR
+	AND Amplitudes+0 ; really only useful for muting here
+	CLC
+	ADC AccBuf
 	STA AccBuf ;3
 
 	;Channel 2 wavestate
@@ -95,13 +95,13 @@ AddCH1:
     STA FreqsH+1
 
 AddCH2:
-    LDA WaveStatesH+1
-	ROL ;2
-	LDA #$FF ;2
-	ADC #$00 ;2
-	AND Amplitudes+1 ;3
-	CLC ;2
-	ADC AccBuf ;3
+    LDX WaveStatesH+1
+	LDA Organ, x
+	LSR
+	LSR
+	AND Amplitudes+1 ; really only useful for muting here
+	CLC
+	ADC AccBuf
 	STA AccBuf ;3
 
 	;LFSR noise channel
@@ -194,7 +194,7 @@ SineChannel:
 	ADC FreqsH+3
 	STA WaveStatesH+3 ;3
 
-    BCC AddSine
+    BCC AddSine3
     LDA Bends+3
     EOR #$80
     ROL
@@ -209,9 +209,9 @@ SineChannel:
     ADC Tmp
     STA FreqsH+3
 
-AddSine: 
+AddSine3: 
 	LDX WaveStatesH+3
-	LDA Sine, x
+	LDA Organ, x
 	LSR
 	LSR
 	AND Amplitudes+3 ; really only useful for muting here
@@ -262,7 +262,8 @@ Sine:
 	.byte 10,11,12,14,15,17,18,20,21,23,25,27,29,31,33,35
 	.byte 37,40,42,44,47,49,52,54,57,59,62,65,67,70,73,76
 	.byte 79,82,85,88,90,93,97,100,103,106,109,112,115,118,121,124
-
+Organ:
+	.incbin "organ2.raw"
 	.segment "VECTORS"
 	.addr NMI_handler
 	.addr RESET

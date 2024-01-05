@@ -1,11 +1,16 @@
 #include "gametank.h"
 #include "drawing_funcs.h"
+#include "dynawave.h"
+#include "music.h"
+#include "gen/assets/music.h"
 
 int main () {
     char col = 30, row = 20;
     int dx = 1, dy = 1;
 
     init_graphics();
+    init_dynawave();
+    init_music();
 
     flip_pages();
     clear_border(0);
@@ -13,6 +18,8 @@ int main () {
     flip_pages();
     await_draw_queue();
     clear_border(0);
+
+    play_song(&ASSET__music__title_mid, REPEAT_NONE);
 
     while (1) {                                     //  Run forever
         clear_screen(3);
@@ -33,6 +40,7 @@ int main () {
         await_draw_queue();
         sleep(1);
         flip_pages();
+        tick_music();
         
     }
 

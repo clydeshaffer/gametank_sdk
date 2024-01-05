@@ -71,7 +71,7 @@ $(ODIR)/assets/%.gtg: assets/%.bmp | node_modules
 	zopfli --deflate $(shell cd scripts/converters && node sprite_convert.js ../../$< ../../$@)
 
 .PRECIOUS: $(ODIR)/assets/%.gtm2
-$(ODIR)/assets/%.gtm2: import assets/%.mid | node_modules
+$(ODIR)/assets/%.gtm2: assets/%.mid | node_modules
 	@mkdir -p $(@D)
 	cd scripts/converters ;\
 	node midiconvert.js ../../$< ../../$@
