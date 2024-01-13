@@ -20,19 +20,22 @@ int main () {
     await_draw_queue();
     clear_border(0);
 
-    play_song(&ASSET__music2__badapple_nointro_mid, REPEAT_LOOP);
+    play_song(&ASSET__music__badapple_mid, REPEAT_LOOP);
+    sleep(30);
 
     while (1) {                                     //  Run forever
-        clear_screen(3);
+        clear_screen(7);
         for(row = 0; row < 16; ++row) {
-          draw_box(1, (row+4) << 2 , audio_amplitudes[row], 2, 92);
+          draw_box(1, (((row) << 5) + (row>>1) + 12) & 0x7F, audio_amplitudes[row], 2, 16);
         }
         clear_border(0);
         
         await_draw_queue();
         sleep(1);
         flip_pages();
+        PROFILER_START(0);
         tick_music();
+        PROFILER_END(0);
         
     }
 

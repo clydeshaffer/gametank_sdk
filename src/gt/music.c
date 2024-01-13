@@ -20,20 +20,20 @@ extern const unsigned char* MapItemMusic;
 #define NUM_FM_CHANNELS 4
 #define NUM_FM_OPS 16
 unsigned char channel_masks[NUM_FM_CHANNELS] = {1, 2, 4, 8};
-signed char channel_note_offset[NUM_FM_CHANNELS] = {0, -12, -48, -12};
+signed char channel_note_offset[NUM_FM_CHANNELS] = {0, -12, -48, 0};
 unsigned char audio_amplitudes[NUM_FM_OPS] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 unsigned char env_initial[NUM_FM_OPS] = { 0x30, 0x58, 0x78, 0x30, 
-                                          0x40, 0x78, 0x7F, 0x70,
-                                          0x20, 0x58, 0x7f, 0x7F,
-                                          0x5F, 0x5F, 0x4F, 0x5F };
-unsigned char env_decay[NUM_FM_OPS] = { 0x04, 0x18, 0x18, 0x01,
-                                        0x02, 0x08, 0x00, 0x01,
-                                        0x10, 0x04, 0x00, 0x01,
+                                          0x40, 0x78, 0x7F, 0x40,
+                                          0x40, 0x58, 0x7f, 0x40,
+                                          0x5F, 0x5F, 0x38, 0x5F };
+unsigned char env_decay[NUM_FM_OPS] = { 0x04, 0x18, 0x18, 0x04,
+                                        0x02, 0x08, 0x00, 0x02,
+                                        0x10, 0x04, 0x00, 0x10,
                                         0x02, 0x02, 0x04, 0x02 };
-unsigned char env_sustain[NUM_FM_OPS] = { 0x04, 0x18, 0x18, 0x01,
-                                        0x02, 0x08, 0x08, 0x01,
-                                        0x10, 0x04, 0x08, 0x1,
-                                        0x02, 0x02, 0x08, 0x40 };
+unsigned char env_sustain[NUM_FM_OPS] = { 0x04, 0x18, 0x18, 0x04,
+                                        0x02, 0x08, 0x08, 0x02,
+                                        0x10, 0x04, 0x08, 0x10,
+                                        0x30, 0x02, 0x08, 0x30 };
 
 unsigned char* music_cursor = 0;
 unsigned char delay_counter = 0;
@@ -104,6 +104,7 @@ void tick_music() {
     }
 
     if(music_cursor) {
+        loadAudioEvent:
         if(delay_counter > 0) {
             delay_counter--;
         } else {
@@ -153,8 +154,11 @@ void tick_music() {
                     music_cursor = repeat_point;
                     if(music_cursor) {
                         delay_counter = *(music_cursor++);
+                        goto loadAudioEvent;
                     }   
                 }
+            } else {
+                --delay_counter;
             }
         }
     }
