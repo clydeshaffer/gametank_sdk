@@ -19,4 +19,6 @@ void pause_music();
 
 void unpause_music();
 
+extern unsigned char audio_amplitudes[16];
+
 #endif

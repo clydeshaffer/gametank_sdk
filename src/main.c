@@ -3,6 +3,7 @@
 #include "dynawave.h"
 #include "music.h"
 #include "gen/assets/music.h"
+#include "gen/assets/music2.h"
 
 int main () {
     char col = 30, row = 20;
@@ -19,23 +20,14 @@ int main () {
     await_draw_queue();
     clear_border(0);
 
-    play_song(&ASSET__music__title_mid, REPEAT_NONE);
+    play_song(&ASSET__music2__badapple_nointro_mid, REPEAT_LOOP);
 
     while (1) {                                     //  Run forever
         clear_screen(3);
-        draw_box(col, row, 8, 8, 92);
-        col += dx;
-        row += dy;
-        if(col == 1) {
-            dx = 1;
-        } else if(col == 119) {
-            dx = -1;
+        for(row = 0; row < 16; ++row) {
+          draw_box(1, (row+4) << 2 , audio_amplitudes[row], 2, 92);
         }
-        if(row == 8) {
-            dy = 1;
-        } else if(row == 112) {
-            dy = -1;
-        }
+        clear_border(0);
         
         await_draw_queue();
         sleep(1);

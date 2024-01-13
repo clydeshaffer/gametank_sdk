@@ -17,7 +17,24 @@ extern const unsigned char* EndMusic;
 extern const unsigned char* PickupMusic;
 extern const unsigned char* FanfareMusic;
 extern const unsigned char* MapItemMusic;
-unsigned char audio_amplitudes[4] = {0, 0, 0, 0};
+#define NUM_FM_CHANNELS 4
+#define NUM_FM_OPS 16
+unsigned char channel_masks[NUM_FM_CHANNELS] = {1, 2, 4, 8};
+signed char channel_note_offset[NUM_FM_CHANNELS] = {0, -12, -48, -12};
+unsigned char audio_amplitudes[NUM_FM_OPS] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+unsigned char env_initial[NUM_FM_OPS] = { 0x30, 0x58, 0x78, 0x30, 
+                                          0x40, 0x78, 0x7F, 0x70,
+                                          0x20, 0x58, 0x7f, 0x7F,
+                                          0x5F, 0x5F, 0x4F, 0x5F };
+unsigned char env_decay[NUM_FM_OPS] = { 0x04, 0x18, 0x18, 0x01,
+                                        0x02, 0x08, 0x00, 0x01,
+                                        0x10, 0x04, 0x00, 0x01,
+                                        0x02, 0x02, 0x04, 0x02 };
+unsigned char env_sustain[NUM_FM_OPS] = { 0x04, 0x18, 0x18, 0x01,
+                                        0x02, 0x08, 0x08, 0x01,
+                                        0x10, 0x04, 0x08, 0x1,
+                                        0x02, 0x02, 0x08, 0x40 };
+
 unsigned char* music_cursor = 0;
 unsigned char delay_counter = 0;
 
@@ -77,84 +94,52 @@ void unpause_music() {
 }
 
 void tick_music() {
-    unsigned char n, noteMask;
+    static unsigned char n, noteMask, a, op;
     change_rom_bank(music_bank);
-    if(audio_amplitudes[0] > 0) {
-        audio_amplitudes[0]--;
-        push_audio_param(AMPLITUDE, audio_amplitudes[0]);
-    }
-
-    if(audio_amplitudes[1] > 0) {
-        audio_amplitudes[1]--;
-        push_audio_param(AMPLITUDE+1, audio_amplitudes[1]);
-    }
-
-    if(audio_amplitudes[2] > 0) {
-        audio_amplitudes[2] --;
-        if(audio_amplitudes[2] == 0) {
-            push_audio_param(AMPLITUDE+2, 0);
-        } else {
-            push_audio_param(AMPLITUDE+2, 127);
+    for(op = 0; op < NUM_FM_OPS; ++op) {
+        if(audio_amplitudes[op] > env_sustain[op]) {
+            audio_amplitudes[op] -= env_decay[op];
+            push_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
         }
     }
 
-    if(audio_amplitudes[3] > 0) {
-        audio_amplitudes[3] --;
-        if(audio_amplitudes[3] == 0) {
-            push_audio_param(AMPLITUDE+3, 0);
-        } else {
-            push_audio_param(AMPLITUDE+3, 127);
-        }
-    }
-    
     if(music_cursor) {
         if(delay_counter > 0) {
             delay_counter--;
         } else {
             noteMask = *(music_cursor++);
-            if(noteMask & 1) {     
-                n = *(music_cursor++);
-                if(n > 0) {
-                    set_note(0, n);
-                    audio_amplitudes[0] = 64;
-                    push_audio_param(AMPLITUDE, 64);
-                } else {
-                    audio_amplitudes[0] = 0;
-                    push_audio_param(AMPLITUDE, 0);
-                }
-            }
-            if(noteMask & 2) {     
-                n = *(music_cursor++);
-                if(n > 0) {
-                    set_note(1, n);
-                    audio_amplitudes[1] = 64;
-                    push_audio_param(AMPLITUDE+1, 64);
-                } else {
-                    audio_amplitudes[1] = 0;
-                    push_audio_param(AMPLITUDE+1, 0);
-                }
-            }
-            if(noteMask & 4) {     
-                n = *(music_cursor++);
-                if(n > 0) {
-                    set_note(2, n);
-                    audio_amplitudes[2] = 4;
-                    push_audio_param(AMPLITUDE+2, 64);
-                    push_audio_param(PITCHBEND+2, -16);
-                } else {
-                    audio_amplitudes[2] = 0;
-                    push_audio_param(AMPLITUDE+2, 0);
-                }
-            }
-            if(noteMask & 8) {     
-                n = *(music_cursor++);
-                if(n > 0) {
-                    set_note(3, n);
-                    audio_amplitudes[3] = 63;
-                    push_audio_param(AMPLITUDE+3, 63);
-                } else {
-                    audio_amplitudes[3] = 0;
-                    push_audio_param(AMPLITUDE+3, 0);
+            for(op = 0; op < NUM_FM_CHANNELS; ++op) {
+                if(noteMask & channel_masks[op]) {
+                    n = *(music_cursor++);
+                    if(n > 0) {
+                        set_note(op, n + channel_note_offset[op]);
+                        audio_amplitudes[op] = env_initial[op];
+                        push_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
+                        op += 4;
+                        audio_amplitudes[op] = env_initial[op];
+                        push_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
+                        op += 4;
+                        audio_amplitudes[op] = env_initial[op];
+                        push_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
+                        op += 4;
+                        audio_amplitudes[op] = env_initial[op];
+                        push_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
+                        op -= 12;
+
+                    } else {
+                        audio_amplitudes[op] = 0;
+                        push_audio_param(AMPLITUDE+op, sine_offset);
+                        op += 4;
+                        audio_amplitudes[op] = 0;
+                        push_audio_param(AMPLITUDE+op, sine_offset);
+                        op += 4;
+                        audio_amplitudes[op] = 0;
+                        push_audio_param(AMPLITUDE+op, sine_offset);
+                        op += 4;
+                        audio_amplitudes[op] = 0;
+                        push_audio_param(AMPLITUDE+op, sine_offset);
+                        op -= 12;
+                    }
                 }
             }
             delay_counter = *(music_cursor++);
@@ -196,5 +181,17 @@ void stop_music() {
     push_audio_param(AMPLITUDE+1, 0);
     push_audio_param(AMPLITUDE+2, 0);
     push_audio_param(AMPLITUDE+3, 0);
+    push_audio_param(AMPLITUDE+4, 0);
+    push_audio_param(AMPLITUDE+5, 0);
+    push_audio_param(AMPLITUDE+6, 0);
+    push_audio_param(AMPLITUDE+7, 0);
+    push_audio_param(AMPLITUDE+8, 0);
+    push_audio_param(AMPLITUDE+9, 0);
+    push_audio_param(AMPLITUDE+10, 0);
+    push_audio_param(AMPLITUDE+11, 0);
+    push_audio_param(AMPLITUDE+12, 0);
+    push_audio_param(AMPLITUDE+13, 0);
+    push_audio_param(AMPLITUDE+14, 0);
+    push_audio_param(AMPLITUDE+15, 0);
     flush_audio_params();
 }
