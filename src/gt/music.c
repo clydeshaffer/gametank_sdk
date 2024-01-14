@@ -36,6 +36,10 @@ unsigned char env_sustain[NUM_FM_OPS] = { 0x04, 0x18, 0x18, 0x04,
                                         0x02, 0x08, 0x08, 0x02,
                                         0x10, 0x04, 0x08, 0x10,
                                         0x30, 0x02, 0x08, 0x30 };
+unsigned char op_shift[NUM_FM_OPS] = { 0, 28, 36, 0, 
+                                       0, 12, 0, 0,
+                                       0, 0, 0, 0,
+                                       0, 19, 0, 0 };
 
 unsigned char* music_cursor = 0;
 unsigned char delay_counter = 0;
@@ -51,6 +55,25 @@ void init_music() {
     music_cursor = 0;
     delay_counter = 0;
     stop_music();
+}
+
+void set_note(char ch, char n) {
+    static char n_mul;
+    n_mul = op_shift[ch] + n;
+    set_audio_param(PITCH_MSB + ch, pitch_table[n_mul * 2]);
+    set_audio_param(PITCH_LSB + ch, pitch_table[n_mul * 2 + 1]);
+    ch += NUM_FM_CHANNELS;
+    n_mul = op_shift[ch] + n;
+    set_audio_param(PITCH_MSB + ch, pitch_table[n_mul * 2]);
+    set_audio_param(PITCH_LSB + ch, pitch_table[n_mul * 2 + 1]);
+    ch += NUM_FM_CHANNELS;
+    n_mul = op_shift[ch] + n;
+    set_audio_param(PITCH_MSB + ch, pitch_table[n_mul * 2]);
+    set_audio_param(PITCH_LSB + ch, pitch_table[n_mul * 2 + 1]);
+    ch += NUM_FM_CHANNELS;
+    n_mul = op_shift[ch] + n;
+    set_audio_param(PITCH_MSB + ch, pitch_table[n_mul * 2]);
+    set_audio_param(PITCH_LSB + ch, pitch_table[n_mul * 2 + 1]);
 }
 
 void play_song(const unsigned char* song, char bank_num, char loop) {

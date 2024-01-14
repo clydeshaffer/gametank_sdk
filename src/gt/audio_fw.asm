@@ -2,7 +2,6 @@ DAC = $8000
 AccBuf = $00
 WavePTR = $02
 WavePTR_MSB = $03
-
 FreqsH = $10
 FreqsL = $20
 BufferedAmplitudes = $30
@@ -42,14 +41,20 @@ IRQ:
 	;Clear sum buffer
 	STZ AccBuf ;3?
 	;Update all wavestates
-.macro tickWave ch
+
+.macro tickWave chn
 	CLC
-	LDA WaveStatesL+ch
-	ADC FreqsL+ch
-	STA WaveStatesL+ch
-	LDA WaveStatesH+ch
-	ADC FreqsH+ch
-	STA WaveStatesH+ch
+	LDA WaveStatesL+chn
+	ADC FreqsL+chn
+	STA WaveStatesL+chn
+	LDA WaveStatesH+chn
+	ADC FreqsH+chn
+	STA WaveStatesH+chn
+.endmacro
+
+.macro tickChannel ch
+	tickWave ch
+
 	BCC :+
 	LDA BufferedAmplitudes+ch
 	STA Amplitudes+ch
@@ -59,14 +64,23 @@ IRQ:
 	STA Amplitudes+ch+8
 	LDA BufferedAmplitudes+ch+12
 	STA Amplitudes+ch+12
+	STZ WaveStatesL+ch+4
+	STZ WaveStatesL+ch+8
+	STZ WaveStatesL+ch+12
 :
+	tickWave ch+4
+	tickWave ch+8
+	tickWave ch+12
 .endmacro
 
 .macro doChannel ch
-	LDA WaveStatesH+ch
+	LDA WaveStatesH+ch+12
 	STA WaveStateParams+3
+	LDA WaveStatesH+ch+8
 	STA WaveStateParams+2
+	LDA WaveStatesH+ch+4
 	STA WaveStateParams+1
+	LDA WaveStatesH+ch+0
 	STA WaveStateParams+0
 
 	LDA Amplitudes+0+ch
@@ -80,90 +94,16 @@ IRQ:
 	JSR FMChannel
 .endmacro
 
-	tickWave 0
-	tickWave 1
-	tickWave 2
-	tickWave 3
-	;tickWave 4
-	;tickWave 5
-	
+	tickChannel 0
+	tickChannel 1
+	tickChannel 2
+	tickChannel 3
+
 	doChannel 0
+	
+	doChannel 1
 
-;channel 1 bass
-	LDA WaveStatesH+1
-	STA WaveStateParams+3
-	STA WaveStateParams+2
-	STA WaveStateParams+1
-	CLC
-	LDA WaveStatesL+1
-	ASL
-	STA ScratchPad
-	LDA WaveStatesH+1
-	ASL
-	STA WaveStateParams+0
-
-	LDA ScratchPad
-	ASL
-	STA ScratchPad
-	LDA WaveStateParams+0
-	ASL
-	STA WaveStateParams+0
-
-	LDA ScratchPad
-	ASL
-	STA ScratchPad
-	LDA WaveStateParams+0
-	ASL
-	STA WaveStateParams+0
-
-	LDA Amplitudes+1
-	STA Op1+2
-	LDA Amplitudes+5
-	STA Op2+2
-	LDA Amplitudes+9
-	STA Op3+2
-	LDA Amplitudes+13
-	STA Op4+2
-	JSR FMChannel
-;channel 1 end
-
-;channel 2 percussion
-	LDA WaveStatesH+2
-	STA WaveStateParams+3
-	STA WaveStateParams+2
-	STA WaveStateParams+1
-	CLC
-	LDA WaveStatesL+2
-	ASL
-	STA ScratchPad
-	LDA WaveStatesH+2
-	ASL
-	STA WaveStateParams+0
-
-	LDA ScratchPad
-	ASL
-	STA ScratchPad
-	LDA WaveStateParams+0
-	ASL
-	STA WaveStateParams+0
-
-	LDA ScratchPad
-	ASL
-	STA ScratchPad
-	LDA WaveStateParams+0
-	ASL
-	STA WaveStateParams+0
-
-	LDA Amplitudes+2
-	STA Op1+2
-	LDA Amplitudes+6
-	STA Op2+2
-	LDA Amplitudes+10
-	STA Op3+2
-	LDA Amplitudes+14
-	STA Op4+2
-	JSR FMChannel
-;channel 2 end
+	doChannel 2
 
 	doChannel 3
 
@@ -197,8 +137,6 @@ Op3:
 
 Op4:
 	LDA Sine, x
-	SEC
-	SBC #$80
 	CLC
 	ADC AccBuf
 	STA AccBuf

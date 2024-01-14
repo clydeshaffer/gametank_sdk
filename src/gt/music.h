@@ -19,6 +19,8 @@ void pause_music();
 
 void unpause_music();
 
+void set_note(char ch, char n);
+
 #define NUM_FM_CHANNELS 4
 #define NUM_FM_OPS 16
 

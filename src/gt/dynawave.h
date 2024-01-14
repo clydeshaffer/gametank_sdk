@@ -11,13 +11,14 @@
 #define AUDIO_PARAM_INPUT_BUFFER ((volatile char *) 0x3070)
 #define WAVE_TABLE_LOCATION ((volatile unsigned int *) 0x3002)
 
+extern char pitch_table[216];
+
 void init_dynawave();
 
 void push_audio_param(char param, char value);
+void set_audio_param(char param, char value);
 
 void flush_audio_params();
-
-void set_note(char ch, char n);
 
 extern char* wavetable_page;
 

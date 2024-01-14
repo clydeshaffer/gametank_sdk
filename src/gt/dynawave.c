@@ -58,6 +58,10 @@ void init_dynawave()
     sine_offset = *((char*)0x3003);
 }
 
+void set_audio_param(char param, char value) {
+    aram[param] = value;
+}
+
 void push_audio_param(char param, char value) {
     AUDIO_PARAM_INPUT_BUFFER[audio_params_index++] = param;
     AUDIO_PARAM_INPUT_BUFFER[audio_params_index++] = value;
@@ -67,9 +71,4 @@ void flush_audio_params() {
     AUDIO_PARAM_INPUT_BUFFER[audio_params_index] = 0;
     *audio_nmi = 1;
     audio_params_index = 0;
-}
-
-void set_note(char ch, char n) {
-    push_audio_param(PITCH_MSB + ch, pitch_table[ n * 2 ]);
-    push_audio_param(PITCH_LSB + ch, pitch_table[ n * 2 + 1]);
 }
