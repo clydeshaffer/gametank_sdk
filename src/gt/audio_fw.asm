@@ -54,12 +54,12 @@ IRQ:
 	BCC :+
 	LDA BufferedAmplitudes+ch
 	STA Amplitudes+ch
-	LDA BufferedAmplitudes+ch+6
-	STA Amplitudes+ch+6
+	LDA BufferedAmplitudes+ch+4
+	STA Amplitudes+ch+4
+	LDA BufferedAmplitudes+ch+8
+	STA Amplitudes+ch+8
 	LDA BufferedAmplitudes+ch+12
 	STA Amplitudes+ch+12
-	LDA BufferedAmplitudes+ch+18
-	STA Amplitudes+ch+18
 :
 .endmacro
 
@@ -72,11 +72,11 @@ IRQ:
 
 	LDA Amplitudes+0+ch
 	STA Op1+2
-	LDA Amplitudes+6+ch
+	LDA Amplitudes+4+ch
 	STA Op2+2
-	LDA Amplitudes+12+ch
+	LDA Amplitudes+8+ch
 	STA Op3+2
-	LDA Amplitudes+18+ch
+	LDA Amplitudes+12+ch
 	STA Op4+2
 	JSR FMChannel
 .endmacro
@@ -119,11 +119,11 @@ IRQ:
 
 	LDA Amplitudes+1
 	STA Op1+2
-	LDA Amplitudes+7
+	LDA Amplitudes+5
 	STA Op2+2
-	LDA Amplitudes+13
+	LDA Amplitudes+9
 	STA Op3+2
-	LDA Amplitudes+19
+	LDA Amplitudes+13
 	STA Op4+2
 	JSR FMChannel
 ;channel 1 end
@@ -157,11 +157,11 @@ IRQ:
 
 	LDA Amplitudes+2
 	STA Op1+2
-	LDA Amplitudes+8
+	LDA Amplitudes+6
 	STA Op2+2
-	LDA Amplitudes+14
+	LDA Amplitudes+10
 	STA Op3+2
-	LDA Amplitudes+20
+	LDA Amplitudes+14
 	STA Op4+2
 	JSR FMChannel
 ;channel 2 end

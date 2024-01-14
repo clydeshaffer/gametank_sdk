@@ -19,8 +19,8 @@ void pause_music();
 
 void unpause_music();
 
-#define NUM_FM_CHANNELS 6
-#define NUM_FM_OPS 24
+#define NUM_FM_CHANNELS 4
+#define NUM_FM_OPS 16
 
 extern unsigned char audio_amplitudes[NUM_FM_OPS];
 
