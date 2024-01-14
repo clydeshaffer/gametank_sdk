@@ -6,8 +6,8 @@
 #include "gen/assets/music2.h"
 
 int main () {
-    char col = 30, row = 20;
-    int dx = 1, dy = 1;
+    char channel, op;
+    char y;
 
     init_graphics();
     init_dynawave();
@@ -20,13 +20,17 @@ int main () {
     await_draw_queue();
     clear_border(0);
 
-    play_song(&ASSET__music2__badapple_nointro_mid, REPEAT_LOOP);
+    play_song(&ASSET__music2__vampire_mid, REPEAT_LOOP);
     sleep(30);
 
     while (1) {                                     //  Run forever
         clear_screen(7);
-        for(row = 0; row < 16; ++row) {
-          draw_box(1, (row << 2) + 8, audio_amplitudes[row], 2, 16);
+        y = 16;
+        for(channel = 0; channel < 4; ++channel) {
+          for(op = 0; op < 4; ++op) {
+            draw_box(1, y + (op << 2), audio_amplitudes[(op << 2) + channel], 2, 16);
+          }
+          y += 24;
         }
         clear_border(0);
         
