@@ -47,7 +47,7 @@ void init_dynawave()
     while(pagecount < 8) {
         offset = 0;
         while(offset < 256) {
-            wavetable_page[offset] = wavetable_page[offset] >> shiftcount;
+            wavetable_page[offset] = (wavetable_page[offset] >> shiftcount) + 128 - (128 >> shiftcount);
             ++offset;
         }
         wavetable_page -= 0x100;
