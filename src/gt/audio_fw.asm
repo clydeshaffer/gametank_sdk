@@ -100,11 +100,8 @@ IRQ:
 	tickChannel 3
 
 	doChannel 0
-	
 	doChannel 1
-
 	doChannel 2
-
 	doChannel 3
 
 	LDA AccBuf

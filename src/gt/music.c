@@ -4,20 +4,6 @@
 #include "note_numbers.h"
 #include "banking.h"
 
-extern const unsigned char* MainMusic;
-extern const unsigned char* SecondMusic;
-extern const unsigned char* ThirdMusic;
-extern const unsigned char* FourthMusic;
-extern const unsigned char* TitleMusic;
-extern const unsigned char* DiedMusic;
-extern const unsigned char* StairsMusic;
-extern const unsigned char* BossMusic;
-extern const unsigned char* BossMusic2;
-extern const unsigned char* EndMusic;
-extern const unsigned char* PickupMusic;
-extern const unsigned char* FanfareMusic;
-extern const unsigned char* MapItemMusic;
-
 unsigned char channel_masks[NUM_FM_CHANNELS] = {1, 2, 4, 8};
 signed char channel_note_offset[NUM_FM_CHANNELS] = {0, -12, -48, 0};
 unsigned char audio_amplitudes[NUM_FM_OPS] = { 0, 0, 0, 0,
