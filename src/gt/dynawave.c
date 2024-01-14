@@ -55,7 +55,7 @@ void init_dynawave()
         ++shiftcount;
     }
     wavetable_page = 0x3000 + *WAVE_TABLE_LOCATION;
-    sine_offset = *((char*)0x3031);
+    sine_offset = *((char*)0x3003);
 }
 
 void push_audio_param(char param, char value) {

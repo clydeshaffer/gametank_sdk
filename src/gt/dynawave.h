@@ -4,12 +4,12 @@
 
 #define PITCH_MSB 0x10
 
-#define PITCH_LSB 0x18
+#define PITCH_LSB 0x20
 
-#define AMPLITUDE 0x20
+#define AMPLITUDE 0x30
 
 #define AUDIO_PARAM_INPUT_BUFFER ((volatile char *) 0x3070)
-#define WAVE_TABLE_LOCATION ((volatile unsigned int *) 0x3030)
+#define WAVE_TABLE_LOCATION ((volatile unsigned int *) 0x3002)
 
 void init_dynawave();
 

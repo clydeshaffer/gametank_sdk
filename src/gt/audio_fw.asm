@@ -1,23 +1,22 @@
 DAC = $8000
-
 AccBuf = $00
-LFSR = $04 ;$05
-Tmp = $06
+WavePTR = $02
+WavePTR_MSB = $03
+
 FreqsH = $10
-FreqsL = $18
-BufferedAmplitudes = $20
-WavePTR = $30
+FreqsL = $20
+BufferedAmplitudes = $30
 WaveStatesH = $50
 WaveStatesL = $60
 Inputs = $70
 	.zeropage
-    .repeat $20
+    .repeat $30
     .byte 0
     .endrep
 	.repeat $10
 	.byte >Sine
 	.endrep
-	.repeat $90
+	.repeat $80
 	.byte 0
 	.endrep
 	.code
