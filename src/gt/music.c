@@ -110,6 +110,7 @@ char tick_music() {
     }
     
     if(music_cursor) {
+        loadNextNotes:
         if(delay_counter > 0) {
             delay_counter--;
         } else {
@@ -171,12 +172,13 @@ char tick_music() {
                     if(music_cursor) {
                         delay_counter = *(music_cursor++);
                         song_status = SONG_STATUS_LOOPED;
+                        goto loadNextNotes;
                     } else {
                         song_status = SONG_STATUS_ENDED;
                     }
                 }
             } else {
-                //delay_counter -= (delay_counter >> 2);
+                --delay_counter;
             }
         }
     }
