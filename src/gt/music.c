@@ -194,10 +194,8 @@ void do_noise_effect(char note, char bend, char duration) {
 void stop_music() {
     char n;
     music_cursor = 0;
-    for(n = 0; n < NUM_FM_CHANNELS; ++n) {
-        audio_amplitudes[n] = 0;
-    }
     for(n = 0; n < NUM_FM_OPS; ++n) {
+        audio_amplitudes[n] = 0;
         push_audio_param(AMPLITUDE+n, sine_offset);
     }
     flush_audio_params();
