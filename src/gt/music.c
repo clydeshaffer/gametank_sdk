@@ -111,7 +111,7 @@ void tick_music() {
     for(op = 0; op < NUM_FM_OPS; ++op) {
         if(audio_amplitudes[op] > env_sustain[op]) {
             audio_amplitudes[op] -= env_decay[op];
-            push_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
+            set_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
         }
     }
 
@@ -127,32 +127,32 @@ void tick_music() {
                     if(n > 0) {
                         set_note(op, n + channel_note_offset[op]);
                         audio_amplitudes[op] = env_initial[op];
-                        push_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
+                        set_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
                         op += NUM_FM_CHANNELS;
                         audio_amplitudes[op] = env_initial[op];
-                        push_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
+                        set_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
                         op += NUM_FM_CHANNELS;
                         audio_amplitudes[op] = env_initial[op];
-                        push_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
+                        set_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
                         op += NUM_FM_CHANNELS;
                         audio_amplitudes[op] = env_initial[op];
-                        push_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
+                        set_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
                         op -= NUM_FM_CHANNELS;
                         op -= NUM_FM_CHANNELS;
                         op -= NUM_FM_CHANNELS;
 
                     } else {
                         audio_amplitudes[op] = 0;
-                        push_audio_param(AMPLITUDE+op, sine_offset);
+                        set_audio_param(AMPLITUDE+op, sine_offset);
                         op += NUM_FM_CHANNELS;
                         audio_amplitudes[op] = 0;
-                        push_audio_param(AMPLITUDE+op, sine_offset);
+                        set_audio_param(AMPLITUDE+op, sine_offset);
                         op += NUM_FM_CHANNELS;
                         audio_amplitudes[op] = 0;
-                        push_audio_param(AMPLITUDE+op, sine_offset);
+                        set_audio_param(AMPLITUDE+op, sine_offset);
                         op += NUM_FM_CHANNELS;
                         audio_amplitudes[op] = 0;
-                        push_audio_param(AMPLITUDE+op, sine_offset);
+                        set_audio_param(AMPLITUDE+op, sine_offset);
                         op -= NUM_FM_CHANNELS;
                         op -= NUM_FM_CHANNELS;
                         op -= NUM_FM_CHANNELS;
@@ -185,10 +185,10 @@ void tick_music() {
 
 void do_noise_effect(char note, char bend, char duration) {
     set_note(2, note);
-    //push_audio_param(PITCHBEND+2, bend);
+    //set_audio_param(PITCHBEND+2, bend);
     audio_amplitudes[2] = duration;
-    push_audio_param(AMPLITUDE+2, 127);
-    flush_audio_params();
+    set_audio_param(AMPLITUDE+2, 127);
+    //flush_audio_params();
 }
 
 void stop_music() {
@@ -196,7 +196,7 @@ void stop_music() {
     music_cursor = 0;
     for(n = 0; n < NUM_FM_OPS; ++n) {
         audio_amplitudes[n] = 0;
-        push_audio_param(AMPLITUDE+n, sine_offset);
+        set_audio_param(AMPLITUDE+n, sine_offset);
     }
-    flush_audio_params();
+    //flush_audio_params();
 }

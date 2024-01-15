@@ -2,6 +2,14 @@ DAC = $8000
 AccBuf = $00
 WavePTR = $02
 WavePTR_MSB = $03
+FeedbackAmount = $04
+;reserve $05
+;reserve $06
+;reserve $07
+LastSample = $08
+;reserve $09
+;reserve $0A
+;reserve $0B
 FreqsH = $10
 FreqsL = $20
 BufferedAmplitudes = $30
@@ -9,7 +17,8 @@ WaveStatesH = $50
 WaveStatesL = $60
 Inputs = $70
 	.zeropage
-    .repeat $30
+	.byte 0, 0, 0, 0, >Sine, >Sine, >Sine, >Sine, $80, $80, $80, $80, 0, 0, 0, 0
+    .repeat $20
     .byte 0
     .endrep
 	.repeat $10
@@ -23,8 +32,6 @@ Amplitudes:
 	.repeat 24
 	.byte >Sine
 	.endrep
-WaveStateParams:
-	.byte 0, 0, 0, 0, 0
 ScratchPad:
 	.byte 0
 RESET:
@@ -36,11 +43,6 @@ RESET:
 Forever:
     WAI
 	JMP Forever
-
-IRQ:
-	;Clear sum buffer
-	STZ AccBuf ;3?
-	;Update all wavestates
 
 .macro tickWave chn
 	CLC
@@ -75,13 +77,17 @@ IRQ:
 
 .macro doChannel ch
 	LDA WaveStatesH+ch+12
-	STA WaveStateParams+3
+	STA Op4Param+1
 	LDA WaveStatesH+ch+8
-	STA WaveStateParams+2
+	STA Op3Param+1
 	LDA WaveStatesH+ch+4
-	STA WaveStateParams+1
+	STA Op2Param+1
+	;CLC
 	LDA WaveStatesH+ch+0
-	STA WaveStateParams+0
+	ADC LastSample+ch
+	SEC
+	SBC #$80
+	STA Op1Param+1
 
 	LDA Amplitudes+0+ch
 	STA Op1+2
@@ -91,9 +97,18 @@ IRQ:
 	STA Op3+2
 	LDA Amplitudes+12+ch
 	STA Op4+2
+	LDA #LastSample+ch
+	STA SaveFeedback+1
+	LDA FeedbackAmount+ch
+	STA SampleFeedback+2
 	JSR FMChannel
 .endmacro
 
+IRQ:
+	;Clear sum buffer
+	STZ AccBuf
+
+	;Update all wavestates
 	tickChannel 0
 	tickChannel 1
 	tickChannel 2
@@ -113,23 +128,31 @@ IRQ:
 
 FMChannel:
 	CLC
-	LDA WaveStateParams+0
+Op1Param:
+	LDA #0
 	TAX
+SampleFeedback:	
+	LDA Sine, x
+SaveFeedback:
+	STA LastSample+0
 Op1:
 	LDA Sine, x
 	CLC
-	ADC WaveStateParams+1
+Op2Param:
+	ADC #0
 	TAX
 Op2:
 	LDA Sine, x
 	CLC
-	ADC WaveStateParams+2
+Op3Param:
+	ADC #0
 	TAX
 
 Op3:
 	LDA Sine, x
 	CLC
-	ADC WaveStateParams+3
+Op4Param:
+	ADC #0
 	TAX
 
 Op4:
@@ -169,6 +192,7 @@ Sine:
 	.incbin "sine.raw"
 	.incbin "sine.raw"
 	.incbin "sine.raw"
+MaxSine:
 	.incbin "sine.raw"
 
 	.segment "VECTORS"
