@@ -10,13 +10,13 @@ unsigned char audio_amplitudes[NUM_FM_OPS] = { 0, 0, 0, 0,
                                               0, 0, 0, 0,
                                               0, 0, 0, 0,
                                               0, 0, 0, 0 };
-unsigned char env_initial[NUM_FM_OPS] = { 0x30, 0x58, 0x78, 0x30,
-                                          0x40, 0x78, 0x7F, 0x40,
-                                          0x40, 0x58, 0x7f, 0x40,
+unsigned char env_initial[NUM_FM_OPS] = { 0x30, 0x58, 0x88, 0x30,
+                                          0x40, 0x88, 0x8f, 0x40,
+                                          0x40, 0x58, 0x8f, 0x40,
                                           0x5F, 0x5F, 0x38, 0x5F };
 unsigned char env_decay[NUM_FM_OPS] = { 0x04, 0x18, 0x18, 0x04,
-                                        0x02, 0x08, 0x00, 0x02,
-                                        0x10, 0x04, 0x00, 0x10,
+                                        0x02, 0x08, 0x02, 0x02,
+                                        0x10, 0x04, 0x04, 0x10,
                                         0x02, 0x02, 0x04, 0x02 };
 unsigned char env_sustain[NUM_FM_OPS] = { 0x04, 0x18, 0x18, 0x04,
                                         0x02, 0x08, 0x08, 0x02,

@@ -80,6 +80,18 @@ int main () {
           play_track(song_number);
         }
 
+        if(player1_buttons & ~player1_old_buttons & INPUT_MASK_A) {
+          set_audio_param(FEEDBACK_AMT, sine_offset+0x8);
+          set_audio_param(FEEDBACK_AMT+1, sine_offset+0x8);
+          set_audio_param(FEEDBACK_AMT+2, sine_offset+0x8);
+          set_audio_param(FEEDBACK_AMT+3, sine_offset+0x8);
+        } else if(~player1_buttons & player1_old_buttons & INPUT_MASK_A) {
+          set_audio_param(FEEDBACK_AMT, sine_offset);
+          set_audio_param(FEEDBACK_AMT+1, sine_offset);
+          set_audio_param(FEEDBACK_AMT+2, sine_offset);
+          set_audio_param(FEEDBACK_AMT+3, sine_offset);
+        }
+
         clear_screen(7);
         y = 16;
         for(channel = 0; channel < 4; ++channel) {

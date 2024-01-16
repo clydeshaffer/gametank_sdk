@@ -185,15 +185,7 @@ NMI_Done:
 
 	.align 256
 Sine:
-	.incbin "sine.raw"
-	.incbin "sine.raw"
-	.incbin "sine.raw"
-	.incbin "sine.raw"
-	.incbin "sine.raw"
-	.incbin "sine.raw"
-	.incbin "sine.raw"
-MaxSine:
-	.incbin "sine.raw"
+	.incbin "scaled_sines.raw"
 
 	.segment "VECTORS"
 	.addr NMI_handler

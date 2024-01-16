@@ -38,27 +38,6 @@ void init_dynawave()
     while(*WAVE_TABLE_LOCATION == 0) {
         
     }
-    wavetable_page = 0x3000;
-    wavetable_page += *WAVE_TABLE_LOCATION;
-
-    wavetable_page += 0x600;
-    shiftcount = 1;
-    pagecount = 1;
-    while(pagecount < 7) {
-        offset = 0;
-        while(offset < 256) {
-            wavetable_page[offset] = (wavetable_page[offset] >> shiftcount) + 128 - (128 >> shiftcount);
-            ++offset;
-        }
-        wavetable_page -= 0x100;
-        ++pagecount;
-        ++shiftcount;
-    }
-    offset = 0;
-    while(offset < 256) {
-        wavetable_page[offset] = 0x80;
-        ++offset;
-    }
     wavetable_page = 0x3000 + *WAVE_TABLE_LOCATION;
     sine_offset = *((char*)0x3003);
 }

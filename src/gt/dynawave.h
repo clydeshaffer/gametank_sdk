@@ -2,6 +2,8 @@
 
 #define DYNAWAVE_H
 
+#define FEEDBACK_AMT 0x04
+
 #define PITCH_MSB 0x10
 
 #define PITCH_LSB 0x20
