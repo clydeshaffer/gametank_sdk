@@ -55,47 +55,50 @@ Forever:
 .endmacro
 
 .macro tickChannel ch
-	tickWave ch
+	tickWave (ch * 4)
 
 	BCC :+
-	LDA BufferedAmplitudes+ch
-	STA Amplitudes+ch
-	LDA BufferedAmplitudes+ch+4
-	STA Amplitudes+ch+4
-	LDA BufferedAmplitudes+ch+8
-	STA Amplitudes+ch+8
-	LDA BufferedAmplitudes+ch+12
-	STA Amplitudes+ch+12
-	STZ WaveStatesL+ch+4
-	STZ WaveStatesL+ch+8
-	STZ WaveStatesL+ch+12
+	LDA BufferedAmplitudes+(ch*4)+0
+	STA Amplitudes+(ch*4)+0
+	LDA BufferedAmplitudes+(ch*4)+1
+	STA Amplitudes+(ch*4)+1
+	LDA BufferedAmplitudes+(ch*4)+2
+	STA Amplitudes+(ch*4)+2
+	LDA BufferedAmplitudes+(ch*4)+3
+	STA Amplitudes+(ch*4)+3
+	;STZ WaveStatesH+(ch*4)+1
+	;STZ WaveStatesH+(ch*4)+2
+	;STZ WaveStatesH+(ch*4)+3
+	STZ WaveStatesL+(ch*4)+1
+	STZ WaveStatesL+(ch*4)+2
+	STZ WaveStatesL+(ch*4)+3
 :
-	tickWave ch+4
-	tickWave ch+8
-	tickWave ch+12
+	tickWave (ch*4)+1
+	tickWave (ch*4)+2
+	tickWave (ch*4)+3
 .endmacro
 
 .macro doChannel ch
-	LDA WaveStatesH+ch+12
+	LDA WaveStatesH+(ch*4)+3
 	STA Op4Param+1
-	LDA WaveStatesH+ch+8
+	LDA WaveStatesH+(ch*4)+2
 	STA Op3Param+1
-	LDA WaveStatesH+ch+4
+	LDA WaveStatesH+(ch*4)+1
 	STA Op2Param+1
 	;CLC
-	LDA WaveStatesH+ch+0
+	LDA WaveStatesH+(ch*4)+0
 	ADC LastSample+ch
 	SEC
 	SBC #$80
 	STA Op1Param+1
 
-	LDA Amplitudes+0+ch
+	LDA Amplitudes+(ch*4)+0
 	STA Op1+2
-	LDA Amplitudes+4+ch
+	LDA Amplitudes+(ch*4)+1
 	STA Op2+2
-	LDA Amplitudes+8+ch
+	LDA Amplitudes+(ch*4)+2
 	STA Op3+2
-	LDA Amplitudes+12+ch
+	LDA Amplitudes+(ch*4)+3
 	STA Op4+2
 	LDA #LastSample+ch
 	STA SaveFeedback+1

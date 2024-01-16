@@ -10,22 +10,24 @@ unsigned char audio_amplitudes[NUM_FM_OPS] = { 0, 0, 0, 0,
                                               0, 0, 0, 0,
                                               0, 0, 0, 0,
                                               0, 0, 0, 0 };
-unsigned char env_initial[NUM_FM_OPS] = { 0x30, 0x58, 0x88, 0x30,
-                                          0x40, 0x88, 0x8f, 0x40,
-                                          0x40, 0x58, 0x8f, 0x40,
-                                          0x5F, 0x5F, 0x38, 0x5F };
-unsigned char env_decay[NUM_FM_OPS] = { 0x04, 0x18, 0x18, 0x04,
-                                        0x02, 0x08, 0x02, 0x02,
-                                        0x10, 0x04, 0x04, 0x10,
-                                        0x02, 0x02, 0x04, 0x02 };
-unsigned char env_sustain[NUM_FM_OPS] = { 0x04, 0x18, 0x18, 0x04,
-                                        0x02, 0x08, 0x08, 0x02,
-                                        0x10, 0x04, 0x08, 0x10,
-                                        0x30, 0x02, 0x08, 0x30 };
-unsigned char op_shift[NUM_FM_OPS] = { 0, 28, 36, 0, 
-                                       0, 12, 0, 0,
-                                       0, 0, 0, 0,
-                                       0, 19, 0, 0 };
+unsigned char env_initial[NUM_FM_OPS] = { 0x30, 0x40, 0x40, 0x5f,
+                                          0x58, 0x88, 0x58, 0x5f,
+                                          0x88, 0x8f, 0x8f, 0x38,
+                                          0x30, 0x40, 0x40, 0x5F };
+unsigned char env_decay[NUM_FM_OPS] = { 0x04, 0x02, 0x10, 0x02,
+                                        0x18, 0x08, 0x04, 0x02,
+                                        0x18, 0x02, 0x04, 0x04,
+                                        0x04, 0x02, 0x10, 0x02 };
+unsigned char env_sustain[NUM_FM_OPS] = { 0x04, 0x02, 0x10, 0x30,
+                                        0x18, 0x08, 0x04, 0x02,
+                                        0x18, 0x08, 0x08, 0x08,
+                                        0x04, 0x02, 0x10, 0x30 };
+
+unsigned char op_shift[NUM_FM_OPS] = { 0, 0, 0, 0, 
+                                       28, 12, 0, 19,
+                                       36, 0, 0, 0,
+                                       0, 0, 0, 0 };
+
 
 unsigned char* music_cursor = 0;
 unsigned char delay_counter = 0;
@@ -48,15 +50,15 @@ void set_note(char ch, char n) {
     n_mul = op_shift[ch] + n;
     set_audio_param(PITCH_MSB + ch, pitch_table[n_mul * 2]);
     set_audio_param(PITCH_LSB + ch, pitch_table[n_mul * 2 + 1]);
-    ch += NUM_FM_CHANNELS;
+    ++ch;
     n_mul = op_shift[ch] + n;
     set_audio_param(PITCH_MSB + ch, pitch_table[n_mul * 2]);
     set_audio_param(PITCH_LSB + ch, pitch_table[n_mul * 2 + 1]);
-    ch += NUM_FM_CHANNELS;
+    ++ch;
     n_mul = op_shift[ch] + n;
     set_audio_param(PITCH_MSB + ch, pitch_table[n_mul * 2]);
     set_audio_param(PITCH_LSB + ch, pitch_table[n_mul * 2 + 1]);
-    ch += NUM_FM_CHANNELS;
+    ++ch;
     n_mul = op_shift[ch] + n;
     set_audio_param(PITCH_MSB + ch, pitch_table[n_mul * 2]);
     set_audio_param(PITCH_LSB + ch, pitch_table[n_mul * 2 + 1]);
@@ -106,7 +108,7 @@ void unpause_music() {
 }
 
 void tick_music() {
-    static unsigned char n, noteMask, a, op;
+    static unsigned char n, noteMask, a, op, ch;
     change_rom_bank(music_bank);
     for(op = 0; op < NUM_FM_OPS; ++op) {
         if(audio_amplitudes[op] > env_sustain[op]) {
@@ -121,41 +123,35 @@ void tick_music() {
             delay_counter--;
         } else {
             noteMask = *(music_cursor++);
-            for(op = 0; op < NUM_FM_CHANNELS; ++op) {
-                if(noteMask & channel_masks[op]) {
+            for(ch = 0; ch < NUM_FM_CHANNELS; ++ch) {
+                if(noteMask & channel_masks[ch]) {
                     n = *(music_cursor++);
+                    op = ch << 2;
                     if(n > 0) {
-                        set_note(op, n + channel_note_offset[op]);
+                        set_note(op, n + channel_note_offset[ch]);
                         audio_amplitudes[op] = env_initial[op];
                         set_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
-                        op += NUM_FM_CHANNELS;
+                        ++op;
                         audio_amplitudes[op] = env_initial[op];
                         set_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
-                        op += NUM_FM_CHANNELS;
+                        ++op;
                         audio_amplitudes[op] = env_initial[op];
                         set_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
-                        op += NUM_FM_CHANNELS;
+                        ++op;
                         audio_amplitudes[op] = env_initial[op];
                         set_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
-                        op -= NUM_FM_CHANNELS;
-                        op -= NUM_FM_CHANNELS;
-                        op -= NUM_FM_CHANNELS;
-
                     } else {
                         audio_amplitudes[op] = 0;
                         set_audio_param(AMPLITUDE+op, sine_offset);
-                        op += NUM_FM_CHANNELS;
+                        ++op;
                         audio_amplitudes[op] = 0;
                         set_audio_param(AMPLITUDE+op, sine_offset);
-                        op += NUM_FM_CHANNELS;
+                        ++op;
                         audio_amplitudes[op] = 0;
                         set_audio_param(AMPLITUDE+op, sine_offset);
-                        op += NUM_FM_CHANNELS;
+                        ++op;
                         audio_amplitudes[op] = 0;
                         set_audio_param(AMPLITUDE+op, sine_offset);
-                        op -= NUM_FM_CHANNELS;
-                        op -= NUM_FM_CHANNELS;
-                        op -= NUM_FM_CHANNELS;
                     }
                 }
             }
