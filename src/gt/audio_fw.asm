@@ -66,12 +66,6 @@ Forever:
 	STA Amplitudes+(ch*4)+2
 	LDA BufferedAmplitudes+(ch*4)+3
 	STA Amplitudes+(ch*4)+3
-	;STZ WaveStatesH+(ch*4)+1
-	;STZ WaveStatesH+(ch*4)+2
-	;STZ WaveStatesH+(ch*4)+3
-	STZ WaveStatesL+(ch*4)+1
-	STZ WaveStatesL+(ch*4)+2
-	STZ WaveStatesL+(ch*4)+3
 :
 	tickWave (ch*4)+1
 	tickWave (ch*4)+2
