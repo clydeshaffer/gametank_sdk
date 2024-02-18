@@ -5,25 +5,25 @@
 #include "banking.h"
 
 unsigned char channel_masks[NUM_FM_CHANNELS] = {1, 2, 4, 8};
-signed char channel_note_offset[NUM_FM_CHANNELS] = {0, -12, -48, 0};
+signed char channel_note_offset[NUM_FM_CHANNELS] = {0, 0, 0, 0};
 unsigned char audio_amplitudes[NUM_FM_OPS] = { 0, 0, 0, 0,
                                               0, 0, 0, 0,
                                               0, 0, 0, 0,
                                               0, 0, 0, 0 };
-unsigned char env_initial[NUM_FM_OPS] = { 0x30, 0x40, 0x40, 0x5f,
-                                          0x58, 0x88, 0x58, 0x5f,
-                                          0x88, 0x8f, 0x8f, 0x38,
-                                          0x30, 0x40, 0x40, 0x5F };
-unsigned char env_decay[NUM_FM_OPS] = { 0x04, 0x02, 0x10, 0x02,
-                                        0x18, 0x08, 0x04, 0x02,
-                                        0x18, 0x02, 0x04, 0x04,
-                                        0x04, 0x02, 0x10, 0x02 };
-unsigned char env_sustain[NUM_FM_OPS] = { 0x04, 0x02, 0x10, 0x30,
-                                        0x18, 0x08, 0x04, 0x02,
-                                        0x18, 0x08, 0x08, 0x08,
-                                        0x04, 0x02, 0x10, 0x30 };
+unsigned char env_initial[NUM_FM_OPS] = { 0x00, 0x00, 0x00, 0x00,
+                                          0x00, 0x00, 0x00, 0x00,
+                                          0x00, 0x00, 0x00, 0x00,
+                                          0x00, 0x00, 0x00, 0x00 };
+unsigned char env_decay[NUM_FM_OPS] = { 0x00, 0x00, 0x00, 0x00,
+                                        0x00, 0x00, 0x00, 0x00,
+                                        0x00, 0x00, 0x00, 0x00,
+                                        0x00, 0x00, 0x00, 0x00 };
+unsigned char env_sustain[NUM_FM_OPS] = { 0x00, 0x00, 0x00, 0x00,
+                                        0x00, 0x00, 0x00, 0x00,
+                                        0x00, 0x00, 0x00, 0x00,
+                                        0x00, 0x00, 0x00, 0x00 };
 
-unsigned char op_shift[NUM_FM_OPS] = { 0, 0, 0, 0, 
+unsigned char op_transpose[NUM_FM_OPS] = { 0, 0, 0, 0, 
                                        28, 12, 0, 19,
                                        36, 0, 0, 0,
                                        0, 0, 0, 0 };
@@ -45,21 +45,46 @@ void init_music() {
     stop_music();
 }
 
+void load_instrument(char channel, Instrument* instr) {
+    channel_note_offset[channel] = instr->transpose;
+    aram[FEEDBACK_AMT + channel] = instr->feedback + sine_offset;
+    channel = channel << 2;
+    env_initial[channel] = instr->env_initial[0];
+    env_decay[channel] = instr->env_decay[0];
+    env_sustain[channel] = instr->env_sustain[0];
+    op_transpose[channel] = instr->op_transpose[0];
+    ++channel;
+    env_initial[channel] = instr->env_initial[1];
+    env_decay[channel] = instr->env_decay[1];
+    env_sustain[channel] = instr->env_sustain[1];
+    op_transpose[channel] = instr->op_transpose[1];
+    ++channel;
+    env_initial[channel] = instr->env_initial[2];
+    env_decay[channel] = instr->env_decay[2];
+    env_sustain[channel] = instr->env_sustain[2];
+    op_transpose[channel] = instr->op_transpose[2];
+    ++channel;
+    env_initial[channel] = instr->env_initial[3];
+    env_decay[channel] = instr->env_decay[3];
+    env_sustain[channel] = instr->env_sustain[3];
+    op_transpose[channel] = instr->op_transpose[3];
+}
+
 void set_note(char ch, char n) {
     static char n_mul;
-    n_mul = op_shift[ch] + n;
+    n_mul = op_transpose[ch] + n;
     set_audio_param(PITCH_MSB + ch, pitch_table[n_mul * 2]);
     set_audio_param(PITCH_LSB + ch, pitch_table[n_mul * 2 + 1]);
     ++ch;
-    n_mul = op_shift[ch] + n;
+    n_mul = op_transpose[ch] + n;
     set_audio_param(PITCH_MSB + ch, pitch_table[n_mul * 2]);
     set_audio_param(PITCH_LSB + ch, pitch_table[n_mul * 2 + 1]);
     ++ch;
-    n_mul = op_shift[ch] + n;
+    n_mul = op_transpose[ch] + n;
     set_audio_param(PITCH_MSB + ch, pitch_table[n_mul * 2]);
     set_audio_param(PITCH_LSB + ch, pitch_table[n_mul * 2 + 1]);
     ++ch;
-    n_mul = op_shift[ch] + n;
+    n_mul = op_transpose[ch] + n;
     set_audio_param(PITCH_MSB + ch, pitch_table[n_mul * 2]);
     set_audio_param(PITCH_LSB + ch, pitch_table[n_mul * 2 + 1]);
 }

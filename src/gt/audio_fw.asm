@@ -17,7 +17,7 @@ WaveStatesH = $50
 WaveStatesL = $60
 Inputs = $70
 	.zeropage
-	.byte 0, 0, 0, 0, >Sine, >Sine, >Sine, >Sine, $80, $80, $80, $80, 0, 0, 0, 0
+	.byte 0, 0, 0, 0, >Sine, >Sine, >Sine+8, >Sine, $80, $80, $80, $80, 0, 0, 0, 0
     .repeat $20
     .byte 0
     .endrep
@@ -141,6 +141,12 @@ Op2Param:
 Op2:
 	LDA Sine, x
 	CLC
+	BRA Op3Param ;;cutoff point betweeb single 4-op and dual 2-op FM
+:
+	ADC AccBuf
+	STA AccBuf
+	CLC
+	LDA #0
 Op3Param:
 	ADC #0
 	TAX
