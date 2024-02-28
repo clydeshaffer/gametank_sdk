@@ -9,6 +9,8 @@
 
 char song_number = 0;
 
+#define MAX_SONG_ID 10
+
 void play_track(char num) {
   stop_music();
   switch(num) {
@@ -38,6 +40,9 @@ void play_track(char num) {
       return;
     case 9:
       play_song(&ASSET__music__megalo1_mid, REPEAT_LOOP);
+      return;
+    case 10:
+      play_song(&ASSET__music3__mfdoom_mid, REPEAT_LOOP);
       return;
     default:
       play_song(&ASSET__music3__e1m1_mid, REPEAT_LOOP);
@@ -118,13 +123,13 @@ int main () {
 
         if(player1_buttons & ~player1_old_buttons & INPUT_MASK_RIGHT) {
           song_number = song_number + 1;
-          if(song_number > 9) {
+          if(song_number > MAX_SONG_ID) {
             song_number = 0;
           }
           play_track(song_number);
         } else if(player1_buttons & ~player1_old_buttons & INPUT_MASK_LEFT) {
           if(song_number == 0) {
-            song_number = 9;
+            song_number = MAX_SONG_ID;
           } else {
             song_number = song_number - 1;
           }
