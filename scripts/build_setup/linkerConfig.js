@@ -80,7 +80,11 @@ function generateLinkerConfig(assetFolderNames, extra_code_banks) {
             load : 'ROM',
             type : 'ro',
             start : '$FFFA'
-        }
+        },
+        SAVE : {
+            load : 'PERSIST',
+            type : 'ro'
+        },
     };
 
     const footer = `
@@ -126,7 +130,7 @@ SYMBOLS {
     }
 
     for(var i = 1; i <= extra_code_banks; i++) {
-        const bankNum = 254 - extra_code_banks + i;
+        const bankNum = 253 - extra_code_banks + i;
         const bankName = 'BANK' + hex(bankNum);
         bankNames.push(`bank${hex(bankNum)}`);
         const bankFile = `"%O.bank${hex(bankNum)}"`;
@@ -142,6 +146,14 @@ SYMBOLS {
             load : bankName,
             type : 'ro'
         };
+    }
+
+    section_MEMORY['PERSIST'] = {
+        start : '$8000',
+        size : '$4000',
+        file : '"%O.bankFE"',
+        bank : '254',
+        fill : 'yes'
     }
 
     section_MEMORY['ROM'] = {
@@ -160,6 +172,7 @@ SYMBOLS {
     }
 
     bankNames.push('filler');
+    bankNames.push('bankFE');
     bankNames.push('bankFF');
 
     var output = '';
