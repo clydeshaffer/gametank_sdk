@@ -9,7 +9,7 @@
 
 char song_number = 0;
 
-#define MAX_SONG_ID 10
+#define MAX_SONG_ID 11
 
 void play_track(char num) {
   stop_music();
@@ -43,6 +43,9 @@ void play_track(char num) {
       return;
     case 10:
       play_song(&ASSET__music3__mfdoom_mid, REPEAT_LOOP);
+      return;
+    case 11:
+      play_song(&ASSET__music2__badapple_nointro_mid, REPEAT_LOOP);
       return;
     default:
       play_song(&ASSET__music3__e1m1_mid, REPEAT_LOOP);
@@ -113,7 +116,7 @@ int main () {
     load_instrument(0, &piano);
     load_instrument(1, &slapbass);
     load_instrument(2, &snare);
-    load_instrument(3, &guitar2);
+    load_instrument(3, &piano);
 
     song_number = 0;
     play_track(song_number);
