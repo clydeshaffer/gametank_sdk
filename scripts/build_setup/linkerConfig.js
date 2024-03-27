@@ -166,7 +166,7 @@ SYMBOLS {
 
     section_MEMORY['FILLER'] = {
         start : '$8000',
-        size : '$' + (Math.pow(2,21) - (extra_code_banks + asset_banks + 1) * 16384).toString(16).toUpperCase(),
+        size : '$' + (Math.pow(2,21) - (extra_code_banks + asset_banks + 2) * 16384).toString(16).toUpperCase(),
         file : '"%O.filler"',
         fill : 'yes'
     }
