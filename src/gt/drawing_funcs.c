@@ -107,7 +107,6 @@ void pushRect();
 void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x, char y, char frame, char flip, char bank) {
     change_rom_bank(sprite_table_bank);
     while(queue_count >= QUEUE_MAX) {
-        asm("CLI");
         await_drawing();
     }
     asm("SEI");
@@ -153,7 +152,6 @@ void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x
 
 void draw_sprite_rect() {
     if(queue_count >= QUEUE_MAX) {
-        asm("CLI");
         await_drawing();
     }
 
@@ -182,7 +180,6 @@ void draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h
         return;
     }
     while(queue_count >= QUEUE_MAX) {
-        asm("CLI");
         await_drawing();
     }
     if(x + w >= 128) {
@@ -218,7 +215,6 @@ void await_draw_queue() {
     }
     while(queue_end != queue_start) {
         next_draw_queue();
-        asm ("CLI");
         await_drawing();
     }
     vram[START] = 0;
