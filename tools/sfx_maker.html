@@ -1,0 +1,292 @@
+<html>
+    <head>
+        <style>
+            .vertslider {
+                -webkit-appearance: slider-vertical;
+                width: 10px;
+                height: 64px;
+            }
+
+            button {
+                font-size: 18pt;
+            }
+
+            #statusBar {
+                width: 100%;
+                height: 16px;
+                position:fixed;
+                left: 0%;
+                bottom: 0%;
+                background-color: lightgray;
+                border-color: black;
+                display: block;
+            }
+        </style>
+        
+    </head>
+    <body>
+        <button id="save">💾</button>
+        <button id="load">📂</button>
+        <h2>Length</h2>
+        <input type="range" id="lengthSlider" value="16" min="0" max="255"/> <span id="lengthNum">0</span>
+        <h2>Feedback Amount</h2>
+        <input type="range" id="feedbackSlider" value="0" min="0" max="8"/>
+        <hr>
+        <h2>Amplitudes</h2>
+        <div>OP1<span id="amplitudes0"></span></div>
+        <div>OP2<span id="amplitudes1"></span></div>
+        <div>OP3<span id="amplitudes2"></span></div>
+        <div>OP4<span id="amplitudes3"></span></div>
+        <br>
+        <h2>Pitches</h2>
+        <div>OP1<span id="note0"></span></div>
+        <div>OP2<span id="note1"></span></div>
+        <div>OP3<span id="note2"></span></div>
+        <div>OP4<span id="note3"></span></div>
+
+        <div id="statusBar">
+            <span id="statusText"></span>
+        </div>
+
+        <script>
+            const statusTextElem = document.getElementById('statusText');
+            function setStatusText(text) {
+                statusTextElem.innerText = text;
+            }
+
+            const lengthSlider = document.getElementById('lengthSlider');
+            amplitudeDivs = [
+                document.getElementById('amplitudes0'),
+                document.getElementById('amplitudes1'),
+                document.getElementById('amplitudes2'),
+                document.getElementById('amplitudes3')
+            ];
+            noteDivs = [
+                document.getElementById('note0'),
+                document.getElementById('note1'),
+                document.getElementById('note2'),
+                document.getElementById('note3')
+            ];
+            const lengthLabel = document.getElementById('lengthNum');
+
+            function createNewAmplitudeSlider(amplitude) {
+                const newSlider = document.createElement('input');
+                newSlider.type = 'range';
+                newSlider.className = 'vertslider';
+                newSlider.value = amplitude;
+                newSlider.min = '0';
+                newSlider.max = '8';
+                newSlider.onmouseover = (evt) => {setStatusText("Amplitude: " + evt.target.value)}
+                return newSlider;
+            }
+
+            function createNewNoteSlider(note) {
+                const newSlider = document.createElement('input');
+                newSlider.type = 'range';
+                newSlider.className = 'vertslider';
+                newSlider.value = note;
+                newSlider.min = '0';
+                newSlider.max = '107';
+                newSlider.onmouseover = (evt) => {setStatusText("Note: " + evt.target.value)}
+                return newSlider;
+            }
+
+            function updateAmplitudeDiv(targetdiv) {
+                const lastAmp = targetdiv.lastChild?.value;
+                if(lengthSlider.value > targetdiv.children.length) {
+                    while(lengthSlider.value > targetdiv.children.length) {
+                        targetdiv.appendChild(createNewAmplitudeSlider(lastAmp));
+                    }
+                } else if(lengthSlider.value < targetdiv.children.length) {
+                    while(lengthSlider.value < targetdiv.children.length) {
+                        targetdiv.removeChild(targetdiv.lastChild);
+                    }
+                }
+            }
+
+            function updateNoteDiv(targetdiv) {
+                const lastNote = targetdiv.lastChild?.value;
+                console.log(lastNote);
+                if(lengthSlider.value > targetdiv.children.length) {
+                    while(lengthSlider.value > targetdiv.children.length) {
+                        targetdiv.appendChild(createNewNoteSlider(lastNote));
+                    }
+                } else if(lengthSlider.value < targetdiv.children.length) {
+                    while(lengthSlider.value < targetdiv.children.length) {
+                        targetdiv.removeChild(targetdiv.lastChild);
+                    }
+                }
+            }
+
+            function addQuickButtonsToParent(targetdiv) {
+                const parent = targetdiv.parentElement;
+                
+                const btnRampDown = document.createElement('button');
+                btnRampDown.innerText = '◣';
+                btnRampDown.onclick = () => {
+                    const x = prompt('set max value');
+                    if(x != null) {
+                        Array.from(targetdiv.children).forEach((child, index) => {
+                            child.value = x * (1 - ((index + 1) / targetdiv.children.length));
+                        })
+                    }
+                }
+
+                const btnRampUp = document.createElement('button');
+                btnRampUp.innerText = '◢';
+                btnRampUp.onclick = () => {
+                    const x = prompt('set max value');
+                    if(x != null) {
+                        Array.from(targetdiv.children).forEach((child, index) => {
+                            child.value = x * (index + 1) / targetdiv.children.length;
+                        })
+                    }
+                }
+
+                const btnRampTriangle = document.createElement('button');
+                btnRampTriangle.innerText = '▲';
+                btnRampTriangle.onclick = () => {
+                    const x = prompt('set max value');
+                    if(x != null) {
+                        Array.from(targetdiv.children).forEach((child, index) => {
+                            const fn = (t) => 1 - Math.abs((t * 2) - 1);
+                            child.value = Math.round(x * fn((index + 0.5) / targetdiv.children.length));
+                        })
+                    }
+                }
+
+                const btnInvTriangle = document.createElement('button');
+                btnInvTriangle.innerText = '◣◢';
+                btnInvTriangle.onclick = () => {
+                    const x = prompt('set max value');
+                    if(x != null) {
+                        Array.from(targetdiv.children).forEach((child, index) => {
+                            const fn = (t) => Math.abs((t * 2) - 1);
+                            child.value = Math.round(x * fn((index + 0.5) / targetdiv.children.length));
+                        })
+                    }
+                } 
+
+                const btnSetConstant = document.createElement('button');
+                btnSetConstant.innerText = 'x';
+                btnSetConstant.onclick = () => {
+                    const x = prompt('set constant number');
+                    if(x != null) {
+                        Array.from(targetdiv.children).forEach((child) => {
+                            child.value = x;
+                        })
+                    }
+                }
+
+                parent.insertBefore(btnRampDown, targetdiv);
+                parent.insertBefore(btnRampUp, targetdiv);
+                parent.insertBefore(btnRampTriangle, targetdiv);
+                parent.insertBefore(btnInvTriangle, targetdiv);
+                parent.insertBefore(btnSetConstant, targetdiv);
+            }
+
+            amplitudeDivs.forEach(addQuickButtonsToParent);
+            noteDivs.forEach(addQuickButtonsToParent);
+
+            lengthSlider.oninput = () => {
+                lengthLabel.innerText = `${lengthSlider.value} frames       ${Math.round(lengthSlider.value * 100/60) / 100} seconds`;
+                amplitudeDivs.forEach(updateAmplitudeDiv);
+                noteDivs.forEach(updateNoteDiv);
+            };
+
+            lengthSlider.oninput();
+
+            function saveFile(arrayBuffer, fileName) {
+                const blob = new Blob([arrayBuffer]);
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+
+                document.body.appendChild(a);
+                a.click();
+
+                // Clean up
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            }
+
+            document.getElementById("save").onclick = () => {
+                const sfxbin = new ArrayBuffer((lengthSlider.value * 8) + 2);
+                const view = new Uint8Array(sfxbin);
+                view[0] = lengthSlider.value;
+                view[1] = document.getElementById('feedbackSlider').value;
+                let vi = 2;
+                for(var i = 0; i < lengthSlider.value; i++) {
+                    amplitudeDivs.forEach((d) => {
+                        view[vi] = d.children[i].value;
+                        vi++;    
+                    });
+                    noteDivs.forEach((d) => {
+                        view[vi] = d.children[i].value;
+                        vi++;    
+                    });
+                }
+
+                saveFile(sfxbin, 'sfx.bin');
+            };
+
+
+            function readFileIntoArrayBuffer() {
+                return new Promise((resolve, reject) => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.bin'; // Filter for .bin files
+
+                    input.onchange = () => {
+                        const file = input.files[0];
+                        if (!file) {
+                            reject(new Error('No file selected'));
+                            return;
+                        }
+
+                        const reader = new FileReader();
+
+                        reader.onload = () => {
+                            resolve(reader.result); // ArrayBuffer loaded successfully
+                        };
+
+                        reader.onerror = () => {
+                            reject(new Error('Error reading file'));
+                        };
+
+                        reader.readAsArrayBuffer(file);
+                    };
+
+                    input.click(); // Trigger file input prompt
+                });
+            }
+
+            document.getElementById('load').onclick = () => {
+                readFileIntoArrayBuffer().then(arrayBuffer => {
+                    const view = new Uint8Array(arrayBuffer);
+                    lengthSlider.value = view[0];
+                    document.getElementById('feedbackSlider').value = view[1];
+                    lengthSlider.oninput();
+                    let vi = 2;
+                    for(var i = 0; i < lengthSlider.value; i++) {
+                        
+                    amplitudeDivs.forEach((d) => {
+                        d.children[i].value = view[vi];
+                        vi++;    
+                    });
+                    noteDivs.forEach((d) => {
+                        d.children[i].value = view[vi];
+                        vi++;    
+                    });
+                }
+                })
+                .catch(error => {
+                    alert('Couldn\'t load');
+                })
+            };
+
+        </script>
+    </body>
+</html>

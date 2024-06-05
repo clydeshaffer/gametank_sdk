@@ -18,11 +18,14 @@ extern const unsigned char* DynaWave;
 
 char audio_params_index = 0;
 char *wavetable_page;
+char sine_offset = 0;
 
 void wait();
 
 void init_dynawave()
 {
+    int offset, shiftcount;
+    char pagecount;
     *audio_rate = 0x7F;
 
     change_rom_bank(128);
@@ -35,8 +38,8 @@ void init_dynawave()
     while(*WAVE_TABLE_LOCATION == 0) {
         
     }
-    wavetable_page = 0x3000;
-    wavetable_page += *WAVE_TABLE_LOCATION;
+    wavetable_page = 0x3000 + *WAVE_TABLE_LOCATION;
+    sine_offset = *((char*)0x3003);
 }
 
 void push_audio_param(char param, char value) {
@@ -48,9 +51,4 @@ void flush_audio_params() {
     AUDIO_PARAM_INPUT_BUFFER[audio_params_index] = 0;
     *audio_nmi = 1;
     audio_params_index = 0;
-}
-
-void set_note(char ch, char n) {
-    push_audio_param(PITCH_MSB + ch, pitch_table[ n * 2]);
-    push_audio_param(PITCH_LSB + ch, pitch_table[ n * 2 + 1]);
 }
