@@ -64,7 +64,17 @@ void clear_screen(char c);
 
 void draw_box_now(char x, char y, char w, char h, char c);
 
-void draw_sprite_now(char x, char y, char w, char h, char gx, char gy, char ramBank);
+extern char draw_busy;
+#define draw_sprite_now( x,  y,  w,  h,  gx,  gy,  ramBank) \
+    await_drawing(); \
+    vram[VX] = x; \
+    vram[VY] = y; \
+    vram[GX] = gx; \
+    vram[GY] = gy; \
+    vram[WIDTH] = w; \
+    vram[HEIGHT] = h; \
+    draw_busy = 1; \
+    vram[START] = 1;
 
 void draw_fade(unsigned char opacity);
 
