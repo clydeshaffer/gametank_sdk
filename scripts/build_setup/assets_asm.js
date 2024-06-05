@@ -5,9 +5,14 @@ const assetsDir = 'assets';
 
 const extensionMap = {
     'bmp' : 'gtg.deflate',
+    'bmpx': 'gtgx',
     'mid' : 'gtm2',
     'json' : 'gsi'
-}
+};
+
+const ignoreList = [
+    "asset.cfg"
+];
 
 function transformFilename(filename) {
     const name = filename.split('.').slice(0, -1);
@@ -51,7 +56,7 @@ function generateAssetsAssemblyFile(dir) {
     const exportLines = [];
     const incbinLines = [];
 
-    nameList.forEach((fname) => {
+    nameList.filter((fname)=>ignoreList.indexOf(fname)===-1).forEach((fname) => {
         const symName = filenameToSymbolName(dirName, fname);
         exportLines.push(`    .export ${symName}_ptr`);
         incbinLines.push(`${symName}_ptr:`)
