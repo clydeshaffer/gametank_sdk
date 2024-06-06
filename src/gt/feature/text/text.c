@@ -39,8 +39,7 @@ void print_text(char* text) {
         text_use_alt_color = 128;
     }
     while(*text != 0) {
-        text_tmp = *text + text_use_alt_color;
-        switch(text_tmp) {
+        switch(*text) {
             case ' ':
                 text_cursor_x += TEXT_CHAR_WIDTH;
                 break;
@@ -52,6 +51,7 @@ void print_text(char* text) {
                 text_cursor_x = text_print_line_start;
                 break;
             default:
+                text_tmp = *text + text_use_alt_color;
                 if(text_cursor_x >= (text_print_width + text_print_line_start)) {
                     text_cursor_x -= text_print_width;
                     text_cursor_y += TEXT_CHAR_HEIGHT;
