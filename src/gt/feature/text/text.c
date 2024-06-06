@@ -12,14 +12,14 @@
 char font_slot;
 char text_cursor_x, text_cursor_y;
 char text_print_width, text_print_line_start;
-TextColor text_color;
+unsigned char text_color;
 
 void init_text() {
     text_cursor_x = 0;
     text_cursor_y = 0;
     text_print_width = 128;
     text_print_line_start = 0;
-    text_color = TextColorBlack;
+    text_color = TEXT_COLOR_BLACK;
 }
 
 void load_font(char slot) {
