@@ -72,6 +72,9 @@ unsigned char paused_cfg = 0;
 unsigned char paused_delay;
 unsigned char music_mode = REPEAT_NONE;
 
+unsigned char sfx_progress = 0;
+unsigned char sfx_progress_increment = 1;
+
 unsigned char music_channel_mask;
 unsigned char* sound_effect_ptr;
 unsigned char sound_effect_bank;
@@ -216,6 +219,7 @@ void tick_music() {
             set_audio_param(PITCH_MSB + op, pitch_table[a]);
             set_audio_param(PITCH_LSB + op, pitch_table[a+1]);
             ++op;
+            sfx_progress += sfx_progress_increment;
         } else {
             op = sound_effect_channel << 2;
             set_audio_param(AMPLITUDE+(op+3), sine_offset);
@@ -322,12 +326,22 @@ void stop_music() {
 
 void play_sound_effect(char* sfx_ptr, char sfx_bank, char priority) {
     if(priority < sound_effect_priority) return;
+    sfx_progress = 0;
     sound_effect_priority = priority;
     sound_effect_bank = sfx_bank;
     sound_effect_ptr = sfx_ptr;
     sound_effect_channel = 2;
     change_rom_bank(sound_effect_bank);
     sound_effect_length = *(sound_effect_ptr++) + 1;
+
+    sfx_progress_increment = 1;
+    if(sound_effect_length < 64) sfx_progress_increment <<= 1;
+    if(sound_effect_length < 32) sfx_progress_increment <<= 1;
+    if(sound_effect_length < 16) sfx_progress_increment <<= 1;
+    if(sound_effect_length < 8) sfx_progress_increment <<= 1;
+    if(sound_effect_length < 4) sfx_progress_increment <<= 1;
+    if(sound_effect_length < 2) sfx_progress_increment <<= 1;
+
     saved_feedback_value = aram[FEEDBACK_AMT + sound_effect_channel];
     aram[FEEDBACK_AMT + sound_effect_channel] = *(sound_effect_ptr++);
     music_channel_mask &= ~(channel_masks[sound_effect_channel]);

@@ -8,6 +8,8 @@
 #define REPEAT_LOOP 1
 #define REPEAT_RESUME 2
 
+extern unsigned char sfx_progress;
+
 void init_music();
 
 void play_song(const unsigned char* song, char bank_num, char loop);
