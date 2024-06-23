@@ -3,10 +3,22 @@
 #include "drawing_funcs.h"
 #include "persist.h"
 
+char executing_from_rom() {
+    asm("PLX");
+    asm("PLA");
+    asm("PHA");
+    asm("PHX");
+    return __A__ > 0xC0;
+}
+
 #pragma code-name (push, "DATA")
 #pragma optimize (push, on)
+
 char i, k;
 void clear_save_sector() {
+    if(executing_from_rom()) {
+        while(1) {}
+    }
     *dma_flags = flagsMirror & ~(DMA_IRQ | DMA_NMI);
     asm("SEI");
     change_rom_bank(SAVE_BANK_NUM);
@@ -48,6 +60,9 @@ void lock_bypass() {
 //src assumed not Flash ROM
 //dest assumned to be in Flash ROM
 void save_write(char* src, char* dest, char len) {
+    if(executing_from_rom()) {
+        while(1) {}
+    }
     *dma_flags = flagsMirror & ~(DMA_IRQ | DMA_NMI);
     asm("SEI");
     change_rom_bank(SAVE_BANK_NUM);
