@@ -188,34 +188,39 @@ void unpause_music() {
 }
 
 void tick_music() {
-    static unsigned char n, noteMask, a, op, ch;
+    static unsigned char n, noteMask, ch;
+    register unsigned char a, op;
 
      if(sound_effect_length) {
         sound_effect_length--;
         if(sound_effect_length) {
             change_rom_bank(sound_effect_bank);
+
             op = sound_effect_channel << 2;
-            set_audio_param(AMPLITUDE+(op++), *(sound_effect_ptr++) + sine_offset);
-            set_audio_param(AMPLITUDE+(op++),*(sound_effect_ptr++) + sine_offset);
-            set_audio_param(AMPLITUDE+(op++), *(sound_effect_ptr++) + sine_offset);
-            set_audio_param(AMPLITUDE+(op++), *(sound_effect_ptr++) + sine_offset);
-            op -= 4;
-            a = *(sound_effect_ptr++) << 1;
+            set_audio_param(AMPLITUDE + op, *(sound_effect_ptr+0) + sine_offset);
+            a = *(sound_effect_ptr+4) << 1;
             set_audio_param(PITCH_MSB + op, pitch_table[a]);
             set_audio_param(PITCH_LSB + op, pitch_table[a+1]);
+
             ++op;
-            a = *(sound_effect_ptr++) << 1;
+            set_audio_param(AMPLITUDE + op, *(sound_effect_ptr+1) + sine_offset);
+            a = *(sound_effect_ptr+5) << 1;
             set_audio_param(PITCH_MSB + op, pitch_table[a]);
             set_audio_param(PITCH_LSB + op, pitch_table[a+1]);
+
             ++op;
-            a = *(sound_effect_ptr++) << 1;
+            set_audio_param(AMPLITUDE + op, *(sound_effect_ptr+2) + sine_offset);
+            a = *(sound_effect_ptr+6) << 1;
             set_audio_param(PITCH_MSB + op, pitch_table[a]);
             set_audio_param(PITCH_LSB + op, pitch_table[a+1]);
+
             ++op;
-            a = *(sound_effect_ptr++) << 1;
+            set_audio_param(AMPLITUDE + op, *(sound_effect_ptr+3) + sine_offset);
+            a = *(sound_effect_ptr+7) << 1;
             set_audio_param(PITCH_MSB + op, pitch_table[a]);
             set_audio_param(PITCH_LSB + op, pitch_table[a+1]);
-            ++op;
+
+            sound_effect_ptr += 8;
 
             pop_rom_bank();
         } else {
