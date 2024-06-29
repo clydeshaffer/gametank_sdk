@@ -47,7 +47,9 @@ function sliceLargeBitmaps(dir) {
 }
 
 function generateAssetsAssemblyFile(dir) {
-    const nameList = fs.readdirSync(dir).flatMap(sliceLargeBitmaps(dir));
+    const nameList = fs.readdirSync(dir)
+                       .flatMap(sliceLargeBitmaps(dir))
+                       .filter((fname) => !ignoreList.includes(fname));
     console.log(nameList);
     const path = dir.split('/');
     const dirName = path[path.length - 1];
@@ -56,7 +58,7 @@ function generateAssetsAssemblyFile(dir) {
     const exportLines = [];
     const incbinLines = [];
 
-    nameList.filter((fname)=>ignoreList.indexOf(fname)===-1).forEach((fname) => {
+    nameList.forEach((fname) => {
         const symName = filenameToSymbolName(dirName, fname);
         exportLines.push(`    .export ${symName}_ptr`);
         incbinLines.push(`${symName}_ptr:`)
