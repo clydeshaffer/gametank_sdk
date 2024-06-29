@@ -216,6 +216,8 @@ void tick_music() {
             set_audio_param(PITCH_MSB + op, pitch_table[a]);
             set_audio_param(PITCH_LSB + op, pitch_table[a+1]);
             ++op;
+
+            pop_rom_bank();
         } else {
             op = sound_effect_channel << 2;
             set_audio_param(AMPLITUDE+(op+3), sine_offset);
