@@ -12,14 +12,14 @@
 char font_slot;
 char text_cursor_x, text_cursor_y;
 char text_print_width, text_print_line_start;
-char text_use_alt_color;
+unsigned char text_color;
 
 void init_text() {
     text_cursor_x = 0;
     text_cursor_y = 0;
     text_print_width = 128;
     text_print_line_start = 0;
-    text_use_alt_color = 0;
+    text_color = TEXT_COLOR_BLACK;
 }
 
 void load_font(char slot) {
@@ -35,12 +35,8 @@ void print_text(char* text) {
     vram[WIDTH] = TEXT_CHAR_WIDTH;
     vram[HEIGHT] = TEXT_CHAR_HEIGHT;
     vram[VY] = text_cursor_y;
-    if(text_use_alt_color) {
-        text_use_alt_color = 128;
-    }
     while(*text != 0) {
-        text_tmp = *text + text_use_alt_color;
-        switch(text_tmp) {
+        switch(*text) {
             case ' ':
                 text_cursor_x += TEXT_CHAR_WIDTH;
                 break;
@@ -52,6 +48,7 @@ void print_text(char* text) {
                 text_cursor_x = text_print_line_start;
                 break;
             default:
+                text_tmp = *text + text_color;
                 if(text_cursor_x >= (text_print_width + text_print_line_start)) {
                     text_cursor_x -= text_print_width;
                     text_cursor_y += TEXT_CHAR_HEIGHT;
