@@ -6,11 +6,15 @@
 ;
 ; Checks for a BRK instruction and returns from all valid interrupts.
 
+.include "zeropage.inc"
+
 .import   _stop, _frameflag, _queue_pending, _queue_start
 .import   _queue_end, _queue_count, _flagsMirror, _frameflip, _draw_busy
 .import   _banksMirror
 .import   _nmi_count, _tick_music, _auto_tick_music
 .export   _irq_int, _nmi_int, _next_draw_queue
+
+.import         popax, __ZP_START__, jmpvec
 
 .pc02
 
@@ -37,9 +41,58 @@ DMA_HEIGHT = $4005
 DMA_Start = $4006
 DMA_Color = $4007
 
+.bss
+
+irqsp:  .res    2
+
+zpsave: .res    zpsavespace
+
+music_stack_area: .res 256
+music_stack_area_end: .res 1
+
 .segment  "CODE"
 
 .PC02                             ; Force 65C02 assembly mode
+
+call_tick_music:
+        ; Save our zero page locations
+@L1:    ldx     #.sizeof(::zpsave)-1
+@L2:    lda     <__ZP_START__,x
+        sta     zpsave,x
+        dex
+        bpl     @L2
+
+        ; Save jmpvec
+        lda     jmpvec+1
+        pha
+        lda     jmpvec+2
+        pha
+
+        ; Set C level interrupt stack
+        lda     #<music_stack_area_end
+        ldx     #>music_stack_area_end
+        sta     sp
+        stx     sp+1
+
+        ; Call C level interrupt request handler
+        jsr     _tick_music
+
+        ; Mark interrupt handled / not handled
+        lsr
+
+        ; Restore our zero page content
+        ldx     #.sizeof(::zpsave)-1
+@L3:    lda     zpsave,x
+        sta     <__ZP_START__,x
+        dex
+        bpl     @L3
+
+        ; Restore jmpvec and return
+        pla
+        sta     jmpvec+2
+        pla
+        sta     jmpvec+1
+        rts    
 
 ; ---------------------------------------------------------------------------
 ; Non-maskable interrupt (NMI) service routine
@@ -55,7 +108,7 @@ nmi_done:
         INC _nmi_count
         LDA _auto_tick_music
         BEQ nmi_after_tick_music
-        JSR _tick_music
+        JSR call_tick_music
 nmi_after_tick_music:
         PLY
         PLX
