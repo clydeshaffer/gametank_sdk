@@ -3,6 +3,7 @@
 #include "input.h"
 #include "dynawave.h"
 #include "music.h"
+#include "instruments.h"
 #include "gen/assets/gfx.h"
 #include "gen/assets/music.h"
 
@@ -37,6 +38,8 @@ int sine_wave[256] = {
 #define BULLET_POOL_SIZE 8
 #define TANK_MAG_SIZE 3
 #define TANK_CD_FRAMES 192
+
+#define TANK_SOUND_AMP 3
 
 unsigned char global_tick;
 
@@ -90,7 +93,7 @@ void update_tank(char num, int inputs, int last_inputs) {
     if(tank_hp[num] == 0) {
         ++tank_victories[1-num];
         tank_hp[num] = 128;
-        do_noise_effect(80, -8, 64);
+        play_sound_effect(&ASSET__music__explode_bin, 4);
         global_tick = 0;
     }
     if(tank_hp[num] & 128) {
@@ -108,19 +111,19 @@ void update_tank(char num, int inputs, int last_inputs) {
 
         if(inputs & (INPUT_MASK_LEFT | INPUT_MASK_RIGHT)) {
             note_out = (num << 2) + 20 + ((global_tick & 8) >> 2);
-            amp_out = 64;
+            amp_out = TANK_SOUND_AMP;
         }
 
         if(inputs & INPUT_MASK_UP) {
             tank_y[num].i -= (sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128);
             tank_x[num].i += (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128);
             note_out = (num << 2) + 20 + ((global_tick & 4) >> 2);
-            amp_out = 64;
+            amp_out = TANK_SOUND_AMP;
         } else if (inputs & INPUT_MASK_DOWN) {
             tank_y[num].i += (sine_wave[(tank_angle[num].b.msb + 64) % 256] - 128);
             tank_x[num].i -= (sine_wave[(tank_angle[num].b.msb + 128) % 256] - 128);
             note_out = (num << 2) + 21 + ((global_tick & 4) >> 2);
-            amp_out = 64;
+            amp_out = TANK_SOUND_AMP;
             
         }
 
@@ -140,7 +143,7 @@ void update_tank(char num, int inputs, int last_inputs) {
                 bullet_x[next_bullet].i = tank_x[num].i + (bullet_vx[next_bullet] * 4);
                 bullet_y[next_bullet].i = tank_y[num].i + (bullet_vy[next_bullet] * 4);
                 next_bullet = (next_bullet+1)%BULLET_POOL_SIZE;
-                do_noise_effect(80, 0, 1);
+                play_sound_effect(&ASSET__music__shot_bin, 2);
                 --tank_ammo[num];
                 if(tank_ammo[num] == 0) {
                     tank_reloading[num] = TANK_CD_FRAMES;
@@ -149,20 +152,29 @@ void update_tank(char num, int inputs, int last_inputs) {
             }
         } else {
             --tank_reloading[num];
+            if(!tank_reloading[num]) {
+                play_sound_effect(&ASSET__music__reload_bin, 1);
+            }
         }
 
         if(tank_hp[num] == 1) {
             if((global_tick & 0b00001100) == 0) {
                 note_out = 64;
-                amp_out = 64;
+                amp_out = TANK_SOUND_AMP;
             } else if((global_tick & 0b00001100) == 4) {
                 note_out = 59;
-                amp_out = 64;
+                amp_out = TANK_SOUND_AMP;
             }
         }
     }
-    set_note(num, note_out);
-    push_audio_param(AMPLITUDE+num, amp_out);
+    set_note(num << 2, note_out);
+    set_audio_param(AMPLITUDE+(num << 2) + 3, amp_out + sine_offset);
+    
+    if(amp_out) amp_out += 2;
+    set_audio_param(AMPLITUDE+(num << 2) + 0, amp_out + sine_offset);
+    set_audio_param(AMPLITUDE+(num << 2) + 1, amp_out + sine_offset);
+    set_audio_param(AMPLITUDE+(num << 2) + 2, amp_out + sine_offset);
+    
 }
 
 void init_tanks() {
@@ -236,6 +248,8 @@ void draw_countdown(char count) {
     draw_sprite_frame(&ASSET__gfx__countdown_json, 64, 64, (256 - count) >> 6, 0, 4);
 }
 
+extern char auto_tick_music;
+
 int tanks_main () {
     char i;
     char tank_angle_frame;
@@ -244,6 +258,7 @@ int tanks_main () {
 
     init_dynawave();
     init_music();
+    auto_tick_music = 1;
 
     init_graphics();
     flip_pages();
@@ -290,11 +305,11 @@ int tanks_main () {
                 } else if(check_tank_hit(0, bullet_x[i].b.msb, bullet_y[i].b.msb)){
                     bullet_life[i] = 0;
                     --tank_hp[0];
-                    do_noise_effect(30, 32, 8);
+                    play_sound_effect(&ASSET__music__hit_bin, 3);
                 } else if(check_tank_hit(1, bullet_x[i].b.msb, bullet_y[i].b.msb)) {
                     bullet_life[i] = 0;
                     --tank_hp[1];
-                    do_noise_effect(30, 32, 8);
+                    play_sound_effect(&ASSET__music__hit_bin, 3);
                 }
             }
         }
@@ -305,12 +320,7 @@ int tanks_main () {
         } else {
             if(count_down) {
                 if((count_down & 62) == 62) {
-                    set_note(0, 64);
-                    push_audio_param(AMPLITUDE, 64);
-                    push_audio_param(AMPLITUDE+1, 0);
-                } else {
-                    push_audio_param(AMPLITUDE, 0);
-                    push_audio_param(AMPLITUDE+1, 0);
+                    play_sound_effect(&ASSET__music__ping1_bin, 1);
                 }
                 draw_countdown(count_down);
                 --count_down;
@@ -319,12 +329,10 @@ int tanks_main () {
                 update_tank(0, player1_buttons, player1_old_buttons);
                 update_tank(1, player2_buttons, player2_old_buttons);
             } else if (count_down < 68) {
-                set_note(0, 69);
-                push_audio_param(AMPLITUDE, 64);
-                push_audio_param(AMPLITUDE+1, 0);
+                play_sound_effect(&ASSET__music__ping2_bin, 2);
             }
         }
-        flush_audio_params();
+        //flush_audio_params();
 
         if(global_tick == 255) {
             if((tank_hp[0] | tank_hp[1]) & 128) {
@@ -338,7 +346,7 @@ int tanks_main () {
         await_draw_queue();
         sleep(1);
         flip_pages();
-        tick_music();
+        //tick_music();
         ++global_tick;
     }
 

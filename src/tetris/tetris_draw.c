@@ -2,6 +2,7 @@
  * GameTank-specific implementation of drawing functions
  */
 #include <zlib.h>
+#include "../gt/gametank.h"
 #include "../gt/drawing_funcs.h"
 #include "../gt/feature/text/text.h"
 #include "tetris_draw.h"
@@ -16,6 +17,8 @@ const unsigned char tetro_colors[TET_COUNT+2] = { 0 , 244, 219, 92, 61, 29, 155,
 extern void wait();
 extern void nop5();
 extern void nop10();
+
+#pragma code-name(push, "PROG0")
 
 void init_tetromino_minis() {
     char i, x, y, r, c;
@@ -38,11 +41,11 @@ void init_tetromino_minis() {
     flagsMirror |= DMA_ENABLE;
     *dma_flags = flagsMirror;
 }
-
+/*
 void printnum(int num) {
     vram[VX] = cursorX;
     vram[VY] = cursorY;
-    vram[GY] = SPRITE_ROW_0_F - 8;
+    vram[GY] = SPRITE_ROW_0_F;
     vram[WIDTH] = SPRITE_CHAR_W;
     vram[HEIGHT] = SPRITE_CHAR_H;
     if(num == 0) {
@@ -102,7 +105,7 @@ void print(char* str) {
         }
     }
 }
-
+*/
 void draw_field0(char x, char y) {
     static char r, c, vx, vy, f, stx, sty, fieldIdx;
     stx = x;
@@ -234,9 +237,9 @@ void drawPlayerState(PlayerState* player) {
         player->bag_anim--;
     }
     draw_box_now(player->field_offset_x + (i * 8), player->field_offset_y, PIECEBUF_WIDTH, PIECEBUF_WIDTH, 3);
-    wait();
+    
     draw_sprite_now(player->field_offset_x + (i * 8), player->field_offset_y,PIECEBUF_WIDTH, PIECEBUF_WIDTH, 106, 2, 0);
-    wait();
+    //wait();
     if(player->pendingGarbage != 0) {
         draw_box_now(
             player->field_offset_x + GRID_SPACING * FIELD_W + 2,
@@ -256,3 +259,5 @@ void drawPlayerState(PlayerState* player) {
         print("over");
     }
 }
+
+#pragma code-name(pop)

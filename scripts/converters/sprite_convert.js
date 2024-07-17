@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const argv = require('minimist')(process.argv.slice(2));
 const BMP = require('bitmap-manipulation');
 
@@ -62,6 +63,12 @@ function saveHeadless(img, filename) {
     var pixelCount = img.width * img.height;
     img.save(tmpname);
     const tmpFileSize = fs.statSync(tmpname).size;
+
+    const parentDir = path.dirname(filename);
+    if(!fs.existsSync(parentDir)) {
+        fs.mkdirSync(parentDir, {recursive : true});
+    }
+
     const outputStream = fs.createWriteStream(filename);
     outputStream.on("finish", () => {
         fs.unlinkSync(tmpname);
@@ -73,6 +80,7 @@ let spriteSheet = BMP.BMPBitmap.fromFile(inFileName);
 let outSheets = splitImage(spriteSheet);
 if(outSheets.length == 1) {
     saveHeadless(flipV(outSheets[0]), outFileName);
+    console.log(outFileName);
 } else {
     var sheetNameTuples = outSheets.map((os, index) => {
         const nameNoExt = outFileName.split('.').slice(0, -1).join('.');

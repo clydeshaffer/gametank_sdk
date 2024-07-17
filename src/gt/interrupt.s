@@ -7,7 +7,7 @@
 ; Checks for a BRK instruction and returns from all valid interrupts.
 
 .import   _stop, _frameflag, _queue_pending, _queue_start
-.import   _queue_end, _queue_count, _flagsMirror, _frameflip
+.import   _queue_end, _queue_count, _flagsMirror, _frameflip, _draw_busy
 .import   _banksMirror
 .import   _nmi_count, _tick_music, _auto_tick_music
 .export   _irq_int, _nmi_int, _next_draw_queue
@@ -46,6 +46,8 @@ DMA_Color = $4007
 
 _nmi_int:
         PHA
+        PHX
+        PHY
         LDA $1FFF
         BNE nmi_done
         STZ _frameflag
@@ -55,6 +57,8 @@ nmi_done:
         BEQ nmi_after_tick_music
         JSR _tick_music
 nmi_after_tick_music:
+        PLY
+        PLX
         PLA
         RTI
 
@@ -70,6 +74,7 @@ _irq_int:
         ;to determine whether there is more to process
         STZ DMA_Start
         STZ _queue_pending
+        STZ _draw_busy
         LDA _queue_start
         CMP _queue_end
         BEQ finish_irq
@@ -133,6 +138,7 @@ finish_irq:
         INC _queue_start
 
         LDA #1
+        STA _draw_busy
         STA DMA_Start ;START
 
         DEC _queue_count

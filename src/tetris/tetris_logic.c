@@ -8,6 +8,8 @@
 #include "../gt/gametank.h"
 #include "../gt/input.h"
 #include "../gt/random.h"
+#include "../gt/music.h"
+#include "../gen/assets/music.h"
 
 #pragma code-name(push, "PROG0")
 
@@ -548,6 +550,14 @@ char updatePlayerState(PlayerState* p, int inp, int last_inp) {
                         player->score = tmpscore;
 
                         garbageOut = garbageTable[tmp + (4 * (tSpinType == T_SPIN_FULL))];
+
+                        if(tSpinType == T_SPIN_FULL) {
+                            play_sound_effect(&ASSET__music__tspin_bin, 5);
+                        } else if(tmp == 4) {
+                            play_sound_effect(&ASSET__music__4clear_bin, 4);
+                        } else if(tmp) {
+                            play_sound_effect(&ASSET__music__1clear_bin, 2);
+                        }
 
                         if(tmp != 0) {
                             if((tmp == 4) || tSpinType == T_SPIN_FULL) {

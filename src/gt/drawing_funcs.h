@@ -4,9 +4,9 @@
 
 #define SPRITE_CHAR_W 8
 #define SPRITE_CHAR_H 8
-#define SPRITE_ROW_0_F 0x68
-#define SPRITE_ROW_G_V 0x70
-#define SPRITE_ROW_W_Z 0x78
+#define SPRITE_ROW_0_F 0x60
+#define SPRITE_ROW_G_V 0x68
+#define SPRITE_ROW_W_Z 0x70
 #define SPRITE_CHAR_BLANK_X 0x70
 #define SPRITE_CHAR_BLANK_Y 0x78
 
@@ -57,16 +57,34 @@ void draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h
 
 void next_draw_queue();
 void await_draw_queue();
-
+void await_drawing();
 
 void clear_border(char c);
 void clear_screen(char c);
 
 void draw_box_now(char x, char y, char w, char h, char c);
 
+extern char draw_busy;
 void draw_sprite_now(char x, char y, char w, char h, char gx, char gy, char ramBank);
 
+/*#define draw_sprite_now( x,  y,  w,  h,  gx,  gy,  ramBank) \
+    await_drawing(); \
+    vram[VX] = x; \
+    vram[VY] = y; \
+    vram[GX] = gx; \
+    vram[GY] = gy; \
+    vram[WIDTH] = w; \
+    vram[HEIGHT] = h; \
+    draw_busy = 1; \
+    vram[START] = 1;*/
+
 void draw_fade(unsigned char opacity);
+
+void printnum(int num);
+
+void print_hex_num(char num);
+
+void print(char* str);
 
 extern char cursorX, cursorY;
 extern unsigned char queue_start, queue_end, queue_pending, queue_count;

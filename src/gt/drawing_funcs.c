@@ -7,6 +7,7 @@
 #include "banking.h"
 
 char cursorX, cursorY;
+char draw_busy;
 
 void sleep(int frames) {
     int i;
@@ -26,15 +27,12 @@ void flip_pages() {
 
 void init_graphics() {
     frameflip = 0;
+    draw_busy = 0;
     flagsMirror = DMA_NMI | DMA_ENABLE | DMA_IRQ;
     bankflip = BANK_SECOND_FRAMEBUFFER;
     *dma_flags = flagsMirror;
     banksMirror = bankflip;
     *bank_reg = banksMirror;
-    queue_count = 0;
-    queue_start = 0;
-    queue_end = 0;
-    queue_pending = 0;
 }
 
 void load_spritesheet(char* spriteData, char srcBank, char ramBank) {
@@ -64,6 +62,7 @@ void load_spritesheet(char* spriteData, char srcBank, char ramBank) {
     banksMirror = oldBanks;
     *dma_flags = flagsMirror;
     *bank_reg = banksMirror;
+    pop_rom_bank();
 }
 
 void clear_spritebank(char bank) {
@@ -110,7 +109,7 @@ void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x
     change_rom_bank(sprite_table_bank);
     while(queue_count >= QUEUE_MAX) {
         asm("CLI");
-        wait();
+        await_drawing();
     }
     asm("SEI");
     queue_flags_param = DMA_GCARRY;
@@ -151,12 +150,13 @@ void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x
         next_draw_queue();
     }
     asm("CLI");
+    pop_rom_bank();
 }
 
 void draw_sprite_rect() {
     if(queue_count >= QUEUE_MAX) {
         asm("CLI");
-        wait();
+        await_drawing();
     }
 
     asm("SEI");
@@ -185,7 +185,7 @@ void draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h
     }
     while(queue_count >= QUEUE_MAX) {
         asm("CLI");
-        wait();
+        await_drawing();
     }
     if(x + w >= 128) {
         w = 128 - x;
@@ -216,15 +216,24 @@ void draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h
 void await_draw_queue() {
     asm ("SEI");
     if(queue_pending != 0) {
-        wait();
+        await_drawing();
     }
     while(queue_end != queue_start) {
         next_draw_queue();
-        wait();
+        asm ("CLI");
+        await_drawing();
     }
     vram[START] = 0;
     queue_pending = 0;
     asm ("CLI");
+}
+
+void await_drawing() {
+    asm ("CLI");
+    while (draw_busy)
+    {
+        wait();
+    }
 }
 
 void clear_border(char c) {
@@ -247,6 +256,7 @@ void draw_box_now(char x, char y, char w, char h, char c) {
     vram[WIDTH] = w;
     vram[HEIGHT] = h;
     vram[COLOR] = ~c;
+    draw_busy = 1;
     vram[START] = 1;
 }
 
@@ -267,6 +277,7 @@ void draw_sprite_now(char x, char y, char w, char h, char gx, char gy, char ramB
     vram[GY] = gy;
     vram[WIDTH] = w;
     vram[HEIGHT] = h;
+    draw_busy = 1;
     vram[START] = 1;
 }
 
@@ -286,4 +297,93 @@ void draw_fade(unsigned char opacity) {
     banksMirror = oldBanks;
     *dma_flags = flagsMirror;
     *bank_reg = banksMirror;
+}
+
+void printnum(int num) {
+    vram[VX] = cursorX;
+    vram[VY] = cursorY;
+    vram[GY] = SPRITE_ROW_0_F;
+    vram[WIDTH] = SPRITE_CHAR_W;
+    vram[HEIGHT] = SPRITE_CHAR_H;
+    if(num == 0) {
+        vram[GX] = 0;
+        draw_busy = 1;
+        vram[START] = 1;
+        wait();
+    } else {
+        while(num != 0) {
+            vram[GX] = (num % 10) << 3;
+            draw_busy = 1;
+            vram[START] = 1;
+            wait();
+            cursorX -= 8;
+            num = num / 10;
+            vram[VX] = cursorX;
+        }
+    }
+}
+
+void print_hex_num(char num) {
+    vram[VX] = cursorX;
+    vram[VY] = cursorY;
+    vram[GY] = SPRITE_ROW_0_F;
+    vram[WIDTH] = SPRITE_CHAR_W;
+    vram[HEIGHT] = SPRITE_CHAR_H;
+
+    vram[GX] = (num & 0xF0) >> 1;
+    draw_busy = 1;
+    vram[START] = 1;
+    wait();
+    cursorX += 8;
+    vram[VX] = cursorX;
+    vram[GX] = (num & 0x0F) << 3;
+    draw_busy = 1;
+    vram[START] = 1;
+    wait();
+    cursorX += 8;
+}
+
+void print(char* str) {
+    flagsMirror &= ~DMA_COLORFILL_ENABLE;
+    *dma_flags = flagsMirror;
+    vram[WIDTH] = SPRITE_CHAR_W;
+    vram[HEIGHT] = SPRITE_CHAR_H;
+    while(*str != 0) {
+        if(*str >= '0' && *str <= '9') {
+            vram[GX] = (*str - '0') << 3;
+            vram[GY] = SPRITE_ROW_0_F;
+        } else if(*str >= 'a' && *str <= 'f') {
+            vram[GX] = ((*str - 'a') << 3) + 0x50;
+            vram[GY] = SPRITE_ROW_0_F;
+        } else if(*str >= 'g' && *str <= 'v') {
+            vram[GX] = (*str - 'g') << 3;
+            vram[GY] = SPRITE_ROW_G_V;
+        } else if(*str >= 'w' && *str <= 'z') {
+            vram[GX] = (*str - 'w') << 3;
+            vram[GY] = SPRITE_ROW_W_Z;
+        } else {
+            vram[GX] = SPRITE_CHAR_BLANK_X;
+            vram[GY] = SPRITE_CHAR_BLANK_Y;
+        }
+        if(*str == '\n') {
+            cursorX = 0;
+            cursorY += 8;
+        } else {
+            vram[VX] = cursorX;
+            vram[VY] = cursorY;
+            draw_busy = 1;
+            vram[START] = 1;
+            wait();
+            cursorX += 8;
+        }
+        str++;
+        if(cursorX >= 128) {
+            cursorX = 0;
+            cursorY += 8;
+        }
+        if(cursorY >= 128) {
+            cursorX = 0;
+            cursorY = 0;
+        }
+    }
 }
