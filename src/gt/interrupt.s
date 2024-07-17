@@ -9,6 +9,7 @@
 .import   _stop, _frameflag, _queue_pending, _queue_start
 .import   _queue_end, _queue_count, _flagsMirror, _frameflip
 .import   _banksMirror
+.import   _nmi_count, _tick_music, _auto_tick_music
 .export   _irq_int, _nmi_int, _next_draw_queue
 
 .pc02
@@ -49,6 +50,11 @@ _nmi_int:
         BNE nmi_done
         STZ _frameflag
 nmi_done:
+        INC _nmi_count
+        LDA _auto_tick_music
+        BEQ nmi_after_tick_music
+        JSR _tick_music
+nmi_after_tick_music:
         PLA
         RTI
 

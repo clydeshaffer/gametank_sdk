@@ -125,6 +125,8 @@ SYMBOLS {
         };
     }
 
+    bankNames.push('filler');
+
     for(var i = 1; i <= extra_code_banks; i++) {
         const bankNum = 254 - extra_code_banks + i;
         const bankName = 'BANK' + hex(bankNum);
@@ -159,7 +161,6 @@ SYMBOLS {
         fill : 'yes'
     }
 
-    bankNames.push('filler');
     bankNames.push('bankFF');
 
     var output = '';

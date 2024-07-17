@@ -77,7 +77,8 @@ void unpause_music() {
 }
 
 void tick_music() {
-    unsigned char n, noteMask;
+    static unsigned char n, noteMask, oldbank;
+    oldbank = romBankMirror;
     change_rom_bank(music_bank);
     if(audio_amplitudes[0] > 0) {
         audio_amplitudes[0]--;
@@ -176,6 +177,7 @@ void tick_music() {
 
 
     flush_audio_params();
+    change_rom_bank(oldbank);
 }
 
 void do_noise_effect(char note, char bend, char duration) {

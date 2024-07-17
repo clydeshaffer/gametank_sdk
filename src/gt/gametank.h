@@ -65,7 +65,7 @@
 #define IER 14
 
 extern char frameflag, frameflip, flagsMirror, banksMirror, bankflip;
-
+extern char nmi_count;
 void wait ();
 void nop5();
 void nop10();

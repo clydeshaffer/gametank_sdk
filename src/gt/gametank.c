@@ -10,3 +10,4 @@ char bankflip = BANK_SECOND_FRAMEBUFFER;
 
 char flagsMirror = 0;
 char banksMirror = 0;
+char nmi_count;

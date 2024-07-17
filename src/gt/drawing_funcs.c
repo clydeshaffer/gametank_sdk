@@ -248,7 +248,6 @@ void draw_box_now(char x, char y, char w, char h, char c) {
     vram[HEIGHT] = h;
     vram[COLOR] = ~c;
     vram[START] = 1;
-    *dma_flags = flagsMirror;
 }
 
 void draw_sprite_now(char x, char y, char w, char h, char gx, char gy, char ramBank) {

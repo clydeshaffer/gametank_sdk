@@ -1,6 +1,7 @@
 #ifndef BANKING_H
 #define BANKING_H
 
+extern unsigned char romBankMirror;
 void change_rom_bank(unsigned char banknum);
 
 #define BANK_COMMON 0

@@ -68,12 +68,6 @@ void draw_sprite_now(char x, char y, char w, char h, char gx, char gy, char ramB
 
 void draw_fade(unsigned char opacity);
 
-void printnum(int num);
-
-void print_hex_num(char num);
-
-void print(char* str);
-
 extern char cursorX, cursorY;
 extern unsigned char queue_start, queue_end, queue_pending, queue_count;
 extern unsigned char queue_flags_param; //defined in draw_util.s
