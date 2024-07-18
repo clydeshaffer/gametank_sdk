@@ -38,10 +38,6 @@ char music_cnt = 0;
 char game_state = GAME_STATE_TITLE;
 char mode_select = 0;
 int tetris_main() {
-    init_graphics();
-    init_dynawave();
-    init_music();
-    
     auto_tick_music = 1;
     
     load_spritesheet(&ASSET__tetris__gamesprites_bmp, 0);
@@ -66,7 +62,9 @@ int tetris_main() {
     players[1].playField = playField_1;
     players[1].field_offset_x = 72;
     players[1].field_offset_y = 24;
-
+    sleep(1);
+    stop_music();
+    stop_sound_effects();
     while(1){
         update_inputs();
         
@@ -79,7 +77,6 @@ int tetris_main() {
                     game_state = GAME_STATE_PLAY_SINGLE;
                 music_cnt = 0;
                 play_song(&ASSET__music__pizza_mid, REPEAT_LOOP);
-                auto_tick_music = 1;
                 for(i = 0; i < 220; ++i) {
                     playField_0[i] = 0;
                     playField_1[i] = 0;
@@ -90,6 +87,7 @@ int tetris_main() {
             }
             if(player1_buttons & ~player1_old_buttons & (INPUT_MASK_UP | INPUT_MASK_DOWN)) {
                 mode_select ^= 16;
+                play_sound_effect(&ASSET__music__blip_bin, 1);
             }
             rnd();
             
@@ -118,7 +116,6 @@ int tetris_main() {
             if((players[0].flags | players[1].flags) & PLAYER_DEAD) {
                 game_state |= STATE_FLAG_END;
                 did_init_music = 0;
-                auto_tick_music = 0;
                 stop_music();
                 stop_sound_effects();
             }

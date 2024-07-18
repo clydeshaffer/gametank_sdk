@@ -256,18 +256,6 @@ int tanks_main () {
     char intro_playing = 255;
     char count_down;
 
-    init_dynawave();
-    init_music();
-    auto_tick_music = 1;
-
-    init_graphics();
-    flip_pages();
-    clear_border(0);
-    await_draw_queue();
-    flip_pages();
-    await_draw_queue();
-    clear_border(0);
-
     load_spritesheet(&ASSET__gfx__green_tank_bmp, 0);
     load_spritesheet(&ASSET__gfx__ground_bmp, 1);
     load_spritesheet(&ASSET__gfx__exlposion_bmp, 2);
@@ -278,6 +266,7 @@ int tanks_main () {
     tank_victories[0] = 0;
     tank_victories[1] = 0;
     count_down = 63;
+    stop_music();
     play_song(&ASSET__music__tank_intro_mid, REPEAT_NONE);
 
     while (1) {             

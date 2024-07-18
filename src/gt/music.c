@@ -318,10 +318,12 @@ void tick_music() {
 }
 
 void stop_music() {
-    char n;
+    static char n;
     music_state.cursor = 0;
     for(n = 0; n < NUM_FM_OPS; ++n) {
         audio_amplitudes[n] = 0;
+        set_audio_param(PITCH_MSB + n, 0);
+        set_audio_param(PITCH_LSB + n, 0);
         set_audio_param(AMPLITUDE+n, sine_offset);
     }
     //flush_audio_params();

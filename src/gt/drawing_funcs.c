@@ -42,7 +42,7 @@ void load_spritesheet(char* spriteData, char srcBank, char ramBank) {
     char xbit = (ramBank & 8) << 4;
     char ybit = (ramBank & 16) << 3;
     change_rom_bank(srcBank);
-    flagsMirror = DMA_ENABLE;
+    flagsMirror = DMA_ENABLE | DMA_NMI;
     *dma_flags = flagsMirror;
     *vram_VX = 0;
     *vram_VY = 0;
@@ -53,7 +53,7 @@ void load_spritesheet(char* spriteData, char srcBank, char ramBank) {
     *vram_START = 1;
     *vram_START = 0;
 
-    flagsMirror = 0;
+    flagsMirror = DMA_NMI;
     *dma_flags = flagsMirror;
     banksMirror = bankflip | GRAM_PAGE(ramBank);
     *bank_reg = banksMirror;
