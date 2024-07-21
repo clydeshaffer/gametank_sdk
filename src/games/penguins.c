@@ -89,6 +89,7 @@ static void try_scan_ray(char pid) {
 }
 
 #pragma codeseg(push, "PROG0")
+static char directions_held;
 static void _try_move_penguin(char pid, char dx, char dy) {
     if(dx | dy) {
         last_dx[pid] = dx;
@@ -140,6 +141,19 @@ static void _try_move_penguin(char pid, char dx, char dy) {
             }
         }
     }
+
+    if(directions_held == 1) {
+        penguin_x[pid] += MAZE_OFFSET_X_PIX;
+        if(dx && (penguin_y[pid] & 7)) {
+            if(penguin_y[pid] & 4) dy = -1;
+            else dy = 1;
+        } else if(dy && (penguin_x[pid] & 7)) {
+            if(penguin_x[pid] & 4) dx = -1;
+            else dx = 1;
+        }
+        penguin_x[pid] -= MAZE_OFFSET_X_PIX;
+    }
+
     penguin_x[pid] -= dx;
     penguin_y[pid] -= dy;
 }
@@ -384,6 +398,11 @@ void run_penguins_game() {
             draw_sprite_now(0, 0, 127, 127, 0, 0, 2);
         } else {
             if(game_state == GAME_STATE_PLAYING) {
+                directions_held = 0;
+                if(player1_buttons & INPUT_MASK_LEFT) ++directions_held;
+                if(player1_buttons & INPUT_MASK_RIGHT) ++directions_held;
+                if(player1_buttons & INPUT_MASK_UP) ++directions_held;
+                if(player1_buttons & INPUT_MASK_DOWN) ++directions_held;
                 if(player1_buttons & INPUT_MASK_LEFT) {
                     penguin_gx[ctrl_penguin] = FACE_LEFT;
                     penguin_gx[1 - ctrl_penguin] = FACE_RIGHT;

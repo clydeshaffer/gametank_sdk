@@ -44,6 +44,11 @@ void _init_snake_game() {
     snake_head_dir = 0;
     snake_tail_pos = 132;
     snake_tail_dir = 0;
+    clear_border(32);
+    await_draw_queue();
+    flip_pages();
+    clear_border(32);
+    await_draw_queue();
     clear_field();
     for(i = 1; i < 15; ++i) {
         field[i + 16] = 30;

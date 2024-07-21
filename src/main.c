@@ -32,11 +32,11 @@ int main () {
     init_text();
     load_font(7);
     game_select = 0;
-
+    clear_border(32);
     while (1) {
         update_inputs();
-        draw_sprite(0, 0, 127, 127, 0, 0, 0);
-        clear_border(0);
+        draw_sprite(1, 4, 126, 120, 1, 4, 0);
+        
 
         if(player1_buttons & ~player1_old_buttons & INPUT_MASK_UP) {
           if(game_select > 0) --game_select;
