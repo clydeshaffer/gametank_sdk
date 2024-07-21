@@ -20,6 +20,8 @@ void draw_mini(const char tet_index, char x, char y);
 
 void drawPlayerState(PlayerState* player);
 
+void printnum_bcd(int num);
+
 extern char cursorX, cursorY;
 
 extern const unsigned char tetro_colors[TET_COUNT+2];

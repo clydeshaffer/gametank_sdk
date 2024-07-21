@@ -41,8 +41,8 @@ void init_tetromino_minis() {
     flagsMirror |= DMA_ENABLE;
     *dma_flags = flagsMirror;
 }
-/*
-void printnum(int num) {
+
+void printnum_bcd(int num) {
     vram[VX] = cursorX;
     vram[VY] = cursorY;
     vram[GY] = SPRITE_ROW_0_F;
@@ -63,7 +63,7 @@ void printnum(int num) {
         }
     }
 }
-
+/*
 void print(char* str) {
     vram[WIDTH] = SPRITE_CHAR_W;
     vram[HEIGHT] = SPRITE_CHAR_H;
@@ -223,7 +223,7 @@ void drawPlayerState(PlayerState* player) {
     wait();
     cursorX = player->field_offset_x + SPRITE_CHAR_W + 4;
     cursorY = player->field_offset_y - SPRITE_CHAR_H - 4;
-    printnum(player->score);
+    printnum_bcd(player->score);
     bag = player->bag;
     j = player->bag_index;
     m = player->field_offset_x + player->bag_anim;

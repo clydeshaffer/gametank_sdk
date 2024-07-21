@@ -337,7 +337,7 @@ char checkLineClears0(char topBound, char botBound) {
     for(r = botBound; r >= topBound; r--) {
         blocks = 0;
         for(c = 0; c < FIELD_W; c++) {
-            blocks += !!playField_0[i--];
+            if(playField_0[i--]) ++blocks;
         }
         if(blocks == FIELD_W) {
             clearCount++;
@@ -359,7 +359,7 @@ char checkLineClears1(char topBound, char botBound) {
     for(r = botBound; r >= topBound; r--) {
         blocks = 0;
         for(c = 0; c < FIELD_W; c++) {
-            blocks += !!playField_1[i--];
+            if(playField_1[i--]) ++blocks;
         }
         if(blocks == FIELD_W) {
             clearCount++;
@@ -447,9 +447,11 @@ void initPlayerState(PlayerState* player) {
     player->heldPiece.y = 0;
 }
 
+int tmpscore;
+extern void add_tmp_score_bcd(char amt);
+
 char updatePlayerState(PlayerState* p, int inp, int last_inp) {
     static char oldX, oldY, tmp, tmp2, tSpinType, garbageOut;
-    static int tmpscore;
     static int inputs, last_inputs;
     static PlayerState* player;
     inputs = inp;
@@ -541,11 +543,10 @@ char updatePlayerState(PlayerState* p, int inp, int last_inp) {
                         } else {
                             tmp = checkLineClears0(tmp, tmp2);
                         }
+                        if(tmp > 4) while(1) {}
                         tmpscore = player->score;
 
-                        asm("SED");
-                        tmpscore += tmp;
-                        asm("CLD");
+                        add_tmp_score_bcd(tmp);
 
                         player->score = tmpscore;
 

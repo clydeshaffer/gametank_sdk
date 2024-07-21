@@ -22,8 +22,6 @@ int main() {
     init_music();
 
     load_spritesheet(&ASSET__gfx__select_bmp, 0);
-    load_font(1);
-    init_text();
 
     clear_border(32);
     draw_sprite(1, 7, 126, 114, 0, 0, 0);

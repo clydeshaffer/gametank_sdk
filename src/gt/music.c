@@ -331,6 +331,7 @@ void stop_music() {
 
 void stop_sound_effects() {
     sound_effect_length = 0;
+    sound_effect_priority = 0;
 }
 
 void play_sound_effect(char* sfx_ptr, char sfx_bank, char priority) {
