@@ -59,7 +59,7 @@ void lock_bypass() {
 
 //src assumed not Flash ROM
 //dest assumned to be in Flash ROM
-void save_write(char* src, char* dest, char len) {
+void save_write(void *src, void *dest, char len) {
     if(executing_from_rom()) {
         while(1) {}
     }
@@ -71,8 +71,8 @@ void save_write(char* src, char* dest, char len) {
     unlock_bypass();
     while(k) {
         *((unsigned char*) 0x8000) = 0xA0;
-        dest[i] = src[i];
-        while(dest[i] != src[i]) {
+        ((char *)dest)[i] = ((char *)src)[i];
+        while(((char *) dest)[i] != ((char *) src)[i]) {
             
         }
         i++;
