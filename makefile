@@ -134,7 +134,13 @@ scripts/%/node_modules:
 dummy%:
 	@:
 
-.PHONY: clean clean-node flash emulate import node_modules
+.PHONY: clean clean-node flash emulate import node_modules check_shell
+
+check_shell:
+	@if ! command -v $(notdir $(SHELL)) > /dev/null 2>&1; then \
+		echo "Error: $(SHELL) is not in your PATH. Please add it to your PATH and try again."; \
+		exit 1; \
+	fi
 
 clean:
 	rm -rf $(ODIR)/*
@@ -151,5 +157,5 @@ emulate: bin/$(TARGET)
 
 node_modules: scripts/build_setup/node_modules scripts/converters/node_modules
 
-import: node_modules
+import: node_modules check_shell
 	node ./scripts/build_setup/import_assets.js
