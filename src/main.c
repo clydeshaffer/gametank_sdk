@@ -4,6 +4,8 @@
 #include "persist.h"
 #include "banking.h"
 
+#include "gen/assets/font.h"
+
 #pragma data-name (push, "SAVE")
 char saved_pos[4] = {30, 40, 1, 1};
 #pragma data-name (pop)
@@ -13,6 +15,8 @@ char pos[4];
 int main () {
 
     init_graphics();
+
+    load_spritesheet(&ASSET__font__track_bmp, 0);
 
     flip_pages();
     clear_border(0);
