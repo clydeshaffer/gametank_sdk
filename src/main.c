@@ -10,6 +10,8 @@ char saved_pos[4] = {30, 40, 1, 1};
 
 char pos[4];
 
+extern void overdoom_main();
+
 int main () {
 
     init_graphics();
@@ -21,14 +23,9 @@ int main () {
     await_draw_queue();
     clear_border(0);
 
+    overdoom_main();
 
-    change_rom_bank(SAVE_BANK_NUM);
-    pos[0] = saved_pos[0];
-    pos[1] = saved_pos[1];
-    pos[2] = saved_pos[2];
-    pos[3] = saved_pos[3];
-
-    while (1) {                                     //  Run forever
+    /*while (1) {                                     //  Run forever
         clear_screen(3);
         draw_box(pos[1], pos[0], 8, 8, 92);
         pos[1] += pos[2];
@@ -53,7 +50,7 @@ int main () {
           save_write(&pos, &saved_pos, sizeof(pos));
         }
 
-    }
+    }*/
 
   return (0);                                     //  We should never get here!
 }
