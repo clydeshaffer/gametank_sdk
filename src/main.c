@@ -3,16 +3,39 @@
 #include "input.h"
 #include "persist.h"
 #include "banking.h"
+#include "dynawave.h"
+#include "gen/assets/audiodata.h"
 
 #pragma data-name (push, "SAVE")
 char saved_pos[4] = {30, 40, 1, 1};
 #pragma data-name (pop)
 
 char pos[4];
+char* audio_data_cursor;
+int audio_data_counter;
 
 int main () {
+    static char i;
 
     init_graphics();
+    init_dynawave();
+
+    set_audio_param(PITCH_MSB+0, 0x00);
+    set_audio_param(PITCH_LSB+0, 0x00);
+    set_audio_param(PITCH_MSB+1, 0x00);
+    set_audio_param(PITCH_LSB+1, 0x00);
+    set_audio_param(PITCH_MSB+2, 0x00);
+    set_audio_param(PITCH_LSB+2, 0x00);
+    set_audio_param(PITCH_MSB+3, 0x00);
+    set_audio_param(PITCH_LSB+3, 0x00);
+    set_audio_param(PITCH_MSB+4, 0x00);
+    set_audio_param(PITCH_LSB+4, 0x00);
+    set_audio_param(PITCH_MSB+5, 0x00);
+    set_audio_param(PITCH_LSB+5, 0x00);
+    set_audio_param(PITCH_MSB+6, 0x00);
+    set_audio_param(PITCH_LSB+6, 0x00);
+    set_audio_param(PITCH_MSB+7, 0x00);
+    set_audio_param(PITCH_LSB+7, 0x00);
 
     flip_pages();
     clear_border(0);
@@ -28,8 +51,28 @@ int main () {
     pos[2] = saved_pos[2];
     pos[3] = saved_pos[3];
 
+    audio_data_cursor = &ASSET__audiodata__pacer_bin_ptr;
+    audio_data_counter = 0;
+
     while (1) {                                     //  Run forever
         clear_screen(3);
+
+        change_rom_bank(ASSET__audiodata__pacer_bin_bank);
+        for(i = 0; i < 8; ++i) {
+            push_audio_param(PITCH_LSB+i, *audio_data_cursor);
+            ++audio_data_cursor;
+            push_audio_param(PITCH_MSB+i, *audio_data_cursor);
+            ++audio_data_cursor;
+            audio_data_counter += 2;
+        }
+        flush_audio_params();
+        pop_rom_bank();
+
+        if(audio_data_counter == 7792) {
+            audio_data_cursor = &ASSET__audiodata__pacer_bin_ptr;
+            audio_data_counter = 0;
+        }
+
         draw_box(pos[1], pos[0], 8, 8, 92);
         pos[1] += pos[2];
         pos[0] += pos[3];

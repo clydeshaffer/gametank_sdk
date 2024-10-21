@@ -48,7 +48,7 @@ COBJS = $(patsubst src/%,$(ODIR)/%,$(C_SRCS:c=o))
 A_SRCS := $(shell $(FIND) src -name "*.s")
 AOBJS = $(filter-out $(ASSETLISTS),$(patsubst src/%,$(ODIR)/%,$(A_SRCS:s=o)))
 
-_AUDIO_FW = audio_fw.bin.deflate
+_AUDIO_FW = sines_fw.bin.deflate
 AUDIO_FW = $(patsubst %,$(ODIR)/assets/%,$(_AUDIO_FW))
 
 -include bankMakeList #sets _BANKS
@@ -91,13 +91,13 @@ $(ODIR)/assets/%.bin: assets/%.bin
 	@mkdir -p $(@D)
 	cp $< $@
 
-$(ODIR)/assets/audio_fw.bin.deflate: $(ODIR)/assets/audio_fw.bin
+$(ODIR)/assets/sines_fw.bin.deflate: $(ODIR)/assets/sines_fw.bin
 	zopfli --deflate $<
 
-$(ODIR)/assets/audio_fw.bin: src/gt/audio_fw.asm gametank-acp.cfg
+$(ODIR)/assets/sines_fw.bin: src/gt/sines_fw.asm gametank-acp.cfg
 	@mkdir -p $(@D)
-	$(AS) --cpu 65C02 src/gt/audio_fw.asm -o $(ODIR)/assets/audio_fw.o
-	$(LN) -C gametank-acp.cfg $(ODIR)/assets/audio_fw.o -o $(ODIR)/assets/audio_fw.bin
+	$(AS) --cpu 65C02 src/gt/sines_fw.asm -o $(ODIR)/assets/sines_fw.o
+	$(LN) -C gametank-acp.cfg $(ODIR)/assets/sines_fw.o -o $(ODIR)/assets/sines_fw.bin
 
 $(ODIR)/gen/assets/%.o: src/gen/assets/%.s.asset $(BMPOBJS) $(JSONOBJS) $(AUDIO_FW) $(MIDOBJS) $(BINOBJS)
 	@mkdir -p $(@D)
@@ -119,7 +119,7 @@ $(ODIR)/%.o: src/%.s
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
-$(ODIR)/gt/crt0.o: src/gt/crt0.s build/assets/audio_fw.bin.deflate
+$(ODIR)/gt/crt0.o: src/gt/crt0.s build/assets/sines_fw.bin.deflate
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 

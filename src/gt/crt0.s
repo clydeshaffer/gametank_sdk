@@ -190,4 +190,4 @@ ShiftHighBits:
 
 	.segment "COMMON"
 _DynaWave:
-    .incbin "build/assets/audio_fw.bin.deflate"
+    .incbin "build/assets/sines_fw.bin.deflate"
