@@ -83,9 +83,13 @@ function generateAssetsHeaderFile(dir, bankNumber) {
 
     nameList.forEach((fname) => {
         const symName = filenameToSymbolName(dirName, fname).substring(1);
+        externLines.push(`//${dir}/${fname}`);
         externLines.push(`extern const unsigned char* ${symName}_ptr;`);
         externLines.push(`#define ${symName}_bank ${bankNumber}`);
         externLines.push(`#define ${symName} ${symName}_ptr,${symName}_bank`);
+        if(fs.existsSync(`${dir}/${fname}`)) {
+            externLines.push(`#define ${symName}_size ${fs.statSync(`${dir}/${fname}`).size}`);
+        }
     });
 
     return [
