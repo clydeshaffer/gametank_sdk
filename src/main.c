@@ -9,12 +9,15 @@
 #include "random.h"
 
 char* audio_data_cursor;
+char* last_audio_cursor;
 int audio_data_counter;
 
 #define CARD_COUNT 52
 #define DECK_SIZE 52
-#define START_HAND_SIZE 0
+#define START_HAND_SIZE 7
 char hand_size;
+char cpu_hand_size; //CPU hand counts down from CARD_COUNT - 1
+char cpu_hand_start_index;
 char card_x[CARD_COUNT];
 char card_y[CARD_COUNT];
 char card_vx[CARD_COUNT];
@@ -34,7 +37,8 @@ const char suit_offset[4] = {0, 24, 48, 72};
 const char hand_offset[HAND_OFFSETS_COUNT] = { 0, 64, 48, 32, 25, 21, 18, 14, 12, 10, 8, 4 };
 
 #define setclip(x) audio_data_cursor = &ASSET__audiodata__##x##_bin_ptr; \
-            audio_data_counter = ASSET__audiodata__##x##_bin_size;
+            audio_data_counter = ASSET__audiodata__##x##_bin_size; \
+            last_audio_cursor = audio_data_cursor;
 
 void set_voice_clip(char x) {
     switch (x) {
@@ -102,7 +106,17 @@ void shuffle_deck() {
     }
 }
 
+#define STATE_NONE 0
+#define STATE_DEALING 1
+#define STATE_CPU_ASKING 2
+#define STATE_CPU_DRAWING 3
+#define STATE_PLAYER_GIVING 4
+#define STATE_PLAYER_ASKING 5
+#define STATE_CPU_GIVING 6
+#define STATE_PLAYER_DRAWING 7
+
 char select_cursor, cardgap, turn, dealing, wait_timer, selecting, requesting, requested;
+char game_state, timeout_state;
 
 int main () {
     static char i, nextcard;
@@ -140,24 +154,17 @@ int main () {
 
     init_deck();
     shuffle_deck();
-    dealing = 7;
+    dealing = START_HAND_SIZE;
     wait_timer = 30;
     selecting = 0;
     requesting = 0xFF;
 
-    card_x[0] = 64;
-    for(i = 0; i < START_HAND_SIZE; ++i) {
-        card_y[i] = UNSELECT_HEIGHT;
-        card_vx[i] = 0;
-        card_vy[i] = 0;
-        card_num[i] = deck[i];
-        deck[i] = 0x00;
-        ++deck_index;
-    }
-    hand_size = START_HAND_SIZE;
+    hand_size = 0;
+    cpu_hand_size = 0;
+    cpu_hand_start_index = CARD_COUNT;
     cardgap = 14;
 
-    for(i = START_HAND_SIZE; i < CARD_COUNT; ++i) {
+    for(i = 0; i < CARD_COUNT; ++i) {
         card_num[i] = 0xFF;
     }
 
@@ -192,48 +199,66 @@ int main () {
                 } else if(requested != 0xFF) {
                     selecting = 1;
                 }
+
+                if(last_audio_cursor == &ASSET__audiodata__awdangit_bin_ptr) {
+                    setclip(giveme);
+                    requesting = card_num[rnd_range(cpu_hand_start_index, CARD_COUNT)] & 0x0F;
+                    requested = 0xFF;
+                }
             }
         }
 
         cardgap = 21 - hand_size;
         if(hand_size > 20) cardgap = 1;
         card_vx[0] = (hand_size < HAND_OFFSETS_COUNT) ? hand_offset[hand_size] : hand_offset[HAND_OFFSETS_COUNT-1];
-        if(card_x[0] > card_vx[0]) --card_x[0];
-        else if(card_x[0] < card_vx[0]) ++card_x[0];
-        card_vx[0] = 0;
-        
-        for(i = CARD_COUNT - 1; i != 255; --i) {
+       
+        for(i = 1; i < hand_size; ++i) {
+            card_vx[i] = card_vx[i-1] + cardgap;
+        }
+
+        cardgap = 21 - cpu_hand_size;
+        card_vx[cpu_hand_start_index] = ((cpu_hand_size < HAND_OFFSETS_COUNT) ? hand_offset[cpu_hand_size] : hand_offset[HAND_OFFSETS_COUNT-1]);
+        for(i = cpu_hand_start_index+1; i < CARD_COUNT; ++i) {
+            card_vx[i] = card_vx[i-1] + cardgap;
+        }
+
+        for(i = 0; i < CARD_COUNT; ++i) {
             if(card_num[i] != 0xFF) {
                 if(i < hand_size) {
-                    if(i) {
-                        card_x[i] = card_x[i-1] + cardgap;
+                    if(selecting) {
+                        if(i == select_cursor) {
+                            card_vy[i] = SELECT_HEIGHT;
+                        } else {
+                            card_vy[i] = UNSELECT_HEIGHT;
+                        }
                     }
-                    if((i == select_cursor) && selecting) {
-                        if(card_y[i] > SELECT_HEIGHT) card_y[i] -= 2;
-                    } else {
-                        if(card_y[i] < UNSELECT_HEIGHT) card_y[i] += 2;
-                    }
-
-                    if(card_y[i] > 196) {
+                }
+                if(card_y[i] == 0) {
+                    if(!(card_num[i] & 0x80)) {
+                        card_num[i] |= 0x80;
+                        --cpu_hand_start_index;
+                        card_num[cpu_hand_start_index] = card_num[i];
                         card_num[i] = 0xFF;
+                        ++cpu_hand_size;
                     }
                 }
 
-                draw_sprite(card_x[i], card_y[i], 16, 24, (card_num[i] & 15) << 4, suit_offset[card_num[i] >> 4], bankflip | BANK_CLIP_X | BANK_CLIP_Y);
-                card_x[i] += card_vx[i];
-                card_y[i] += card_vy[i];
-                if(card_x[i] == 1) {
-                    card_vx[i] = 1;
-                } else if(card_x[i] == 119) {
-                    card_vx[i] = -1;
-                }
-                if(card_y[i] == 8) {
-                    card_vy[i] = 1;
-                } else if(card_y[i] == 112) {
-                    card_vy[i] = -1;
-                }
+                if(card_x[i] > card_vx[i]) --card_x[i];
+                else if(card_x[i] < card_vx[i]) ++card_x[i];
+                if(card_y[i] > card_vy[i]) --card_y[i];
+                else if(card_y[i] < card_vy[i]) ++card_y[i];
             }
         }
+
+        for(i = CARD_COUNT - 1; i != 255; --i) {
+            if(card_num[i] != 0xFF) {
+                if(card_num[i] & 0x80) {
+                    draw_sprite(card_x[i], card_y[i], 16, 24, 0, 96, bankflip | BANK_CLIP_X | BANK_CLIP_Y);
+                } else {
+                    draw_sprite(card_x[i], card_y[i], 16, 24, (card_num[i] & 15) << 4, suit_offset[card_num[i] >> 4], bankflip | BANK_CLIP_X | BANK_CLIP_Y);
+                }
+            }
+        }        
 
         clear_border(0);
         
@@ -251,11 +276,29 @@ int main () {
         if(player1_buttons & ~player1_old_buttons & INPUT_MASK_A) {
             //set_voice_clip((card_num[select_cursor] & 15) + 1);
             if((card_num[select_cursor] & 15) == requested) {
-                card_vy[select_cursor] = -3;
+                card_x[hand_size] = card_x[select_cursor];
+                card_y[hand_size] = card_y[select_cursor];
+                card_vx[hand_size] = card_vx[select_cursor];
+                card_vy[hand_size] = 0;
+                card_num[hand_size] = card_num[select_cursor];
+                card_num[select_cursor] = 0xFF;
+                for(i = select_cursor; i < hand_size-1; ++i) {
+                    card_num[i] = card_num[i+1];
+                    card_x[i] = card_x[i+1];
+                    card_y[i] = card_y[i+1];
+                }
+                --hand_size;
+                card_num[hand_size] = 0xFF;
                 setclip(thankyou);
                 selecting = 0;
             } else {
                 setclip(no);
+            }
+        }
+
+        if(player1_buttons & ~player1_old_buttons & INPUT_MASK_B) {
+            if(requested != 0xFF) {
+                setclip(awdangit);
             }
         }
 
@@ -264,14 +307,23 @@ int main () {
             if(!wait_timer) {
                 if(dealing) {
                     card_x[hand_size] = 64;
+                    card_y[hand_size] = 64;
                     card_num[hand_size] = deck[deck_index++];
-                    card_y[hand_size] = 72;
+                    card_vy[hand_size] = UNSELECT_HEIGHT;
                     ++hand_size;
+
+                    --cpu_hand_start_index;
+                    card_x[cpu_hand_start_index] = 64;
+                    card_y[cpu_hand_start_index] = 64;
+                    card_num[cpu_hand_start_index] = deck[deck_index++] | 0x80;
+                    card_vy[cpu_hand_start_index] = 0;
+                    ++cpu_hand_size;
+
                     --dealing;
                     wait_timer = DEAL_ANIM_DELAY;
                 } else if (!selecting && !audio_data_counter && (requesting = 0xFF)) {
                     setclip(giveme);
-                    requesting = 8;//rnd_range(0,13);
+                    requesting = card_num[rnd_range(cpu_hand_start_index, CARD_COUNT)] & 0x0F;
                 }
             }
         }
