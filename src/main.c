@@ -14,7 +14,7 @@ int audio_data_counter;
 
 #define CARD_COUNT 52
 #define DECK_SIZE 52
-#define START_HAND_SIZE 7
+#define START_HAND_SIZE 2
 #define RANK(x) (x & 0xF)
 char hand_size;
 char hand_start;
@@ -32,7 +32,7 @@ char deck_index;
 
 #define SELECT_HEIGHT 86
 #define UNSELECT_HEIGHT 104
-#define CPU_HAND_HEIGHT 0
+#define CPU_HAND_HEIGHT 16
 #define CPU_SHOWING_HEIGHT 26
 
 char player_score;
@@ -142,8 +142,13 @@ void init_deck() {
             deck[i] = (deck[i] & 0xF0) + 0x10;
         }
     }
+    //if deck is inited then all cards are put back
+    for(i = 0; i < CARD_COUNT; ++i) {
+        card_num[i] = 0xFF;
+    }
 }
 
+//assumes full deck
 void shuffle_deck() {
     char i, swap, select;
     for(i = 0; i < DECK_SIZE; ++i) {
@@ -190,6 +195,16 @@ char count_rank_cpu_hand(char rank) {
 #define STATE_CHECK_PLAYER_SCORING 11
 #define STATE_CHECK_CPU_SCORING 12
 #define STATE_TITLE 13
+#define STATE_END 14
+
+#define WAIT_LONG 90
+#define WAIT_MED 60
+#define WAIT_SHORT 30
+
+#define TEXT_FRAME_LOSE 0
+#define TEXT_FRAME_WIN 1
+#define TEXT_FRAME_DRAW 2
+char text_frame;
 
 const char card_spacings[53] = {0,0,24,17,16,14,13,13,13,13,12,11,10,9,8,7,7,6,6,6,5,5,5,5,4,4,4,4,4,3,3,3,3,3,3,3,3,3,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2};
 const char card_offsets[53] = {0,56,44,39,32,28,23,17,10,4,2,1,1,2,4,7,3,8,5,2,8,6,3,1,10,8,6,4,2,14,12,11,9,8,6,5,3,2,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5};
@@ -197,7 +212,7 @@ const char card_offsets[53] = {0,56,44,39,32,28,23,17,10,4,2,1,1,2,4,7,3,8,5,2,8
 char select_cursor, cardgap, turn, dealing, wait_timer, selecting, cpu_requested_rank, num_cards_given;
 char player_selected_rank;
 char cpu_showing_index;
-char game_state, timeout_state;
+char game_state, timeout_state, old_state;
 char first_to_play;
 
 #define PICK_CPU_CARD_INDEX rnd_range(cpu_hand_start, cpu_hand_end)
@@ -281,8 +296,10 @@ char check_player_scoring(char newestCard) {
     return cnt;
 }
 
+char debug_show_all_cards;
+
 void draw_card(char i) {
-    if(card_num[i] & 0x80) {
+    if((card_num[i] & 0x80) && (!debug_show_all_cards)) {
         draw_sprite(card_x[i], card_y[i], 16, 24, 0, 96, bankflip | BANK_CLIP_X | BANK_CLIP_Y);
     } else {
         draw_sprite(card_x[i], card_y[i], 16, 24, (card_num[i] & 15) << 4, suit_offset[(card_num[i] & 0x7F) >> 4], bankflip | BANK_CLIP_X | BANK_CLIP_Y);
@@ -291,6 +308,7 @@ void draw_card(char i) {
 
 int main () {
     static char i, nextcard;
+    debug_show_all_cards = 0;
 
     init_graphics();
 
@@ -298,6 +316,7 @@ int main () {
     load_spritesheet(&ASSET__img__cards_1_bmp, QUADRANT_1);
     load_spritesheet(&ASSET__img__table_bmp, 1);
     load_spritesheet(&ASSET__img__title_bmp, 2);
+    load_spritesheet(&ASSET__img__texts_bmp, 3);
 
     init_dynawave();
 
@@ -328,7 +347,7 @@ int main () {
     init_deck();
     shuffle_deck();
     dealing = START_HAND_SIZE;
-    wait_timer = 30;
+    wait_timer = WAIT_SHORT;
     selecting = 0;
     cpu_requested_rank = 0xFF;
 
@@ -343,6 +362,7 @@ int main () {
     cpu_hand_end = CARD_COUNT;
     num_cards_given = 0;
     game_state = STATE_TITLE;
+    old_state = STATE_WAITING;
     timeout_state = STATE_DEALING;
     first_to_play = 0;
 
@@ -383,18 +403,21 @@ int main () {
             }
         }
 
-        cardgap = card_spacings[hand_size];
-        if(hand_size > 20) cardgap = 1;
-        card_vx[hand_start] = card_offsets[hand_size];
-       
-        for(i = hand_start+1; i < hand_end; ++i) {
-            card_vx[i] = card_vx[i-1] + cardgap;
+        if(hand_size) {
+            cardgap = card_spacings[hand_size];
+            card_vx[hand_start] = card_offsets[hand_size];
+        
+            for(i = hand_start+1; i < hand_end; ++i) {
+                card_vx[i] = card_vx[i-1] + cardgap;
+            }
         }
 
-        cardgap = card_spacings[cpu_hand_size];
-        card_vx[cpu_hand_start] = card_offsets[cpu_hand_size];
-        for(i = cpu_hand_start+1; i < cpu_hand_end; ++i) {
-            card_vx[i] = card_vx[i-1] + cardgap;
+        if(cpu_hand_size) {
+            cardgap = card_spacings[cpu_hand_size];
+            card_vx[cpu_hand_start] = card_offsets[cpu_hand_size];
+            for(i = cpu_hand_start+1; i < cpu_hand_end; ++i) {
+                card_vx[i] = card_vx[i-1] + cardgap;
+            }
         }
 
         for(i = 0; i < CARD_COUNT; ++i) {
@@ -492,7 +515,7 @@ int main () {
                         } else {
                             game_state = STATE_WAITING;
                             timeout_state = STATE_PLAYER_GIVING;
-                            wait_timer = 30;
+                            wait_timer = WAIT_SHORT;
                         }
                     }
                 }
@@ -533,13 +556,13 @@ int main () {
                                 if(!num_cards_given) {
                                     setclip(awdangit);
                                     game_state = STATE_WAITING;
-                                    wait_timer = 60;
+                                    wait_timer = WAIT_MED;
                                     timeout_state = STATE_CPU_DRAWING;
                                 } else {
                                     num_cards_given = 0;
                                     setclip(thankyou);
                                     game_state = STATE_CHECK_CPU_SCORING;
-                                    wait_timer = 60;
+                                    wait_timer = WAIT_MED;
                                     timeout_state = STATE_CPU_ASKING;
                                 }
                             }
@@ -556,7 +579,7 @@ int main () {
                     ++cpu_hand_size;
                 }
                 game_state = STATE_WAITING;
-                wait_timer = 60;
+                wait_timer = WAIT_MED;
                 timeout_state = STATE_CPU_READING_CARD;
                 break;
             case STATE_CPU_READING_CARD:
@@ -565,16 +588,10 @@ int main () {
                     if(check_cpu_scoring(cpu_requested_rank) == BOOK_SIZE) {
                         game_state = STATE_WAITING;
                     } else {
-                        if(cpu_hand_size) {
-                            game_state = STATE_CPU_SHOWING_CARD;
-                            cpu_showing_index = cpu_hand_start;
-                        } else {
-                            //TODO create a game end scoring check state
-                            game_state = STATE_WAITING;
-                            timeout_state = STATE_WAITING;
-                        }
+                        game_state = STATE_CPU_SHOWING_CARD;
+                        cpu_showing_index = cpu_hand_start;
                     }
-                    wait_timer = 60;
+                    wait_timer = WAIT_MED;
                     timeout_state = STATE_CPU_ASKING;
                 } else {
                     if(check_cpu_scoring(RANK(card_num[cpu_hand_start])) == BOOK_SIZE) {
@@ -583,8 +600,12 @@ int main () {
                         setclip(no);
                     }
                     game_state = STATE_WAITING;
-                    wait_timer = 60;
+                    wait_timer = WAIT_MED;
                     timeout_state = STATE_PLAYER_ASKING;
+                }
+                if((cpu_hand_size == 0) || (deck_index == DECK_SIZE)) {
+                    game_state = STATE_END;
+                    wait_timer = 2;
                 }
                 break;  
             case STATE_CPU_SHOWING_CARD:
@@ -626,14 +647,14 @@ int main () {
                                 ++cpu_hand_start;
                                 card_num[cpu_hand_start-1] = 0xFF;
                                 game_state = STATE_CHECK_PLAYER_SCORING;
-                                wait_timer = 90;
+                                wait_timer = WAIT_LONG;
                                 timeout_state = STATE_PLAYER_ASKING;
                             }
                         }
                     } else {
                         setclip(gofish);
                         game_state = STATE_WAITING;
-                        wait_timer = 60;
+                        wait_timer = WAIT_MED;
                         timeout_state = STATE_PLAYER_DRAWING;
                     }
                 }
@@ -648,18 +669,18 @@ int main () {
                     ++hand_end;
                 }
                 game_state = STATE_WAITING;
-                wait_timer = 60;
+                wait_timer = WAIT_MED;
                 timeout_state = STATE_PLAYER_READING_CARD;
                 break;
             case STATE_PLAYER_READING_CARD:
                 if(RANK(card_num[hand_end-1]) == player_selected_rank) {
                     game_state = STATE_CHECK_PLAYER_SCORING;
-                    wait_timer = 30;
+                    wait_timer = WAIT_SHORT;
                     timeout_state = STATE_PLAYER_ASKING;
                 } else {
                     player_selected_rank = RANK(card_num[hand_end-1]);
                     game_state = STATE_CHECK_PLAYER_SCORING;
-                    wait_timer = 60;
+                    wait_timer = WAIT_MED;
                     timeout_state = STATE_CPU_ASKING;
                 }
                 break;
@@ -667,14 +688,22 @@ int main () {
                 if(!wait_timer) {
                     check_player_scoring(player_selected_rank);
                     game_state = STATE_WAITING;
-                    wait_timer = 30;
+                    wait_timer = WAIT_SHORT;
+                }
+                if((hand_size == 0) || (deck_index == DECK_SIZE)) {
+                    game_state = STATE_END;
+                    wait_timer = 2;
                 }
                 break;
             case STATE_CHECK_CPU_SCORING:
                 if(!wait_timer) {
                     check_cpu_scoring(cpu_requested_rank);
                     game_state = STATE_WAITING;
-                    wait_timer = 30;
+                    wait_timer = WAIT_SHORT;
+                }
+                if((cpu_hand_size == 0) || (deck_index == DECK_SIZE)) {
+                    game_state = STATE_END;
+                    wait_timer = 2;
                 }
                 break;
             case STATE_TITLE:
@@ -683,6 +712,33 @@ int main () {
                     first_to_play = RANK(deck[0]) > RANK(deck[1]);                
                     shuffle_deck();
                     game_state = STATE_DEALING;
+                }
+                break;
+            case STATE_END:
+                if(wait_timer) {
+                    if(player_score > cpu_score) {
+                        text_frame = TEXT_FRAME_WIN;
+                        setclip(win);
+                    } else if(player_score < cpu_score) {
+                        text_frame = TEXT_FRAME_LOSE;
+                        setclip(lose);
+                    } else {
+                        text_frame = TEXT_FRAME_DRAW;
+                        setclip(awdangit);
+                    }
+                }
+                draw_sprite_frame(&ASSET__img__texts_json, 64, 64, text_frame, 0, 3);
+                if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
+                    hand_start = 0;
+                    hand_end = 0;
+                    hand_size = 0;
+                    cpu_hand_start = CARD_COUNT;
+                    cpu_hand_end = CARD_COUNT;
+                    cpu_hand_size = CARD_COUNT;
+                    dealing = START_HAND_SIZE;
+                    init_deck();                
+                    shuffle_deck();
+                    game_state = STATE_TITLE;
                 }
                 break;
             default:
