@@ -14,7 +14,7 @@ int audio_data_counter;
 
 #define CARD_COUNT 52
 #define DECK_SIZE 52
-#define START_HAND_SIZE 2
+#define START_HAND_SIZE 7
 #define RANK(x) (x & 0xF)
 char hand_size;
 char hand_start;
@@ -32,7 +32,7 @@ char deck_index;
 
 #define SELECT_HEIGHT 86
 #define UNSELECT_HEIGHT 104
-#define CPU_HAND_HEIGHT 16
+#define CPU_HAND_HEIGHT 0
 #define CPU_SHOWING_HEIGHT 26
 
 char player_score;
