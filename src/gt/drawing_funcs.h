@@ -23,6 +23,11 @@
 #define BG_COLOR 16
 #define WINDOW_COLOR 0
 
+#define BORDER_BOTTOM_HEIGHT 8
+#define BORDER_TOP_HEIGHT 7
+#define BORDER_LEFT_WIDTH 1
+#define BORDER_RIGHT_WIDTH 1
+
 #define SET_RECT(xm,ym,wm,hm,gxm,gym,cm,bm) rect.x = xm;\
     rect.y = ym; \
     rect.w = wm; \
