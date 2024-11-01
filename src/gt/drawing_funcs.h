@@ -77,7 +77,7 @@ void prepare_box_mode();
     flagsMirror &= ~(DMA_COLORFILL_ENABLE | DMA_OPAQUE); \
     *dma_flags = flagsMirror; \
     banksMirror &= BANK_RAM_MASK & ~BANK_SECOND_FRAMEBUFFER; \
-    banksMirror |= frameflip | ramBank; \
+    banksMirror |= bankFlip | ramBank; \
     *bank_reg = banksMirror; \
     await_drawing(); \
     vram[VX] = x; \
