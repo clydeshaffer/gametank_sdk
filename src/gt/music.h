@@ -14,6 +14,8 @@ void play_song(const unsigned char* song, char bank_num, char loop);
 
 void tick_music();
 
+void silence_all_channels();
+
 void stop_music();
 
 void pause_music();

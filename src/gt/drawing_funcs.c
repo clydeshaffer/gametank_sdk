@@ -271,18 +271,21 @@ void clear_screen(char c) {
     draw_box(1, 7, SCREEN_WIDTH-2, SCREEN_HEIGHT - 15, c);
 }
 
-void draw_box_now(char x, char y, char w, char h, char c) {
-    *dma_flags = flagsMirror | DMA_COLORFILL_ENABLE | DMA_OPAQUE;
-    vram[VX] = x;
-    vram[VY] = y;
-    vram[GX] = 0;
-    vram[GY] = 0;
-    vram[WIDTH] = w;
-    vram[HEIGHT] = h;
-    vram[COLOR] = ~c;
-    draw_busy = 1;
-    vram[START] = 1;
+void prepare_sprite_mode(char ramBank) {
+    flagsMirror |= DMA_ENABLE | DMA_OPAQUE | DMA_IRQ;
+    flagsMirror &= ~(DMA_COLORFILL_ENABLE | DMA_OPAQUE);
     *dma_flags = flagsMirror;
+    banksMirror &= BANK_RAM_MASK & ~BANK_SECOND_FRAMEBUFFER;
+    banksMirror |= frameflip | ramBank;
+    *bank_reg = banksMirror;
+}
+
+void prepare_box_mode() {
+    flagsMirror |= DMA_ENABLE | DMA_OPAQUE | DMA_IRQ | DMA_COLORFILL_ENABLE | DMA_OPAQUE;
+    *dma_flags = flagsMirror;
+    banksMirror &= BANK_RAM_MASK & ~BANK_SECOND_FRAMEBUFFER;
+    banksMirror |= frameflip;
+    *bank_reg = banksMirror;
 }
 
 void draw_fade(unsigned char opacity) {

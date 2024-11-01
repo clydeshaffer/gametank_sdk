@@ -175,6 +175,12 @@ void play_song(const unsigned char* song, char bank_num, char loop) {
         load_instrument(3, get_instrument_ptr(*(music_state.cursor++)));
         music_state.delay = *(music_state.cursor++);
     }
+
+    if(sound_effect_length) {
+        music_channel_mask = ~(channel_masks[sound_effect_channel]);
+    } else {
+        music_channel_mask = 0xFF;
+    }
     pop_rom_bank();
 }
 
@@ -306,7 +312,9 @@ void tick_music() {
                         music_state.cursor+=5; //skip cfg and instruments
                         music_state.delay = *(music_state.cursor++);
                         goto loadAudioEvent;
-                    }   
+                    } else {
+                        silence_all_channels();
+                    }
                 }
             } else {
                 --music_state.delay;
@@ -318,14 +326,18 @@ void tick_music() {
     pop_rom_bank();
 }
 
-void stop_music() {
+void silence_all_channels() {
     char n;
-    music_state.cursor = 0;
+    music_channel_mask = 0;
     for(n = 0; n < NUM_FM_OPS; ++n) {
         audio_amplitudes[n] = 0;
         set_audio_param(AMPLITUDE+n, sine_offset);
     }
-    //flush_audio_params();
+}
+
+void stop_music() {
+    music_state.cursor = 0;
+    silence_all_channels();
 }
 
 void play_sound_effect(char* sfx_ptr, char sfx_bank, char priority) {

@@ -67,10 +67,18 @@ void await_drawing();
 void clear_border(char c);
 void clear_screen(char c);
 
-void draw_box_now(char x, char y, char w, char h, char c);
-
 extern char draw_busy;
+
+void prepare_sprite_mode(char ramBank);
+void prepare_box_mode();
+
 #define draw_sprite_now( x,  y,  w,  h,  gx,  gy,  ramBank) \
+    flagsMirror |= DMA_ENABLE | DMA_OPAQUE | DMA_IRQ; \
+    flagsMirror &= ~(DMA_COLORFILL_ENABLE | DMA_OPAQUE); \
+    *dma_flags = flagsMirror; \
+    banksMirror &= BANK_RAM_MASK & ~BANK_SECOND_FRAMEBUFFER; \
+    banksMirror |= frameflip | ramBank; \
+    *bank_reg = banksMirror; \
     await_drawing(); \
     vram[VX] = x; \
     vram[VY] = y; \
@@ -78,6 +86,23 @@ extern char draw_busy;
     vram[GY] = gy; \
     vram[WIDTH] = w; \
     vram[HEIGHT] = h; \
+    draw_busy = 1; \
+    vram[START] = 1;
+
+#define draw_box_now(x, y, w, h, c) \
+    flagsMirror |= DMA_ENABLE | DMA_OPAQUE | DMA_IRQ | DMA_COLORFILL_ENABLE | DMA_OPAQUE; \
+    *dma_flags = flagsMirror; \
+    banksMirror &= BANK_RAM_MASK & ~BANK_SECOND_FRAMEBUFFER; \
+    banksMirror |= bankflip; \
+    *bank_reg = banksMirror; \
+    await_drawing(); \
+    vram[VX] = x; \
+    vram[VY] = y; \
+    vram[GX] = 0; \
+    vram[GY] = 0; \
+    vram[WIDTH] = w; \
+    vram[HEIGHT] = h; \
+    vram[COLOR] = ~(c); \
     draw_busy = 1; \
     vram[START] = 1;
 
