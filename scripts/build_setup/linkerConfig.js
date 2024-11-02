@@ -148,6 +148,10 @@ SYMBOLS {
             load : bankName,
             type : 'ro'
         };
+        section_SEGMENTS[segmentName+"_RO"] = {
+            load : bankName,
+            type : 'ro'
+        };
     }
 
     section_MEMORY['PERSIST'] = {

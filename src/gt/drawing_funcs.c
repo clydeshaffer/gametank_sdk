@@ -100,58 +100,8 @@ unsigned char queue_start = 0;
 unsigned char queue_end = 0;
 unsigned char queue_count = 0;
 unsigned char queue_pending = 0;
-#define QUEUE_MAX 250
-Frame temp_frame;
 
 void pushRect();
-
-void draw_sprite_frame(const Frame* sprite_table, char sprite_table_bank, char x, char y, char frame, char flip, char bank) {
-    change_rom_bank(sprite_table_bank);
-    while(queue_count >= QUEUE_MAX) {
-        asm("CLI");
-        await_drawing();
-    }
-    asm("SEI");
-    queue_flags_param = DMA_GCARRY;
-    temp_frame = sprite_table[frame];
-    bank |= bankflip;
-    rect.b = bank;
-
-    if(flip & SPRITE_FLIP_X) {
-        rect.x = (x - temp_frame.w - temp_frame.x - 1);
-    } else {
-        rect.x = (temp_frame.x + x);
-    }
-
-    if(flip & SPRITE_FLIP_Y) {
-        rect.y = (y - temp_frame.h - temp_frame.y - 1);
-    } else {
-        rect.y = (temp_frame.y + y);
-    }
-
-    rect.gx = temp_frame.gx;
-    if(flip & SPRITE_FLIP_X) {
-        rect.gx ^= 0xFF;
-        rect.gx -= temp_frame.w - 1;
-    }
-
-    rect.gy = temp_frame.gy;
-    if(flip & SPRITE_FLIP_Y) {
-        rect.gy ^= 0xFF;
-        rect.gy -= temp_frame.h - 1;
-    }
-
-    rect.w = temp_frame.w | (flip & SPRITE_FLIP_X ? 128 : 0);
-    rect.h = temp_frame.h | (flip & SPRITE_FLIP_Y ? 128 : 0);
-
-    pushRect();
-
-    if(queue_pending == 0) {
-        next_draw_queue();
-    }
-    asm("CLI");
-    pop_rom_bank();
-}
 
 void draw_sprite_rect() {
     if(queue_count >= QUEUE_MAX) {
@@ -160,7 +110,9 @@ void draw_sprite_rect() {
     }
 
     asm("SEI");
-    rect.b |= bankflip;
+    if(rect.b & 64) { rect.gx |= 128; }
+    if(rect.b & 128) { rect.gy |= 128; }
+    rect.b = (rect.b & (~BANK_RAM_MASK)) | bankflip;
     queue_flags_param = DMA_GCARRY;
     pushRect();
 

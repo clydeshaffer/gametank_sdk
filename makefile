@@ -149,7 +149,18 @@ flash: $(BANKS)
 emulate: bin/$(TARGET)
 	$(EMUPATH)/build/GameTankEmulator bin/$(TARGET)
 
-node_modules: scripts/build_setup/node_modules scripts/converters/node_modules
+node_modules:
+	cd scripts/converters ;\
+	npm install
+	cd scripts/build_setup ;\
+	npm install 
 
 import: node_modules
+	find assets -type f -name '*:Zone.Identifier' -delete
 	node ./scripts/build_setup/import_assets.js
+	for json_file in assets/*/*.json; do \
+		inc_name=$$(basename $$json_file); \
+		dir_name=$$(dirname $$json_file); \
+		mkdir -p src/gen/$$dir_name; \
+		node ./scripts/build_setup/frame_import.js $$json_file src/gen/$$dir_name/$$inc_name.h; \
+	done

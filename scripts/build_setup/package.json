@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "bitmap-manipulation": "^2.0.0"
+    "bitmap-manipulation": "^2.0.0",
+    "minimist":"^1.2.5"
   }
 }

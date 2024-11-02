@@ -2,6 +2,8 @@
 
 #define DRAWING_FUNCS_H
 
+#define QUEUE_MAX 250
+
 #define SPRITE_CHAR_W 8
 #define SPRITE_CHAR_H 8
 #define SPRITE_ROW_0_F 0x68
@@ -53,7 +55,6 @@ load_spritesheet(NAME##_2_bmp, BANK|QUADRANT_2); \
 load_spritesheet(NAME##_3_bmp, BANK|QUADRANT_3);
 
 void clear_spritebank(char bank);
-void draw_sprite_frame(const Frame *sprite_table, char sprite_table_bank, char x, char y, char frame, char flip, char bank);
 
 void draw_sprite_rect();
 #define draw_sprite(X,Y,W,H,GX,GY,RAMBANK) rect.x=X;rect.y=Y;rect.w=W;rect.h=H;rect.gx=GX;rect.gy=GY;rect.b=RAMBANK;draw_sprite_rect();
@@ -77,7 +78,7 @@ void prepare_box_mode();
     flagsMirror &= ~(DMA_COLORFILL_ENABLE | DMA_OPAQUE); \
     *dma_flags = flagsMirror; \
     banksMirror &= BANK_RAM_MASK & ~BANK_SECOND_FRAMEBUFFER; \
-    banksMirror |= bankFlip | ramBank; \
+    banksMirror |= bankflip | ramBank; \
     *bank_reg = banksMirror; \
     await_drawing(); \
     vram[VX] = x; \
