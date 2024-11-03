@@ -1,6 +1,6 @@
-#ifndef DYNAWAVE_H
+#ifndef AUDIO_COPROCESSOR_H
 
-#define DYNAWAVE_H
+#define AUDIO_COPROCESSOR_H
 
 #define FEEDBACK_AMT 0x04
 
@@ -19,7 +19,7 @@
 
 extern char pitch_table[216];
 
-void init_dynawave();
+void init_audio_coprocessor();
 
 void push_audio_param(char param, char value);
 

@@ -16,7 +16,7 @@
 .import _bankflip
 .export _SwitchRomBank
 
-.export _DynaWave
+.export _AudioFWPkg
 
 .PC02
 
@@ -189,5 +189,5 @@ ShiftHighBits:
 	RTS
 
 	.segment "COMMON"
-_DynaWave:
+_AudioFWPkg:
     .incbin "build/assets/audio_fw.bin.deflate"

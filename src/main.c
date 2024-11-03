@@ -2,7 +2,7 @@
 #include "drawing_funcs.h"
 #include "sprites.h"
 #include "input.h"
-#include "dynawave.h"
+#include "audio_coprocessor.h"
 #include "music.h"
 
 //Specific to this example game code
@@ -13,7 +13,7 @@ int main () {
     
     //Setup the graphics and audio systems
     init_graphics();
-    init_dynawave();
+    init_audio_coprocessor();
     init_music();
 
     /* See player.c for the player init code */

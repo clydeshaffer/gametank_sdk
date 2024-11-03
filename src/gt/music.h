@@ -1,7 +1,7 @@
 #ifndef MUSIC_H
 #define MUSIC_H
 
-#include "dynawave.h"
+#include "audio_coprocessor.h"
 #include "instruments.h"
 
 #define REPEAT_NONE 0

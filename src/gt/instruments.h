@@ -1,7 +1,7 @@
 #ifndef INSTRUMENTS_H
 #define INSTRUMENTS_H
 
-#include "dynawave.h"
+#include "audio_coprocessor.h"
 
 typedef struct {
     unsigned char env_initial[OPS_PER_CHANNEL];
