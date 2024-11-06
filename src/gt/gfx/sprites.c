@@ -2,6 +2,7 @@
 #include "gametank.h"
 #include "banking.h"
 #include <zlib.h>
+#include "../../gen/bank_nums.h"
 
 /*
     For each sprite bank:
@@ -92,7 +93,7 @@ void clear_spritebank(char bank) {
 SpriteSlot allocate_sprite(SpritePage* sprite) {
     register SpritePage* current;
     register char mask, i, free_page;
-    change_rom_bank(0xFD);
+    change_rom_bank(BANK_LOADERS);
     mask = 0; i = 1;
     for(current = sprite; current != 0; current = current->next) {
         if(current->data != 0) {

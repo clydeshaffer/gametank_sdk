@@ -174,7 +174,7 @@ function generateAssetsCFile(dir, bankNumber, folder) {
         '',
         '#include "../../gt/gfx/sprites.h"',
         `#include "${folder}.h"`,
-        '#pragma rodata-name (push, "PROG0_RO")',
+        '#pragma rodata-name (push, "LOADERS")',
         '',
         ...externLines,
         '#pragma rodata-name (pop)'

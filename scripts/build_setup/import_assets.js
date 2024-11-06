@@ -6,6 +6,7 @@ const fs = require('fs');
 const assetsDir = './assets';
 const linkerConfigFileName = './build/gametank-2M.cfg';
 const bankMakeListFileName = './build/bankMakeList.inc';
+const bankNumHeaderFileName = './src/gen/bank_nums.h';
 
 const projectConfig = JSON.parse(fs.readFileSync('./project.json'));
 const requiredProjectKeys = [
@@ -33,3 +34,11 @@ fs.writeFileSync(linkerConfigFileName, buildCfg.linker);
 fs.writeFileSync(bankMakeListFileName, buildCfg.bankMakeList);
 
 AssetAssembly.generateAssetAssemblyFiles(dirInfo, buildCfg.folderBankMap);
+
+fs.writeFileSync(bankNumHeaderFileName, 
+    `//@generated
+//Editing this manually is not recommended
+//This file contains bank numbers for segments not associated with asset folders
+${buildCfg.bankNumbers.map((bank) => `#define BANK_${bank.name} ${bank.num}`).join('\n')}
+`
+);

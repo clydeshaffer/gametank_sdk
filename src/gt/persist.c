@@ -1,6 +1,7 @@
 #include "banking.h"
 #include "gametank.h"
 #include "persist.h"
+#include "../gen/bank_nums.h"
 
 char executing_from_rom() {
     asm("PLX");
@@ -20,7 +21,7 @@ void clear_save_sector() {
     }
     *dma_flags = flagsMirror & ~(DMA_IRQ | DMA_NMI);
     asm("SEI");
-    change_rom_bank(SAVE_BANK_NUM);
+    change_rom_bank(BANK_SAVE);
     //unlock
     *((unsigned char*) 0x8AAA) = 0xAA;
     *((unsigned char*) 0x8555) = 0x55;
@@ -64,7 +65,7 @@ void save_write(void *src, void *dest, char len) {
     }
     *dma_flags = flagsMirror & ~(DMA_IRQ | DMA_NMI);
     asm("SEI");
-    change_rom_bank(SAVE_BANK_NUM);
+    change_rom_bank(BANK_SAVE);
     i = 0;
     k = len;
     unlock_bypass();

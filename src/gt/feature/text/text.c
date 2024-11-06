@@ -77,7 +77,7 @@ void text_print_string(char* str) {
     }
 }
 
-#pragma rodata-name (push, "PROG0_RO")
+#pragma rodata-name (push, "PROG0")
 
 const unsigned char decimal_conversion_table[100] = {
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
