@@ -6,23 +6,12 @@
 ;
 ; Checks for a BRK instruction and returns from all valid interrupts.
 
-.import   _stop, _frameflag, _queue_pending, _queue_start
-.import   _queue_end, _queue_count, _flagsMirror, _frameflip, _draw_busy
-.import   _banksMirror
-.export   _irq_int, _nmi_int, _next_draw_queue
+.import   _frameflag, _queue_pending, _queue_start
+.import   _queue_end, _draw_busy
+.import   _next_draw_queue
+.export   _irq_int, _nmi_int
 
 .pc02
-
-
-Q_DMAFlags = $0200
-Q_VX       = $0300
-Q_VY       = $0400
-Q_GX       = $0500
-Q_GY       = $0600
-Q_WIDTH    = $0700
-Q_HEIGHT   = $0800
-Q_Color    = $0900
-Q_BankReg  = $0A00
 
 
 BankReg = $2005
@@ -74,63 +63,3 @@ finish_irq:
         PLA                    ; Restore accumulator contents
         PLX                    ; Restore X register contents
         RTI                    ; Return from all IRQ interrupts
-
-.proc _next_draw_queue: near
-        ;determined that there is more to process
-        ;so load next set of parameters
-        STZ BankReg
-        LDA #1
-        STA _queue_pending
-
-        ;make sure DMA mode is set to input these params
-        LDA _flagsMirror
-        ORA #$01
-
-        LDY _queue_start
-
-        LDA #$40
-        STA BankReg
-
-        LDA Q_VX, y
-        STA DMA_VX
-
-        LDA Q_VY, y
-        STA DMA_VY
-
-        LDA Q_GX, y
-        STA DMA_GX
-
-        LDA Q_GY, y
-        STA DMA_GY
-
-        LDA Q_WIDTH, y
-        STA DMA_WIDTH
-
-        LDA Q_HEIGHT, y
-        STA DMA_HEIGHT
-
-        LDA Q_Color, y
-        STA DMA_Color
-
-        LDX Q_DMAFlags, y
-        LDA Q_BankReg, y
-
-        AND #$3F
-        STA BankReg
-        STA _banksMirror
-
-        TXA ;retrieve Q_DMAFlags value
-        ORA _frameflip
-        ORA #$45 ; DMA_ENABLE | DMA_NMI | DMA_IRQ
-        STA _flagsMirror
-        STA DMAFlags
-
-        INC _queue_start
-
-        LDA #1
-        STA _draw_busy
-        STA DMA_Start ;START
-
-        DEC _queue_count
-        RTS
-.endproc

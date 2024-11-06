@@ -1,6 +1,5 @@
 #include "banking.h"
 #include "gametank.h"
-#include "drawing_funcs.h"
 #include "persist.h"
 
 char executing_from_rom() {

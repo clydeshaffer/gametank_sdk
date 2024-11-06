@@ -5,6 +5,10 @@
 #ifndef GAMETANK_H
 #define GAMETANK_H
 
+typedef char bool;
+#define true 1
+#define false 0
+
 #define audio_reset ((volatile char *) 0x2000)
 #define audio_nmi ((volatile char *) 0x2001)
 #define audio_rate ((volatile char *) 0x2006)

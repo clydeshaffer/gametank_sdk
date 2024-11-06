@@ -1,5 +1,6 @@
-#include "gt/sprites.h"
 #include "gt/input.h"
+#include "gt/gfx/sprites.h"
+#include "gt/gfx/draw_queue.h"
 
 #include "gen/assets/gfx.h"
 #include "gen/assets/gfx/TemplateCharacter.json.h"
@@ -32,7 +33,7 @@ void init_player() {
 }
 
 void draw_player() {
-    draw_sprite_frame(player_sprite, player_x, player_y, player_frame_start + player_frame, 0);
+    queue_draw_sprite_frame(player_sprite, player_x, player_y, player_frame_start + player_frame, 0);
 }
 
 void update_player() {

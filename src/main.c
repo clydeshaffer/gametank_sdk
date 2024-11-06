@@ -1,9 +1,9 @@
-#include "gametank.h"
-#include "drawing_funcs.h"
-#include "sprites.h"
-#include "input.h"
-#include "audio_coprocessor.h"
-#include "music.h"
+#include "gt/gametank.h"
+#include "gt/gfx/draw_queue.h"
+#include "gt/gfx/sprites.h"
+#include "gt/input.h"
+#include "gt/audio/audio_coprocessor.h"
+#include "gt/audio/music.h"
 
 //Specific to this example game code
 #include "gen/assets/audio.h"
@@ -25,10 +25,10 @@ int main () {
     play_song(&ASSET__audio__gameloop_mid, REPEAT_LOOP);
 
     while (1) {                                     //  Run forever
-        clear_screen(3);
+        queue_clear_screen(3);
         /* See player.c for the player draw code */
         draw_player();
-        clear_border(0);
+        queue_clear_border(0);
 
         /* See player.c for the player update code */
         update_player();
@@ -36,9 +36,7 @@ int main () {
         /* Make sure the draw_queue is finished before flipping pages */
         await_draw_queue();
 
-        /* sleep(1) will wait for the next start of frame
-        instead of a whole frame, i.e. waiting for vsync*/
-        sleep(1);
+        await_vsync(1);
         /* there are two frame buffers. typically we draw on one while
          displaying the other, and then switch them during vsync */
         flip_pages();
