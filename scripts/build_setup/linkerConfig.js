@@ -193,7 +193,7 @@ SYMBOLS {
 
     return {
         linker: output,
-        bankMakeList : `_BANKS = ${bankNames.join(' ')}`,
+        bankMakeList : `_BANKS := ${bankNames.join(' ')}`,
         folderBankMap
     }
 }
