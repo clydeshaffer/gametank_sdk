@@ -1,7 +1,7 @@
 #include "banking.h"
 #include "gametank.h"
 #include "persist.h"
-#include "../gen/bank_nums.h"
+#include "../../../gen/bank_nums.h"
 
 char executing_from_rom() {
     asm("PLX");

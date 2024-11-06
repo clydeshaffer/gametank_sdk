@@ -13,17 +13,7 @@
 
 .pc02
 
-
-BankReg = $2005
-DMAFlags = $2007
-DMA_VX = $4000
-DMA_VY = $4001
-DMA_GX = $4002
-DMA_GY = $4003
-DMA_WIDTH = $4004
-DMA_HEIGHT = $4005
 DMA_Start = $4006
-DMA_Color = $4007
 
 .segment  "CODE"
 
