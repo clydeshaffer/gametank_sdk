@@ -6,10 +6,15 @@
 ;
 ; Checks for a BRK instruction and returns from all valid interrupts.
 
-.import   _frameflag, _queue_pending, _queue_start
-.import   _queue_end, _draw_busy
-.import   _next_draw_queue
+.include "../gen/modules_enabled.inc"
+
+.import   _frameflag
+.import   _draw_busy
 .export   _irq_int, _nmi_int
+
+.ifdef ENABLE_MODULE_DRAWQUEUE
+.import _next_draw_queue, _queue_end, _queue_pending, _queue_start
+.endif
 
 .pc02
 
@@ -34,6 +39,7 @@ nmi_done:
 ; ---------------------------------------------------------------------------
 ; Maskable interrupt (IRQ) service routine
 
+.ifdef ENABLE_MODULE_DRAWQUEUE
 _irq_int:
         PHX                    ; Save X register contents to stack
         PHA
@@ -53,3 +59,9 @@ finish_irq:
         PLA                    ; Restore accumulator contents
         PLX                    ; Restore X register contents
         RTI                    ; Return from all IRQ interrupts
+.else
+_irq_int:
+        STZ DMA_Start
+        STZ _draw_busy
+        RTI
+.endif

@@ -1,5 +1,8 @@
 #include "draw_queue.h"
 #include "gametank.h"
+#include "../../gen/modules_enabled.h"
+
+#ifdef ENABLE_MODULE_DRAWQUEUE
 
 void pushRect();
 
@@ -152,7 +155,11 @@ void queue_clear_screen(char c) {
     queue_draw_box(1, 7, SCREEN_WIDTH-2, SCREEN_HEIGHT - 15, c);
 }
 
+#endif
+
 void await_draw_queue() {
+    //If draw queue isn't installed leave the stub in case something waits for it
+#ifdef ENABLE_MODULE_DRAWQUEUE
     asm ("SEI");
     if(queue_pending != 0) {
         await_drawing();
@@ -165,4 +172,5 @@ void await_draw_queue() {
     vram[START] = 0;
     queue_pending = 0;
     asm ("CLI");
+#endif
 }

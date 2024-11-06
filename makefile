@@ -104,19 +104,19 @@ $(ODIR)/gen/assets/%.o.asset: src/gen/assets/%.s.asset
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
-$(ODIR)/%.si: src/%.c src/%.h
+$(ODIR)/%.si: src/%.c src/%.h project.json
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $<
 
-$(ODIR)/%.si: src/%.c
+$(ODIR)/%.si: src/%.c project.json
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $<
 
-$(ODIR)/%.o: $(ODIR)/%.si
+$(ODIR)/%.o: $(ODIR)/%.si project.json
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
-$(ODIR)/%.o: src/%.s
+$(ODIR)/%.o: src/%.s project.json
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 

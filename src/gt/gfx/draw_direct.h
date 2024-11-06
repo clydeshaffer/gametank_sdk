@@ -29,6 +29,8 @@ void direct_transparent_mode(bool enabled);
 //Set whether drawings will be clipped at screen edges or wrap around
 void direct_clip_mode(clip_mode_t mode);
 
+void direct_draw_sprite_frame(SpriteSlot sprite, char x, char y, char frame, char flip);
+
 #define DIRECT_DRAW_START() draw_busy = 1; \
     vram[START] = 1;
 

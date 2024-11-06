@@ -8,6 +8,7 @@ const linkerConfigFileName = './build/gametank-2M.cfg';
 const bankMakeListFileName = './build/bankMakeList.inc';
 const bankNumHeaderFileName = './src/gen/bank_nums.h';
 const modulesHeaderFileName = './src/gen/modules_enabled.h';
+const modulesAsmFileName = './src/gen/modules_enabled.inc';
 
 const projectConfig = JSON.parse(fs.readFileSync('./project.json'));
 const requiredProjectKeys = [
@@ -50,5 +51,13 @@ fs.writeFileSync(modulesHeaderFileName,
 //Editing this manually is not recommended
 //This file tells the SDK optional features which ones are enabled
 ${projectConfig.modules.map((mod) => `#define ENABLE_MODULE_${mod}`).join('\n')}
+`
+);
+
+fs.writeFileSync(modulesAsmFileName, 
+    `;@generated
+;Editing this manually is not recommended
+;This file tells the SDK optional features which ones are enabled
+${projectConfig.modules.map((mod) => `ENABLE_MODULE_${mod}:`).join('\n')}
 `
 );

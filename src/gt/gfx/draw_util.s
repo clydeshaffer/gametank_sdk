@@ -1,9 +1,16 @@
-.export _pushRect, _rect, _queue_flags_param, _next_draw_queue
+.export _rect
 .importzp sp, ptr1
-.import _queue_start,_queue_end, _queue_count, _queue_pending
+
 .import incsp2, pushax
 .import _flagsMirror, _frameflip, _draw_busy
 .import _banksMirror
+
+.include "../../gen/modules_enabled.inc"
+
+.ifdef ENABLE_MODULE_DRAWQUEUE
+.export _pushRect, _queue_flags_param, _next_draw_queue
+.import _queue_start,_queue_end, _queue_count, _queue_pending
+.endif
 
 BankReg = $2005
 DMAFlags = $2007
@@ -30,6 +37,7 @@ DMA_Color = $4007
 _queue_flags_param = $3200
 _rect = $3201 ;borrow unbanked Audio RAM memory
 
+.ifdef ENABLE_MODULE_DRAWQUEUE
 ; ---------------------------------------------------------------
 ; void __near__ pushRect ()
 ; ---------------------------------------------------------------
@@ -145,3 +153,5 @@ _rect = $3201 ;borrow unbanked Audio RAM memory
         DEC _queue_count
         RTS
 .endproc
+
+.endif

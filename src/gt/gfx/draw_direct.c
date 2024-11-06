@@ -4,6 +4,7 @@
 
 void direct_prepare_sprite_mode(SpriteSlot sprite) {
     await_draw_queue(); //Make sure we don't intersect with the queued system.
+    await_drawing();
     flagsMirror |= DMA_ENABLE | DMA_IRQ | DMA_GCARRY;
     flagsMirror &= ~(DMA_COLORFILL_ENABLE | DMA_OPAQUE);
     *dma_flags = flagsMirror;
@@ -20,6 +21,7 @@ void direct_quick_select_sprite(SpriteSlot sprite) {
 
 void direct_prepare_box_mode() {
     await_draw_queue(); //Make sure we don't intersect with the queued system.
+    await_drawing();
     flagsMirror |= DMA_ENABLE | DMA_OPAQUE | DMA_IRQ | DMA_COLORFILL_ENABLE | DMA_OPAQUE;
     *dma_flags = flagsMirror;
     banksMirror &= ~(BANK_RAM_MASK | BANK_SECOND_FRAMEBUFFER);
