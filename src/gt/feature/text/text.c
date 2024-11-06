@@ -4,6 +4,7 @@
 #include "banking.h"
 #include "../../gfx/draw_direct.h"
 #include "../../../gen/assets/font.h"
+#include "../../../gen/modules_enabled.h"
 
 #define SPRITE_CHAR_W 8
 #define SPRITE_CHAR_H 8
@@ -16,6 +17,8 @@
 #define TEXT_CHAR_WIDTH 8
 #define TEXT_CHAR_HEIGHT 8
 #define TEXT_LINE_HEIGHT 8
+
+#ifdef ENABLE_MODULE_TEXT
 
 char font_slot;
 char text_cursor_x, text_cursor_y;
@@ -102,3 +105,5 @@ void text_sprint_num(char* s, unsigned char num) {
     *(s+1) = (num & 0xF) + '0';
     pop_rom_bank();
 }
+
+#endif

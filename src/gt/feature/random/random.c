@@ -1,4 +1,7 @@
 #include "random.h"
+#include "../../../gen/modules_enabled.h"
+
+#ifdef ENABLE_MODULE_RANDOM
 
 int xorshift16(int x) {
     x |= x == 0;   /* if x == 0, set x = 1 instead */
@@ -33,3 +36,5 @@ int rnd() {
 int rnd_range(int low, int high) {
     return ((rnd() & 0x7FFF) % (high - low)) + low;
 }
+
+#endif

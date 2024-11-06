@@ -2,6 +2,9 @@
 #include "gametank.h"
 #include "persist.h"
 #include "../../../gen/bank_nums.h"
+#include "../../../gen/modules_enabled.h"
+
+#ifdef ENABLE_MODULE_PERSIST
 
 char executing_from_rom() {
     asm("PLX");
@@ -89,3 +92,4 @@ void save_write(void *src, void *dest, char len) {
 #pragma code-name (pop)
 
 
+#endif

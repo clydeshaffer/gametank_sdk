@@ -157,7 +157,7 @@ scripts/converters/node_modules: scripts/converters/package.json
 $(ODIR)/%.cfg $(ODIR)/%.inc src/gen/assets/%.s.asset: project.json scripts/build_setup/*.js scripts/build_setup/node_modules $(BMPOBJS) $(JSONOBJS) $(AUDIO_FW) $(MIDOBJS) $(BINOBJS)
 	mkdir -p $(ODIR)
 	find assets -type f -name '*:Zone.Identifier' -delete
-	node ./scripts/build_setup/import_assets.js
+	node ./scripts/build_setup/build_setup.js
 	for json_file in assets/*/*.json; do \
 		inc_name=$$(basename $$json_file); \
 		dir_name=$$(dirname $$json_file); \
