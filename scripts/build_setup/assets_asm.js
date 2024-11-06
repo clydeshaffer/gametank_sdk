@@ -41,18 +41,47 @@ function sliceLargeBitmaps(dir) {
             const dims = BMPUtil.getBmpFileDimensions(fullPath);
             if(dims.width > 128) fileCount *= 2;
             if(dims.height > 128) fileCount *= 2;
+            if((dims.height > 128) && (dims.width <= 128)) {
+                //Special case for tall bmps
+                return [
+                    {
+                        name: filename,
+                        loadName: filename,
+                        size: [Math.ceil(dims.width / 128), Math.ceil(dims.height / 128)],
+                        sequence: 0,
+                        ext,
+                    },
+                    {
+                        name: nameOnly + '_1.bmp',
+                        loadName : null,
+                        size: [Math.ceil(dims.width / 128), Math.ceil(dims.height / 128)],
+                        sequence: 1,
+                        ext,
+                    },
+                    {
+                        name: nameOnly + '_2.bmp',
+                        loadName: nameOnly + '_1.bmp',
+                        size: [Math.ceil(dims.width / 128), Math.ceil(dims.height / 128)],
+                        sequence: 2,
+                        ext,
+                    },
+                ];
+            }
             if(fileCount > 1) {
                 return [...Array(fileCount).keys()].map((num) => (num === 0) ? filename : nameOnly + '_' + num + '.bmp').map((s, i) => ({
                     name: s,
+                    loadName : s,
                     size: [Math.ceil(dims.width / 128), Math.ceil(dims.height / 128)],
                     sequence: i,
-                    ext
+                    ext,
                 }));
             }
         }
         return [{
-            name: filename,
-            ext
+            name: filename, 
+            loadName: filename,
+            ext,
+            sequence: 0,
         }];
     }
 }
@@ -67,11 +96,11 @@ function generateAssetsAssemblyFile(dir) {
     const exportLines = [];
     const incbinLines = [];
 
-    nameList.filter(ignoreFilter).forEach((x) => {
-        const symName = filenameToSymbolName(dirName, x.name);
+    nameList.filter(ignoreFilter).filter((x)=>(x.loadName != null)).forEach((x) => {
+        const symName = filenameToSymbolName(dirName, x.loadName);
         exportLines.push(`    .export ${symName}_ptr`);
         incbinLines.push(`${symName}_ptr:`)
-        incbinLines.push(`    .incbin "build/assets/${dirName}/${transformFilename(x.name)}"`);
+        incbinLines.push(`    .incbin "build/assets/${dirName}/${transformFilename(x.loadName)}"`);
         incbinLines.push('');
     });
 
@@ -95,7 +124,7 @@ function generateAssetsHeaderFile(dir, bankNumber) {
         externLines.push(`extern const unsigned char* ${symName}_ptr;`);
         externLines.push(`#define ${symName}_bank ${bankNumber}`);
         externLines.push(`#define ${symName} ${symName}_ptr,${symName}_bank`);
-        if(assetObj.ext === "bmp") {
+        if((assetObj.ext === "bmp") && (assetObj.sequence == 0)) {
             externLines.push(`extern const SpritePage ${symName}_load_list;`);
         }
     });
@@ -125,14 +154,15 @@ function generateAssetsCFile(dir, bankNumber, folder) {
         const names = group.map((assetObj) => assetObj.name);
         group.filter(ignoreFilter).filter(bmpFilter).forEach((assetObj) => {
             const symName = filenameToSymbolName(dirName, assetObj.name).substring(1);
+            const data = assetObj.loadName != null ? `&${filenameToSymbolName(dirName, assetObj.loadName).substring(1)}_ptr` : '0';
             let nextPtr = '0';
             if(group.length > 1) {
                 if(assetObj.sequence != (group.length-1)) {
                     nextPtr = `&${filenameToSymbolName(dirName, names[assetObj.sequence+1]).substring(1)}_load_list`;
                 }
             }
-            externLines.push(`const SpritePage ${symName}_load_list = {
-                &${symName}_ptr, ${bankNumber}, ${nextPtr}
+            externLines.unshift(`${assetObj.sequence == 0 ? '' : 'static '}const SpritePage ${symName}_load_list = {
+                ${data}, ${bankNumber}, ${nextPtr}
             };`);
         });
     });
