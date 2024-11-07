@@ -9,5 +9,6 @@ build/*.bin
 bin
 build
 src/gen
+scripts/build_setup/node_modules
 scripts/converters/node_modules
 gametank-2M.cfg
