@@ -8,6 +8,7 @@
 //Specific to this example game code
 #include "gen/assets/audio.h"
 #include "./player.h"
+#include "./map.h"
 
 int main () {
     
@@ -18,6 +19,7 @@ int main () {
 
     /* See player.c for the player init code */
     init_player();
+    load_tile_graphics();
 
     /*  ASSET__audio__title_mid is an automatically-generated reference
         to assets/audio/gameloop.mid in the graphics folder, and provides
@@ -25,7 +27,7 @@ int main () {
     play_song(&ASSET__audio__gameloop_mid, REPEAT_LOOP);
 
     while (1) {                                     //  Run forever
-        queue_clear_screen(3);
+        draw_tile_map();
         /* See player.c for the player draw code */
         draw_player();
         queue_clear_border(0);

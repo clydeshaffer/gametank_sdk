@@ -121,11 +121,15 @@ function generateAssetsHeaderFile(dir, bankNumber) {
 
     nameList.filter(ignoreFilter).forEach((assetObj) => {
         const symName = filenameToSymbolName(dirName, assetObj.name).substring(1);
-        externLines.push(`extern const unsigned char* ${symName}_ptr;`);
+        externLines.push(`//${dir}/${assetObj.name}`);
+        externLines.push(`extern const unsigned char ${symName}_ptr[];`);
         externLines.push(`#define ${symName}_bank ${bankNumber}`);
         externLines.push(`#define ${symName} ${symName}_ptr,${symName}_bank`);
         if((assetObj.ext === "bmp") && (assetObj.sequence == 0)) {
             externLines.push(`extern const SpritePage ${symName}_load_list;`);
+        }
+        if(fs.existsSync(`${dir}/${assetObj.name}`)) {
+            externLines.push(`#define ${symName}_size ${fs.statSync(`${dir}/${assetObj.name}`).size}`);
         }
     });
 
