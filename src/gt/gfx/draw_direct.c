@@ -1,4 +1,5 @@
 #include "draw_direct.h"
+#define MODULE_DRAWQUEUE_INTERNAL_USE
 #include "draw_queue.h"
 #include "gametank.h"
 

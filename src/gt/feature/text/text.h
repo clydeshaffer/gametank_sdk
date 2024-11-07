@@ -1,6 +1,12 @@
 #ifndef TEXT_H
 #define TEXT_H
 
+#include "../../../gen/modules_enabled.h"
+
+#ifndef ENABLE_MODULE_TEXT
+#error "Module TEXT included but not enabled!"
+#endif
+
 #include "../../gfx/sprites.h"
 
 #define TEXT_COLOR_BLACK 0

@@ -1,3 +1,4 @@
+#define MODULE_DRAWQUEUE_INTERNAL_USE
 #include "draw_queue.h"
 #include "gametank.h"
 #include "../../gen/modules_enabled.h"

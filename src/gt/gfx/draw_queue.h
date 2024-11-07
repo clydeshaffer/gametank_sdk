@@ -24,6 +24,11 @@ void queue_clear_screen(char c);
 //defined in draw_util.s
 void next_draw_queue();
 
+#else
+
+#ifndef MODULE_DRAWQUEUE_INTERNAL_USE
+#error "Module DRAWQUEUE included but not enabled!"
+#endif
 #endif
 
 void await_draw_queue();
