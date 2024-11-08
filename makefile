@@ -100,7 +100,7 @@ $(ODIR)/assets/audio_fw.bin: src/gt/audio/audio_fw.asm gametank-acp.cfg
 	$(AS) --cpu 65C02 src/gt/audio/audio_fw.asm -o $(ODIR)/assets/audio_fw.o
 	$(LN) -C gametank-acp.cfg $(ODIR)/assets/audio_fw.o -o $(ODIR)/assets/audio_fw.bin
 
-$(ODIR)/gen/assets/%.o.asset: src/gen/assets/%.s.asset
+$(ODIR)/gen/assets/%.o.asset: src/gen/assets/%.s.asset $(BINOBJS)
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
