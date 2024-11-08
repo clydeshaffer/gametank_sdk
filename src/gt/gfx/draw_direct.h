@@ -40,7 +40,7 @@ void direct_draw_sprite_frame(SpriteSlot sprite, char x, char y, char frame, cha
 // then you can skip the macro and just set the registers directly.
 // eg. for tilemaps you'd only need to set WIDTH, HEIGHT once and
 // set VY once per row
-#define direct_draw_sprite(dst_x, dst_y, w, h, src_gx, src_gy) \
+#define DIRECT_DRAW_SPRITE(dst_x, dst_y, w, h, src_gx, src_gy) \
     vram[VX] = dst_x; \
     vram[VY] = dst_y; \
     vram[GX] = src_gx; \
@@ -49,7 +49,7 @@ void direct_draw_sprite_frame(SpriteSlot sprite, char x, char y, char frame, cha
     vram[HEIGHT] = h; \
     DIRECT_DRAW_START();
 
-#define direct_draw_box(dst_x, dst_y, w, h, c) \
+#define DIRECT_DRAW_SPRITE(dst_x, dst_y, w, h, c) \
     vram[VX] = dst_x; \
     vram[VY] = dst_y; \
     vram[WIDTH] = w; \

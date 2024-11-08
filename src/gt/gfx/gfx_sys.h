@@ -46,8 +46,4 @@ void await_drawing();
 extern char draw_busy;
 extern Frame rect; //Defined in draw_util.s
 
-void printnum(int num);
-
-void print_hex_num(char num);
-
 #endif
