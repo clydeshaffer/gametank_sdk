@@ -1,50 +1,36 @@
 #include "gt/gametank.h"
 #include "gt/gfx/draw_queue.h"
-#include "gt/gfx/sprites.h"
-#include "gt/input.h"
-#include "gt/audio/audio_coprocessor.h"
-#include "gt/audio/music.h"
 
-//Specific to this example game code
-#include "gen/assets/audio.h"
-#include "./player.h"
-#include "./map.h"
+char box_x = 30, box_y = 20;
+char dx = 1, dy = 1;
 
 int main () {
-    
-    //Setup the graphics and audio systems
+ 
     init_graphics();
-    init_audio_coprocessor();
-    init_music();
-
-    /* See player.c for the player init code */
-    init_player();
-    load_tile_graphics();
-
-    /*  ASSET__audio__title_mid is an automatically-generated reference
-        to assets/audio/gameloop.mid in the graphics folder, and provides
-        both the memory location and ROM bank number to play_song */
-    play_song(&ASSET__audio__gameloop_mid, REPEAT_LOOP);
-
+ 
     while (1) {                                     //  Run forever
-        draw_tile_map();
-        /* See player.c for the player draw code */
-        draw_player();
+        queue_clear_screen(3);
+        queue_draw_box(box_x, box_y, 8, 8, 92);
         queue_clear_border(0);
-
-        /* See player.c for the player update code */
-        update_player();
-
-        /* Make sure the draw_queue is finished before flipping pages */
+        
+        box_x += dx;
+        box_y += dy;
+        if(box_x == 1) {
+            dx = 1;
+        } else if(box_x == 119) {
+            dx = -1;
+        }
+        if(box_y == 8) {
+            dy = 1;
+        } else if(box_y == 112) {
+            dy = -1;
+        }
+ 
         await_draw_queue();
-
         await_vsync(1);
-        /* there are two frame buffers. typically we draw on one while
-         displaying the other, and then switch them during vsync */
         flip_pages();
-        update_inputs();
-        tick_music();
+ 
     }
-
-  return (0);
+ 
+  return (0);                                     //  We should never get here!
 }

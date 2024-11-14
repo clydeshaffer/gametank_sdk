@@ -38,9 +38,9 @@ JSONOBJS = $(patsubst %,$(ODIR)/%,$(JSONSRC:json=gsi))
 BINSRC = $(shell $(FIND) assets -name "*.bin")
 BINOBJS = $(patsubst %,$(ODIR)/%,$(BINSRC))
 
-CFLAGS = -t none -Osr --cpu 65c02 --codesize 500 --static-locals -I src/gt
-AFLAGS = --cpu 65C02 --bin-include-dir lib --bin-include-dir $(ODIR)/assets
-LFLAGS = -C $(ODIR)/gametank-2M.cfg -m $(ODIR)/out.map -vm
+CFLAGS = -t none -Osr --cpu 65c02 --codesize 500 --static-locals -I src/gt -g
+AFLAGS = --cpu 65C02 --bin-include-dir lib --bin-include-dir $(ODIR)/assets -g
+LFLAGS = -C $(ODIR)/gametank-2M.cfg -m $(ODIR)/out.map -vm --dbgfile $(ODIR)/sourcemap.dbg
 LLIBS = lib/gametank.lib
 
 C_SRCS := $(shell $(FIND) src -name "*.c")
@@ -154,15 +154,18 @@ scripts/converters/node_modules: scripts/converters/package.json
 	cd scripts/converters ;\
 	npm install
 
+
 $(ODIR)/%.cfg $(ODIR)/%.inc src/gen/assets/%.s.asset: project.json scripts/build_setup/*.js scripts/build_setup/node_modules $(BMPOBJS) $(JSONOBJS) $(AUDIO_FW) $(MIDOBJS) $(BINOBJS)
 	mkdir -p $(ODIR)
 	find assets -type f -name '*:Zone.Identifier' -delete
 	node ./scripts/build_setup/build_setup.js
-	for json_file in assets/*/*.json; do \
-		inc_name=$$(basename $$json_file); \
-		dir_name=$$(dirname $$json_file); \
-		mkdir -p src/gen/$$dir_name; \
-		node ./scripts/build_setup/frame_import.js $$json_file src/gen/$$dir_name/$$inc_name.h; \
-	done
+	if [ -n "$(wildcard assets/*/*.json)" ]; then \
+		for json_file in assets/*/*.json; do \
+			inc_name=$$(basename $$json_file); \
+			dir_name=$$(dirname $$json_file); \
+			mkdir -p src/gen/$$dir_name; \
+			node ./scripts/build_setup/frame_import.js $$json_file src/gen/$$dir_name/$$inc_name.h; \
+		done \
+	fi
 
 import : $(ODIR)/gametank-2M.cfg $(ODIR)/bankMakeList.inc
