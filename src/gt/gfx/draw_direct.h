@@ -49,7 +49,7 @@ void direct_draw_sprite_frame(SpriteSlot sprite, char x, char y, char frame, cha
     vram[HEIGHT] = h; \
     DIRECT_DRAW_START();
 
-#define DIRECT_DRAW_SPRITE(dst_x, dst_y, w, h, c) \
+#define DIRECT_DRAW_COLOR(dst_x, dst_y, w, h, c) \
     vram[VX] = dst_x; \
     vram[VY] = dst_y; \
     vram[WIDTH] = w; \
