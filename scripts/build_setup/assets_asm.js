@@ -158,7 +158,7 @@ function generateAssetsCFile(dir, bankNumber, folder) {
         const names = group.map((assetObj) => assetObj.name);
         group.filter(ignoreFilter).filter(bmpFilter).forEach((assetObj) => {
             const symName = filenameToSymbolName(dirName, assetObj.name).substring(1);
-            const data = assetObj.loadName != null ? `&${filenameToSymbolName(dirName, assetObj.loadName).substring(1)}_ptr` : '0';
+            const data = assetObj.loadName != null ? `${filenameToSymbolName(dirName, assetObj.loadName).substring(1)}_ptr` : '0';
             let nextPtr = '0';
             if(group.length > 1) {
                 if(assetObj.sequence != (group.length-1)) {
