@@ -24,7 +24,7 @@ int main () {
     /*  ASSET__audio__title_mid is an automatically-generated reference
         to assets/audio/gameloop.mid in the graphics folder, and provides
         both the memory location and ROM bank number to play_song */
-    play_song(&ASSET__audio__gameloop_mid, REPEAT_LOOP);
+    play_song(ASSET__audio__gameloop_mid, REPEAT_LOOP);
 
     while (1) {                                     //  Run forever
         draw_tile_map();
