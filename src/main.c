@@ -7,6 +7,7 @@
 
 //Specific to this example game code
 #include "gen/assets/audio.h"
+#include "gen/assets/snd.h"
 #include "./player.h"
 #include "./map.h"
 
@@ -34,6 +35,12 @@ int main () {
 
         /* See player.c for the player update code */
         update_player();
+        if(player1_new_buttons & INPUT_MASK_A) {
+            //play_sound_effect(ASSET__snd__bell_sfx_ID, 0);
+            //play_sound_effect(ASSET__snd__bell_sfx_ID, 1);
+            play_sound_effect(ASSET__snd__bell_sfx_ID, 2);
+            //play_sound_effect(ASSET__snd__bell_sfx_ID, 3);
+        }
 
         /* Make sure the draw_queue is finished before flipping pages */
         await_draw_queue();

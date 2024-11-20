@@ -19,6 +19,7 @@ void draw_tile_map() {
     static char x, y, i, t;
     direct_prepare_sprite_mode(map_tile_gfx);
     direct_transparent_mode(false);
+    push_rom_bank();
     change_rom_bank(ASSET__gfx__test1_bin_bank);
 
     x = 0;
