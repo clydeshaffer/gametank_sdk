@@ -38,6 +38,9 @@ JSONOBJS = $(patsubst %,$(ODIR)/%,$(JSONSRC:json=gsi))
 BINSRC = $(shell $(FIND) assets -name "*.bin")
 BINOBJS = $(patsubst %,$(ODIR)/%,$(BINSRC))
 
+SFXSRC = $(shell $(FIND) assets -name "*.sfx")
+SFXOBJS = $(patsubst %,$(ODIR)/%,$(SFXSRC))
+
 CFLAGS = -t none -Osr --cpu 65c02 --codesize 500 --static-locals -I src/gt -g
 AFLAGS = --cpu 65C02 --bin-include-dir lib --bin-include-dir $(ODIR)/assets -g
 LFLAGS = -C $(ODIR)/gametank-2M.cfg -m $(ODIR)/out.map -vm --dbgfile $(ODIR)/sourcemap.dbg
@@ -92,6 +95,10 @@ $(ODIR)/assets/%.bin: assets/%.bin
 	@mkdir -p $(@D)
 	cp $< $@
 
+$(ODIR)/assets/%.sfx: assets/%.sfx
+	@mkdir -p $(@D)
+	cp $< $@
+
 $(ODIR)/assets/audio_fw.bin.deflate: $(ODIR)/assets/audio_fw.bin
 	zopfli --deflate $<
 
@@ -100,7 +107,7 @@ $(ODIR)/assets/audio_fw.bin: src/gt/audio/audio_fw.asm gametank-acp.cfg
 	$(AS) --cpu 65C02 src/gt/audio/audio_fw.asm -o $(ODIR)/assets/audio_fw.o
 	$(LN) -C gametank-acp.cfg $(ODIR)/assets/audio_fw.o -o $(ODIR)/assets/audio_fw.bin
 
-$(ODIR)/gen/assets/%.o.asset: src/gen/assets/%.s.asset $(BINOBJS)
+$(ODIR)/gen/assets/%.o.asset: src/gen/assets/%.s.asset $(BINOBJS) $(SFXOBJS)
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
@@ -155,7 +162,7 @@ scripts/converters/node_modules: scripts/converters/package.json
 	npm install
 
 
-$(ODIR)/%.cfg $(ODIR)/%.inc src/gen/assets/%.s.asset: project.json scripts/build_setup/*.js scripts/build_setup/node_modules $(BMPOBJS) $(JSONOBJS) $(AUDIO_FW) $(MIDOBJS) $(BINOBJS)
+$(ODIR)/%.cfg $(ODIR)/%.inc src/gen/assets/%.s.asset: project.json scripts/build_setup/*.js scripts/build_setup/node_modules $(BMPOBJS) $(JSONOBJS) $(AUDIO_FW) $(MIDOBJS) $(BINOBJS) $(SFXOBJS)
 	mkdir -p $(ODIR)
 	find assets -type f -name '*:Zone.Identifier' -delete
 	node ./scripts/build_setup/build_setup.js

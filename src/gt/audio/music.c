@@ -3,6 +3,9 @@
 #include "note_numbers.h"
 #include "banking.h"
 
+#include "../../gen/bank_nums.h"
+#include "../../gen/assets/assets_index.h"
+
 typedef struct music_state_t {
     unsigned char* cursor;
     unsigned char bank;
@@ -338,12 +341,17 @@ void stop_music() {
     silence_all_channels();
 }
 
-void play_sound_effect(char* sfx_ptr, char sfx_bank, char channel, char priority) {
+void play_sound_effect(char sfx_id, char channel) { 
+    static char priority;
+    priority = channel;
+    channel &= 0x03;
     if(priority < sound_effect_priority[channel]) return;
     sound_effect_priority[channel] = priority;
-    sound_effect_bank[channel] = sfx_bank;
-    sound_effect_ptr[channel] = sfx_ptr;
-    change_rom_bank(sfx_bank);
+    change_rom_bank(BANK_LOADERS);
+    sound_effect_bank[channel] = ASSET__sfx_bank_table[sfx_id];
+    sound_effect_ptr[channel] = ASSET__sfx_ptr_table[sfx_id];
+    pop_rom_bank();
+    change_rom_bank(sound_effect_bank[channel]);
     sound_effect_length[channel] = *(sound_effect_ptr[channel]++) + 1;
     saved_feedback_value[channel] = aram[FEEDBACK_AMT + channel];
     aram[FEEDBACK_AMT + channel] = *(sound_effect_ptr[channel]++);

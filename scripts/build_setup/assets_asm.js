@@ -196,6 +196,7 @@ function generateAssetsCFile(dir, bankNumber, folder) {
 function generateACertainAssetsIndex(assetCollection, includeList) {
     return [
         ...includeList.map((inc) => `#include "./${inc}"`),
+        '#pragma rodata-name ("LOADERS")',
         ...Object.keys(assetCollection).map((ext) => `
 const void* ASSET__${ext}_ptr_table[] = {
 ${assetCollection[ext].map((fileEntry) => fileEntry.ptrName).join(',')}
@@ -208,6 +209,16 @@ ${assetCollection[ext].map((fileEntry) => fileEntry.bankName).join(',')}
     ].join('\n');
 }
 
+function generateACertainAssetsIndexHeader(assetCollection, includeList) {
+    return [
+        ...Object.keys(assetCollection).map((ext) => `
+extern const void* ASSET__${ext}_ptr_table[];
+
+extern const unsigned char ASSET__${ext}_bank_table[];
+`)
+    ].join('\n');
+}
+
 function generateAssetAssemblyFiles(assetFolderNames, folderBankMap) {
 
     if (fs.existsSync(srcGenDir)){
@@ -215,7 +226,10 @@ function generateAssetAssemblyFiles(assetFolderNames, folderBankMap) {
     }
     fs.mkdirSync(srcGenDir, { recursive: true });
 
-    const assetsByExtension = {};
+    const assetsByExtension = {
+        "sfx" : [],
+        "bmp" : []
+    };
     const allIncludes = [];
     const collectFunc = (ext, ptrName, bankName) => {
         if(!assetsByExtension.hasOwnProperty(ext)) {
@@ -247,8 +261,12 @@ function generateAssetAssemblyFiles(assetFolderNames, folderBankMap) {
     });
 
     const assetIndexFile = generateACertainAssetsIndex(assetsByExtension, allIncludes);
+    const assetIndexHeaderFile = generateACertainAssetsIndexHeader(assetsByExtension, allIncludes);
     const assetsIndexName = 'assets_index.c';
+    const assetsIndexHeaderName = 'assets_index.h';
     fs.writeFileSync(srcGenDir + '/' + assetsIndexName, assetIndexFile);
+    fs.writeFileSync(srcGenDir + '/' + assetsIndexHeaderName, assetIndexHeaderFile);
+
 }
 
 module.exports = {
