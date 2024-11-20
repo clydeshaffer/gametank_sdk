@@ -76,6 +76,7 @@ unsigned char paused_delay;
 unsigned char music_mode = REPEAT_NONE;
 
 unsigned char music_channel_mask;
+unsigned char percussion_channel_mask;
 unsigned char* sound_effect_ptr[NUM_FM_CHANNELS];
 unsigned char sound_effect_bank[NUM_FM_CHANNELS];
 unsigned char sound_effect_length[NUM_FM_CHANNELS];
@@ -96,6 +97,10 @@ void init_music() {
 }
 
 void load_instrument(char channel, Instrument* instr) {
+    if(instr == 0xFFFF) {
+        percussion_channel_mask |= channel_masks[channel];
+        return;
+    }
     music_state.instruments[channel] = instr;
     channel_note_offset[channel] = instr->transpose;
     aram[FEEDBACK_AMT + channel] = instr->feedback + sine_offset;
@@ -174,6 +179,7 @@ void play_song(const unsigned char* song, char bank_num, char loop) {
     }
 
     if(music_state.cursor) {
+        percussion_channel_mask = 0;
         music_state.cfg = *(music_state.cursor++);
         load_instrument(0, get_instrument_ptr(*(music_state.cursor++)));
         load_instrument(1, get_instrument_ptr(*(music_state.cursor++)));
@@ -270,7 +276,9 @@ void tick_music() {
                     n = *(music_state.cursor++);
                     if(music_state.cfg & MUSIC_CFG_VELOCITY)
                         a = *(music_state.cursor++);
-                    if(channel_masks[ch] & music_channel_mask) {
+                    if(channel_masks[ch] & percussion_channel_mask) {
+                        if(n > 0) play_sound_effect(n - 1, ch);
+                    } else if(channel_masks[ch] & music_channel_mask) {
                         op = ch << 2;
                         if(n > 0) {
                             set_note(op, n + channel_note_offset[ch]);
@@ -343,7 +351,7 @@ void stop_music() {
 
 void play_sound_effect(char sfx_id, char channel) { 
     static char priority;
-    priority = channel;
+    priority = channel & 0xF0;
     channel &= 0x03;
     if(priority < sound_effect_priority[channel]) return;
     sound_effect_priority[channel] = priority;

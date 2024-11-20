@@ -55,6 +55,7 @@ Instrument sitar = {
 };
 
 Instrument* instrument_table[] = {
+    0xFFFF,
     &piano,
     &guitar,
     &guitar2,
