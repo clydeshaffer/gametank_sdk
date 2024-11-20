@@ -110,7 +110,7 @@ function generateAssetsAssemblyFile(dir) {
         ...exportLines, '', segmentLine, '', ...incbinLines].join('\n');
 }
 
-function generateAssetsHeaderFile(dir, bankNumber) {
+function generateAssetsHeaderFile(dir, bankNumber, pushFileHandles) {
 
     const nameList = fs.readdirSync(dir).flatMap(sliceLargeBitmaps(dir));
     const path = dir.split('/');
@@ -122,9 +122,17 @@ function generateAssetsHeaderFile(dir, bankNumber) {
     nameList.filter(ignoreFilter).forEach((assetObj) => {
         const symName = filenameToSymbolName(dirName, assetObj.name).substring(1);
         externLines.push(`//${dir}/${assetObj.name}`);
-        externLines.push(`extern const unsigned char ${symName}_ptr[];`);
-        externLines.push(`#define ${symName}_bank ${bankNumber}`);
-        externLines.push(`#define ${symName} ${symName}_ptr,${symName}_bank`);
+
+        const ptrName = `${symName}_ptr`;
+        const bankName = `${symName}_bank`;
+        const idName = `${symName}_ID`;
+
+        const assetId = pushFileHandles(assetObj.ext, ptrName, bankName);
+
+        externLines.push(`extern const unsigned char ${ptrName}[];`);
+        externLines.push(`#define ${bankName} ${bankNumber}`);
+        externLines.push(`#define ${symName} ${ptrName},${bankName}`);
+        externLines.push(`#define ${idName} ${assetId}`);
         if((assetObj.ext === "bmp") && (assetObj.sequence == 0)) {
             externLines.push(`extern const SpritePage ${symName}_load_list;`);
         }
@@ -185,6 +193,21 @@ function generateAssetsCFile(dir, bankNumber, folder) {
     ].join('\n');
 }
 
+function generateACertainAssetsIndex(assetCollection, includeList) {
+    return [
+        ...includeList.map((inc) => `#include "./${inc}"`),
+        ...Object.keys(assetCollection).map((ext) => `
+const void* ASSET__${ext}_ptr_table[] = {
+${assetCollection[ext].map((fileEntry) => fileEntry.ptrName).join(',')}
+};
+
+const unsigned char ASSET__${ext}_bank_table[] = {
+${assetCollection[ext].map((fileEntry) => fileEntry.bankName).join(',')}
+};
+`)
+    ].join('\n');
+}
+
 function generateAssetAssemblyFiles(assetFolderNames, folderBankMap) {
 
     if (fs.existsSync(srcGenDir)){
@@ -192,21 +215,40 @@ function generateAssetAssemblyFiles(assetFolderNames, folderBankMap) {
     }
     fs.mkdirSync(srcGenDir, { recursive: true });
 
+    const assetsByExtension = {};
+    const allIncludes = [];
+    const collectFunc = (ext, ptrName, bankName) => {
+        if(!assetsByExtension.hasOwnProperty(ext)) {
+            assetsByExtension[ext] = [];
+        }
+        assetsByExtension[ext].push({
+            ptrName,
+            bankName
+        });
+        return assetsByExtension[ext].length - 1;
+    }
+
     assetFolderNames.forEach((folder) => {
         if(fs.lstatSync(`./${assetsDir}/${folder}`).isDirectory()) {
             const assetsAsm = generateAssetsAssemblyFile(`./${assetsDir}/${folder}`);
             const assetsFileName = `${folder}.s.asset`;
 
-            const assetsHeader = generateAssetsHeaderFile(`./${assetsDir}/${folder}`, folderBankMap[folder]);
+            const assetsHeader = generateAssetsHeaderFile(`./${assetsDir}/${folder}`, folderBankMap[folder], collectFunc);
             const assetsCFile = generateAssetsCFile(`./${assetsDir}/${folder}`, folderBankMap[folder],
             folder);
+            
             const assetsHeaderName = `${folder}.h`
-            const assetsCName = `_${folder}__loaders.c`
+            const assetsCName = `${folder}__loaders.c`
             fs.writeFileSync(srcGenDir + '/' + assetsFileName, assetsAsm);
             fs.writeFileSync(srcGenDir + '/' + assetsHeaderName, assetsHeader);
             fs.writeFileSync(srcGenDir + '/' + assetsCName, assetsCFile);
+            allIncludes.push(assetsHeaderName);
         }
     });
+
+    const assetIndexFile = generateACertainAssetsIndex(assetsByExtension, allIncludes);
+    const assetsIndexName = 'assets_index.c';
+    fs.writeFileSync(srcGenDir + '/' + assetsIndexName, assetIndexFile);
 }
 
 module.exports = {
