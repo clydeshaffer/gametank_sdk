@@ -73,20 +73,22 @@ unsigned char paused_delay;
 unsigned char music_mode = REPEAT_NONE;
 
 unsigned char music_channel_mask;
-unsigned char* sound_effect_ptr;
-unsigned char sound_effect_bank;
-unsigned char sound_effect_channel;
-unsigned char sound_effect_length;
-unsigned char saved_feedback_value;
-unsigned char sound_effect_priority;
+unsigned char* sound_effect_ptr[NUM_FM_CHANNELS];
+unsigned char sound_effect_bank[NUM_FM_CHANNELS];
+unsigned char sound_effect_length[NUM_FM_CHANNELS];
+unsigned char saved_feedback_value[NUM_FM_CHANNELS];
+unsigned char sound_effect_priority[NUM_FM_CHANNELS];
 
 void init_music() {
+    char i;
     music_stack_idx = 0;
     music_state.cursor = 0;
     music_state.delay = 0;
     music_channel_mask = 0b11111111;
-    sound_effect_length = 0;
-    sound_effect_priority = 0;
+    for(i = 0; i < NUM_FM_CHANNELS; ++i) {
+        sound_effect_length[i] = 0;
+        sound_effect_priority[i] = 0;
+    }
     stop_music();
 }
 
@@ -176,11 +178,6 @@ void play_song(const unsigned char* song, char bank_num, char loop) {
         music_state.delay = *(music_state.cursor++);
     }
 
-    if(sound_effect_length) {
-        music_channel_mask = ~(channel_masks[sound_effect_channel]);
-    } else {
-        music_channel_mask = 0xFF;
-    }
     pop_rom_bank();
 }
 
@@ -197,47 +194,48 @@ void tick_music() {
     static unsigned char n, noteMask, ch;
     register unsigned char a, op;
 
-     if(sound_effect_length) {
-        sound_effect_length--;
-        if(sound_effect_length) {
-            change_rom_bank(sound_effect_bank);
+    for(n = 0; n < NUM_FM_CHANNELS; ++n) {
+        if(sound_effect_length[n]) {
+            --sound_effect_length[n];
+            if(sound_effect_length[n]) {
+                change_rom_bank(sound_effect_bank[n]);
 
-            op = sound_effect_channel << 2;
-            set_audio_param(AMPLITUDE + op, *(sound_effect_ptr+0) + sine_offset);
-            a = *(sound_effect_ptr+4) << 1;
-            set_audio_param(PITCH_MSB + op, pitch_table[a]);
-            set_audio_param(PITCH_LSB + op, pitch_table[a+1]);
+                op = n << 2;
+                set_audio_param(AMPLITUDE + op, *(sound_effect_ptr[n]+0) + sine_offset);
+                a = *(sound_effect_ptr[n]+4) << 1;
+                set_audio_param(PITCH_MSB + op, pitch_table[a]);
+                set_audio_param(PITCH_LSB + op, pitch_table[a+1]);
 
-            ++op;
-            set_audio_param(AMPLITUDE + op, *(sound_effect_ptr+1) + sine_offset);
-            a = *(sound_effect_ptr+5) << 1;
-            set_audio_param(PITCH_MSB + op, pitch_table[a]);
-            set_audio_param(PITCH_LSB + op, pitch_table[a+1]);
+                ++op;
+                set_audio_param(AMPLITUDE + op, *(sound_effect_ptr[n]+1) + sine_offset);
+                a = *(sound_effect_ptr[n]+5) << 1;
+                set_audio_param(PITCH_MSB + op, pitch_table[a]);
+                set_audio_param(PITCH_LSB + op, pitch_table[a+1]);
 
-            ++op;
-            set_audio_param(AMPLITUDE + op, *(sound_effect_ptr+2) + sine_offset);
-            a = *(sound_effect_ptr+6) << 1;
-            set_audio_param(PITCH_MSB + op, pitch_table[a]);
-            set_audio_param(PITCH_LSB + op, pitch_table[a+1]);
+                ++op;
+                set_audio_param(AMPLITUDE + op, *(sound_effect_ptr[n]+2) + sine_offset);
+                a = *(sound_effect_ptr[n]+6) << 1;
+                set_audio_param(PITCH_MSB + op, pitch_table[a]);
+                set_audio_param(PITCH_LSB + op, pitch_table[a+1]);
 
-            ++op;
-            set_audio_param(AMPLITUDE + op, *(sound_effect_ptr+3) + sine_offset);
-            a = *(sound_effect_ptr+7) << 1;
-            set_audio_param(PITCH_MSB + op, pitch_table[a]);
-            set_audio_param(PITCH_LSB + op, pitch_table[a+1]);
+                ++op;
+                set_audio_param(AMPLITUDE + op, *(sound_effect_ptr[n]+3) + sine_offset);
+                a = *(sound_effect_ptr[n]+7) << 1;
+                set_audio_param(PITCH_MSB + op, pitch_table[a]);
+                set_audio_param(PITCH_LSB + op, pitch_table[a+1]);
 
-            sound_effect_ptr += 8;
+                sound_effect_ptr[n] += 8;
 
-            pop_rom_bank();
-        } else {
-            op = sound_effect_channel << 2;
-            set_audio_param(AMPLITUDE+(op+3), sine_offset);
-            aram[FEEDBACK_AMT + sound_effect_channel] = saved_feedback_value;
-            music_channel_mask = 0xFF;
-            sound_effect_priority = 0;
+                pop_rom_bank();
+            } else {
+                op = n << 2;
+                set_audio_param(AMPLITUDE+(op+3), sine_offset);
+                aram[FEEDBACK_AMT + n] = saved_feedback_value;
+                music_channel_mask |= channel_masks[n];
+                sound_effect_priority[n] = 0;
+            }
         }
     }
-
 
     change_rom_bank(music_state.bank);
     op = 0;
@@ -340,16 +338,15 @@ void stop_music() {
     silence_all_channels();
 }
 
-void play_sound_effect(char* sfx_ptr, char sfx_bank, char priority) {
-    if(priority < sound_effect_priority) return;
-    sound_effect_priority = priority;
-    sound_effect_bank = sfx_bank;
-    sound_effect_ptr = sfx_ptr;
-    sound_effect_channel = 2;
-    change_rom_bank(sound_effect_bank);
-    sound_effect_length = *(sound_effect_ptr++) + 1;
-    saved_feedback_value = aram[FEEDBACK_AMT + sound_effect_channel];
-    aram[FEEDBACK_AMT + sound_effect_channel] = *(sound_effect_ptr++);
-    music_channel_mask &= ~(channel_masks[sound_effect_channel]);
+void play_sound_effect(char* sfx_ptr, char sfx_bank, char channel, char priority) {
+    if(priority < sound_effect_priority[channel]) return;
+    sound_effect_priority[channel] = priority;
+    sound_effect_bank[channel] = sfx_bank;
+    sound_effect_ptr[channel] = sfx_ptr;
+    change_rom_bank(sfx_bank);
+    sound_effect_length[channel] = *(sound_effect_ptr[channel]++) + 1;
+    saved_feedback_value[channel] = aram[FEEDBACK_AMT + channel];
+    aram[FEEDBACK_AMT + channel] = *(sound_effect_ptr[channel]++);
+    music_channel_mask &= ~(channel_masks[channel]);
     pop_rom_bank();
 }
