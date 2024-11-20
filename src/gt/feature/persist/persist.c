@@ -24,6 +24,7 @@ void clear_save_sector() {
     }
     *dma_flags = flagsMirror & ~(DMA_IRQ | DMA_NMI);
     asm("SEI");
+    push_rom_bank();
     change_rom_bank(BANK_SAVE);
     //unlock
     *((unsigned char*) 0x8AAA) = 0xAA;
@@ -68,6 +69,7 @@ void save_write(void *src, void *dest, char len) {
     }
     *dma_flags = flagsMirror & ~(DMA_IRQ | DMA_NMI);
     asm("SEI");
+    push_rom_bank();
     change_rom_bank(BANK_SAVE);
     i = 0;
     k = len;

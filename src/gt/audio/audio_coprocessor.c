@@ -2,6 +2,7 @@
 #include "audio_coprocessor.h"
 #include "gametank.h"
 #include "banking.h"
+#include "../../gen/bank_nums.h"
 
 char pitch_table[216] = {
     0x00, 0x4D, 0x00, 0x51, 0x00, 0x56, 0x00, 0x5B, 0x00, 0x61, 0x00, 0x66, 0x00, 0x6C, 0x00, 0x73, 0x00, 0x7A, 0x00, 0x81, 0x00, 0x89, 0x00, 0x91,
@@ -28,7 +29,8 @@ void init_audio_coprocessor()
     char pagecount;
     *audio_rate = 0x7F;
 
-    change_rom_bank(128);
+    push_rom_bank();
+    change_rom_bank(BANK_COMMON);
     inflatemem(aram, &AudioFWPkg);
 
     audio_params_index = 0;
@@ -40,6 +42,7 @@ void init_audio_coprocessor()
     }
     wavetable_page = 0x3000 + *WAVE_TABLE_LOCATION;
     sine_offset = *((char*)0x3003);
+    pop_rom_bank();
 }
 
 void push_audio_param(char param, char value) {

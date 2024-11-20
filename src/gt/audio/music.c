@@ -148,6 +148,7 @@ void play_song(const unsigned char* song, char bank_num, char loop) {
     char n;
     push_song_stack();
     music_state.bank = bank_num;
+    push_rom_bank();
     change_rom_bank(music_state.bank);
     music_state.cursor = song;
 
@@ -196,11 +197,12 @@ void unpause_music() {
 void tick_music() {
     static unsigned char n, noteMask, ch;
     register unsigned char a, op;
-
+    push_rom_bank();
     for(n = 0; n < NUM_FM_CHANNELS; ++n) {
         if(sound_effect_length[n]) {
             --sound_effect_length[n];
             if(sound_effect_length[n]) {
+                
                 change_rom_bank(sound_effect_bank[n]);
 
                 op = n << 2;
@@ -229,7 +231,6 @@ void tick_music() {
 
                 sound_effect_ptr[n] += 8;
 
-                pop_rom_bank();
             } else {
                 op = n << 2;
                 set_audio_param(AMPLITUDE+(op+3), sine_offset);
@@ -347,10 +348,10 @@ void play_sound_effect(char sfx_id, char channel) {
     channel &= 0x03;
     if(priority < sound_effect_priority[channel]) return;
     sound_effect_priority[channel] = priority;
+    push_rom_bank();
     change_rom_bank(BANK_LOADERS);
     sound_effect_bank[channel] = ASSET__sfx_bank_table[sfx_id];
     sound_effect_ptr[channel] = ASSET__sfx_ptr_table[sfx_id];
-    pop_rom_bank();
     change_rom_bank(sound_effect_bank[channel]);
     sound_effect_length[channel] = *(sound_effect_ptr[channel]++) + 1;
     saved_feedback_value[channel] = aram[FEEDBACK_AMT + channel];

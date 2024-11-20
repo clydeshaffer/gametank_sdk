@@ -192,6 +192,11 @@ SYMBOLS {
         num: 0xFE
     });
 
+    bankNums.push({
+        name: 'COMMON',
+        num: 0x80
+    });
+
     var output = '';
     function printout(str) {
         output += str + '\n';

@@ -35,6 +35,7 @@ void load_spritesheet(char* spriteData, char srcBank, char ramBank) {
     char bankNum = ramBank & 7;
     char xbit = (ramBank & 8) << 4;
     char ybit = (ramBank & 16) << 3;
+    push_rom_bank();
     change_rom_bank(srcBank);
     flagsMirror = DMA_ENABLE;
     *dma_flags = flagsMirror;
@@ -93,6 +94,7 @@ void clear_spritebank(char bank) {
 SpriteSlot allocate_sprite(SpritePage* sprite) {
     register SpritePage* current;
     register char mask, i, free_page;
+    push_rom_bank();
     change_rom_bank(BANK_LOADERS);
     mask = 0; i = 1;
     for(current = sprite; current != 0; current = current->next) {
@@ -193,6 +195,7 @@ Frame sprite_temp_frame;
 static PointerUnion dsf_frametable;
 
 void sprite_fetch_frame(SpriteSlot sprite, char frame) {
+    push_rom_bank();
     change_rom_bank(frametable_B[sprite]);
     dsf_frametable.b.lsb = frametable_L[sprite];
     dsf_frametable.b.msb = frametable_H[sprite];

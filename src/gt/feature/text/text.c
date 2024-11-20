@@ -99,7 +99,8 @@ const unsigned char decimal_conversion_table[100] = {
 
 void text_sprint_num(char* s, unsigned char num) {
     if(num > 99) return;
-    change_rom_bank(0xFD);
+    push_rom_bank();
+change_rom_bank(0xFD);
     num = decimal_conversion_table[num];
     *s = (num >> 4) + '0';
     *(s+1) = (num & 0xF) + '0';
