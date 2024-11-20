@@ -119,8 +119,8 @@ function generateAssetsHeaderFile(dir, bankNumber, pushFileHandles) {
     const gate_define = `ASSETS__${dirName}_H`;
     const externLines = [];
 
-    nameList.filter(ignoreFilter).forEach((assetObj) => {
-        const symName = filenameToSymbolName(dirName, assetObj.name).substring(1);
+    nameList.filter(ignoreFilter).filter((assetInfo) => assetInfo.loadName != null).forEach((assetObj) => {
+        const symName = filenameToSymbolName(dirName, assetObj.loadName).substring(1);
         externLines.push(`//${dir}/${assetObj.name}`);
 
         const ptrName = `${symName}_ptr`;

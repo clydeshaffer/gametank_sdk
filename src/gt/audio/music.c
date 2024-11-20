@@ -87,7 +87,7 @@ void init_music() {
     music_stack_idx = 0;
     music_state.cursor = 0;
     music_state.delay = 0;
-    music_channel_mask = 0b11111111;
+    music_channel_mask = 255;
     for(i = 0; i < NUM_FM_CHANNELS; ++i) {
         sound_effect_length[i] = 0;
         sound_effect_priority[i] = 0;
@@ -330,7 +330,6 @@ void tick_music() {
 
 void silence_all_channels() {
     char n;
-    music_channel_mask = 0;
     for(n = 0; n < NUM_FM_OPS; ++n) {
         audio_amplitudes[n] = 0;
         set_audio_param(AMPLITUDE+n, sine_offset);
