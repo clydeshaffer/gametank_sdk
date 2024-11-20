@@ -101,6 +101,7 @@ void load_instrument(char channel, Instrument* instr) {
         percussion_channel_mask |= channel_masks[channel];
         return;
     }
+    percussion_channel_mask &= ~channel_masks[channel];
     music_state.instruments[channel] = instr;
     channel_note_offset[channel] = instr->transpose;
     aram[FEEDBACK_AMT + channel] = instr->feedback + sine_offset;
