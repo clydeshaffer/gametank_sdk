@@ -3,7 +3,7 @@
 #include "gametank.h"
 #include "banking.h"
 #include "../../gfx/draw_direct.h"
-#include "../../../gen/assets/font.h"
+#include "../../../gen/assets/sdk_default.h"
 #include "../../../gen/modules_enabled.h"
 
 #define SPRITE_CHAR_W 8
@@ -35,7 +35,7 @@ void text_init() {
 }
 
 SpriteSlot load_font() {
-    font_slot = allocate_sprite(&ASSET__font__bios8_bmp_load_list);
+    font_slot = allocate_sprite(&ASSET__sdk_default__bios8_bmp_load_list);
     font_offset_x = SPRITE_OFFSET_X(font_slot);
     font_offset_y = SPRITE_OFFSET_Y(font_slot);
     return font_slot;
