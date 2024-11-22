@@ -6,7 +6,8 @@
 
 typedef char clip_mode_t;
 
-
+extern char direct_sprite_offset_x;
+extern char direct_sprite_offset_y;
 
 //Setup registers to draw sprites in direct mode
 //Also checks for and awaits queued drawing operations
@@ -36,6 +37,14 @@ void direct_draw_sprite_frame(SpriteSlot sprite, char x, char y, char frame, cha
 
 #define DIRECT_DRAW_CLEAR_IRQ() vram[START] = 0;
 
+#define DIRECT_SET_DEST_X(x) vram[VX] = (x);
+#define DIRECT_SET_DEST_Y(y) vram[VY] = (y);
+#define DIRECT_SET_SOURCE_X(x) vram[GX] = (x) | direct_sprite_offset_x
+#define DIRECT_SET_SOURCE_Y(y) vram[GY] = (y) | direct_sprite_offset_y
+#define DIRECT_SET_WIDTH(w) vram[WIDTH] = (w);
+#define DIRECT_SET_HEIGHT(h) vram[HEIGHT] = (h);
+#define DIRECT_SET_COLOR(c) vram[COLOR] = ~(c);
+
 //If you do consecutive draws that will cause redundant register sets
 // then you can skip the macro and just set the registers directly.
 // eg. for tilemaps you'd only need to set WIDTH, HEIGHT once and
@@ -43,8 +52,8 @@ void direct_draw_sprite_frame(SpriteSlot sprite, char x, char y, char frame, cha
 #define DIRECT_DRAW_SPRITE(dst_x, dst_y, w, h, src_gx, src_gy) \
     vram[VX] = dst_x; \
     vram[VY] = dst_y; \
-    vram[GX] = src_gx; \
-    vram[GY] = src_gy; \
+    vram[GX] = src_gx + direct_sprite_offset_x; \
+    vram[GY] = src_gy + direct_sprite_offset_y; \
     vram[WIDTH] = w; \
     vram[HEIGHT] = h; \
     DIRECT_DRAW_START();

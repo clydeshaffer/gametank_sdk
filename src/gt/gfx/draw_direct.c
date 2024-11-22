@@ -3,6 +3,10 @@
 #include "draw_queue.h"
 #include "gametank.h"
 
+
+char direct_sprite_offset_x = 0;
+char direct_sprite_offset_y = 0;
+
 void direct_prepare_sprite_mode(SpriteSlot sprite) {
     await_draw_queue(); //Make sure we don't intersect with the queued system.
     await_drawing();
@@ -12,12 +16,16 @@ void direct_prepare_sprite_mode(SpriteSlot sprite) {
     banksMirror &= ~(BANK_RAM_MASK | BANK_SECOND_FRAMEBUFFER | BANK_GRAM_MASK);
     banksMirror |= bankflip | (sprite & BANK_GRAM_MASK) | BANK_CLIP_X | BANK_CLIP_Y;
     *bank_reg = banksMirror;
+    direct_sprite_offset_x = SPRITE_OFFSET_X(sprite);
+    direct_sprite_offset_y = SPRITE_OFFSET_Y(sprite);
 }
 
 void direct_quick_select_sprite(SpriteSlot sprite) {
     banksMirror &= ~BANK_GRAM_MASK;
     banksMirror |= sprite & BANK_GRAM_MASK;
     *bank_reg = banksMirror;
+    direct_sprite_offset_x = SPRITE_OFFSET_X(sprite);
+    direct_sprite_offset_y = SPRITE_OFFSET_Y(sprite);
 }
 
 void direct_prepare_box_mode() {
