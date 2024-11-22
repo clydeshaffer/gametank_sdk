@@ -19,8 +19,8 @@ void queue_draw_sprite_rect() {
     }
 
     asm("SEI");
-    if(rect.b & SPRITE_OFFSET_X) { rect.gx |= 128; }
-    if(rect.b & SPRITE_OFFSET_Y) { rect.gy |= 128; }
+    if(rect.b & SPRITE_OFFSET_X_MASK) { rect.gx |= 128; }
+    if(rect.b & SPRITE_OFFSET_Y_MASK) { rect.gy |= 128; }
     rect.b = (rect.b & BANK_GRAM_MASK) | bankflip | CLIP_MODE_XY;
     queue_flags_param = DMA_GCARRY;
     pushRect();
@@ -128,14 +128,14 @@ void queue_draw_sprite_frame(SpriteSlot sprite, char x, char y, char frame, char
     }
 
     rect.gx = sprite_temp_frame.gx;
-    if(sprite & SPRITE_OFFSET_X) { rect.gx |= 128; }
+    if(sprite & SPRITE_OFFSET_X_MASK) { rect.gx |= 128; }
     if(flip & SPRITE_FLIP_X) {
         rect.gx ^= 0xFF;
         rect.gx -= sprite_temp_frame.w - 1;
     }
 
     rect.gy = sprite_temp_frame.gy;
-    if(sprite & SPRITE_OFFSET_Y) { rect.gy |= 128; }
+    if(sprite & SPRITE_OFFSET_Y_MASK) { rect.gy |= 128; }
     if(flip & SPRITE_FLIP_Y) {
         rect.gy ^= 0xFF;
         rect.gy -= sprite_temp_frame.h - 1;

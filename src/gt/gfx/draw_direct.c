@@ -70,14 +70,14 @@ void direct_draw_sprite_frame(SpriteSlot sprite, char x, char y, char frame, cha
     }
 
     rect.gx = sprite_temp_frame.gx;
-    if(sprite & SPRITE_OFFSET_X) { rect.gx |= 128; }
+    if(sprite & SPRITE_OFFSET_X_MASK) { rect.gx |= 128; }
     if(flip & SPRITE_FLIP_X) {
         rect.gx ^= 0xFF;
         rect.gx -= sprite_temp_frame.w - 1;
     }
 
     rect.gy = sprite_temp_frame.gy;
-    if(sprite & SPRITE_OFFSET_Y) { rect.gy |= 128; }
+    if(sprite & SPRITE_OFFSET_Y_MASK) { rect.gy |= 128; }
     if(flip & SPRITE_FLIP_Y) {
         rect.gy ^= 0xFF;
         rect.gy -= sprite_temp_frame.h - 1;

@@ -117,7 +117,7 @@ SpriteSlot allocate_sprite(SpritePage* sprite) {
             //if mask doesn't span horizontally
             if(!(bank_occupied[i] & (mask << 1))) {
                 bank_occupied[i] |= ((mask << 1) & 0b1010) | HEAD_CORNER_NE;
-                free_page = i | SPRITE_OFFSET_X;
+                free_page = i | SPRITE_OFFSET_X_MASK;
                 break;
             }
         }
@@ -125,14 +125,14 @@ SpriteSlot allocate_sprite(SpritePage* sprite) {
             //if mask doesn't span vertically
             if(!(bank_occupied[i] & (mask << 2))) {
                 bank_occupied[i] |= ((mask << 2) & 0b1100) | HEAD_CORNER_SW;
-                free_page = i | SPRITE_OFFSET_Y;
+                free_page = i | SPRITE_OFFSET_Y_MASK;
                 break;
             }
         }
         if(mask == 1) {
             if(!(bank_occupied[i] & (mask << 3))) {
                 bank_occupied[i] |= ((mask << 3) & 0b1000) | HEAD_CORNER_SE;
-                free_page = i | SPRITE_OFFSET_XY;
+                free_page = i | SPRITE_OFFSET_XY_MASK;
                 break;
             }
         }
@@ -144,7 +144,7 @@ SpriteSlot allocate_sprite(SpritePage* sprite) {
     }
 
     i = 1;
-    mask = (free_page & SPRITE_OFFSET_XY) >> 3;
+    mask = (free_page & SPRITE_OFFSET_XY_MASK);
     for(current = sprite; current != 0; current = current->next) {
         if(current->data != 0) {
             load_spritesheet(current->data, current->bank, (free_page & 7) | mask);
@@ -164,10 +164,10 @@ void set_sprite_frametable(SpriteSlot sprite, const Frame *frametable, char fram
 
 void free_sprite(SpriteSlot slot) {
     register char anchor, clear_mask, heads;
-    anchor = slot & SPRITE_OFFSET_XY;
+    anchor = slot & SPRITE_OFFSET_XY_MASK;
     heads = bank_occupied[slot & 7] >> 4;
     clear_mask = ~heads;
-    switch(slot & SPRITE_OFFSET_XY) {
+    switch(slot & SPRITE_OFFSET_XY_MASK) {
         case 0:
             clear_mask &= 0b1111;
             clear_mask |= 1;
@@ -175,15 +175,15 @@ void free_sprite(SpriteSlot slot) {
                 clear_mask &= 7;
             }
             break;
-        case SPRITE_OFFSET_X:
+        case SPRITE_OFFSET_X_MASK:
             clear_mask &= 0b1010;
             clear_mask |= 2;
             break;
-        case SPRITE_OFFSET_Y:
+        case SPRITE_OFFSET_Y_MASK:
             clear_mask &= 0b1100;
             clear_mask |= 4;
             break;
-        case SPRITE_OFFSET_XY:
+        case SPRITE_OFFSET_XY_MASK:
             clear_mask = 0b1000;
             break;
     }

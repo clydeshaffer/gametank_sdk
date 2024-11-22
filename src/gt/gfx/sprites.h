@@ -2,7 +2,7 @@
 #define SPRITES_H
 #include "gfx_sys.h"
 
-#define SPRITE_SLOT_INVALID(x) (x & 0b00111000)
+#define SPRITE_SLOT_INVALID(x) (x & 0b11100000)
 
 //Sprite sheets MUST be one of these
 #define PAGE_MASK_SINGLE 1
@@ -10,9 +10,12 @@
 #define PAGE_MASK_TALL 5
 #define PAGE_MASK_FULL 15
 
-#define SPRITE_OFFSET_X 8
-#define SPRITE_OFFSET_Y 16
-#define SPRITE_OFFSET_XY 24
+#define SPRITE_OFFSET_X_MASK 8
+#define SPRITE_OFFSET_Y_MASK 16
+#define SPRITE_OFFSET_XY_MASK 24
+
+#define SPRITE_OFFSET_X(slot) ((slot & SPRITE_OFFSET_X_MASK) ? 128 : 0)
+#define SPRITE_OFFSET_Y(slot) ((slot & SPRITE_OFFSET_Y_MASK) ? 128 : 0)
 
 typedef char SpriteSlot;
 
