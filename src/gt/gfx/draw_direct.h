@@ -21,6 +21,12 @@ void direct_quick_select_sprite(SpriteSlot sprite);
 //Also checks for and awaits queued drawing operations
 void direct_prepare_box_mode();
 
+//Setup registers to access the framebuffer as an array
+void direct_prepare_array_mode();
+
+//Setup registers to access Sprite RAM as an array
+void direct_prepare_sprite_ram_array_mode(SpriteSlot sprite);
+
 //If enabled, sprite draws will repeat the same 16x16 grid from the source data
 void direct_tiled_mode(bool enabled);
 
