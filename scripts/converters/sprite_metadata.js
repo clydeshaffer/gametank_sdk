@@ -1,5 +1,6 @@
 const fs = require('fs');
 const argv = require('minimist')(process.argv.slice(2));
+const path = require('path');
 
 const inFileName = argv._[0];
 const outFileName = argv._.length == 2 ?
@@ -39,8 +40,19 @@ console.log(spriteInfo.meta);
 
 console.log(spriteInfo.frames.length + " frames read");
 
+function framesObjToArray(framesObj) {
+    return Object.keys(framesObj).map((frameFileName) => {
+        return {
+            originalKey: frameFileName, 
+            frameNumber : parseInt(path.parse(frameFileName).name.split(' ').slice(-1)[0])
+        };
+    }).sort((a,b) => a.frameNumber - b.frameNumber).map((a) => framesObj[a.originalKey]);
+}
+
+const framesArray = Array.isArray(spriteInfo.frames) ? spriteInfo.frames : framesObjToArray(spriteInfo.frames);
+
 const outBuf = Buffer.concat(
-    spriteInfo.frames
+    framesArray
         .map(aseprite2gametank)
         .map(frame2Buf)
 );

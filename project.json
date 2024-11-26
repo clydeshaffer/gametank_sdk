@@ -1,0 +1,11 @@
+{
+    "title" : "My GameTank Game",
+    "romname" : "game.gtr",
+    "progbanks" : 1,
+    "modules" : [
+        "PERSIST",
+        "RANDOM",
+        "TEXT",
+        "DRAWQUEUE"
+    ]
+}

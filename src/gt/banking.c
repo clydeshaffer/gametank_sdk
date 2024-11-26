@@ -12,15 +12,17 @@ unsigned char romBankStackIdx;
 void bank_shift_out(unsigned char banknum);
 
 void change_rom_bank(unsigned char banknum) {
+    if(banknum != romBankMirror)
+        bank_shift_out(banknum);
+}
+
+void push_rom_bank() {
     romBankStackIdx = (romBankStackIdx + 1) & BANK_WRAP_MASK;
     romBankStack[romBankStackIdx] = romBankMirror;
-    if(banknum == romBankMirror)
-        return;
-    bank_shift_out(banknum);
 }
 
 void pop_rom_bank() {
-    bank_shift_out(romBankStack[romBankStackIdx]);
+    change_rom_bank(romBankStack[romBankStackIdx]);
     if(romBankStackIdx == 0)
         romBankStackIdx = BANK_STACK_SIZE;
     --romBankStackIdx;

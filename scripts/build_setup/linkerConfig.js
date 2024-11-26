@@ -108,6 +108,7 @@ SYMBOLS {
     const names2 = ['COMMON', ...assetFolderNames];
     const asset_banks = names2.length;
     const bankNames = [];
+    const bankNums = [];
 
     for(var i = 0; i < asset_banks; i++) {
         const bankNum = i + 128;
@@ -131,12 +132,10 @@ SYMBOLS {
 
     bankNames.push('filler');
 
-    for(var i = 1; i <= extra_code_banks; i++) {
-        const bankNum = 253 - extra_code_banks + i;
-        const bankName = 'BANK' + hex(bankNum);
+    function addBank(bankNum, segmentName) {
         bankNames.push(`bank${hex(bankNum)}`);
+        const bankName = 'BANK' + hex(bankNum);
         const bankFile = `"%O.bank${hex(bankNum)}"`;
-        const segmentName = 'PROG' + (extra_code_banks - i).toString(16).toUpperCase()
         section_MEMORY[bankName] = {
             start : '$8000',
             size : '$4000',
@@ -148,7 +147,19 @@ SYMBOLS {
             load : bankName,
             type : 'ro'
         };
+        bankNums.push({
+            name: segmentName,
+            num: bankNum
+        });
     }
+
+    for(var i = 1; i <= extra_code_banks; i++) {
+        const bankNum = 252 - extra_code_banks + i;
+        const segmentName = 'PROG' + (extra_code_banks - i).toString(16).toUpperCase();
+        addBank(bankNum, segmentName);
+    }
+
+    addBank(0xFD, 'LOADERS');
 
     section_MEMORY['PERSIST'] = {
         start : '$8000',
@@ -156,7 +167,7 @@ SYMBOLS {
         file : '"%O.bankFE"',
         bank : '254',
         fill : 'yes'
-    }
+    };
 
     section_MEMORY['ROM'] = {
         start : '$C000',
@@ -168,13 +179,23 @@ SYMBOLS {
 
     section_MEMORY['FILLER'] = {
         start : '$8000',
-        size : '$' + (Math.pow(2,21) - (extra_code_banks + asset_banks + 2) * 16384).toString(16).toUpperCase(),
+        size : '$' + (Math.pow(2,21) - (extra_code_banks + asset_banks + 3) * 16384).toString(16).toUpperCase(),
         file : '"%O.filler"',
         fill : 'yes'
     }
 
     bankNames.push('bankFE');
     bankNames.push('bankFF');
+
+    bankNums.push({
+        name: 'SAVE',
+        num: 0xFE
+    });
+
+    bankNums.push({
+        name: 'COMMON',
+        num: 0x80
+    });
 
     var output = '';
     function printout(str) {
@@ -189,8 +210,9 @@ SYMBOLS {
 
     return {
         linker: output,
-        bankMakeList : `_BANKS = ${bankNames.join(' ')}`,
-        folderBankMap
+        bankMakeList : `_BANKS := ${bankNames.join(' ')}`,
+        folderBankMap,
+        bankNumbers : bankNums
     }
 }
 

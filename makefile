@@ -11,15 +11,16 @@ else
 	FIND = find
 endif
 
-#set this for your output ROM file name
-TARGET=game.gtr
+SDIR = src
+ODIR = build
+ROMDIR = bin
+
+# ROM name is now set in project.json
+TARGET := $(shell node -p "require('./project.json').romname")
 
 EMUPATH=../GameTankEmulator
 
 FLASHTOOL = ../GTFO
-
-SDIR = src
-ODIR = build
 
 PORT = COM3
 
@@ -28,7 +29,7 @@ $(info bmpsrc is $(BMPSRC))
 MIDSRC := $(shell $(FIND) assets -name "*.mid")
 JSONSRC := $(shell $(FIND) assets -name "*.json")
 ASSETLISTS := $(shell $(FIND) src/gen/assets -name "*.s.asset")
-ASSETOBJS = $(filter-out $(ASSETLISTS),$(patsubst src/%,$(ODIR)/%,$(ASSETLISTS:s.asset=o)))
+ASSETOBJS = $(filter-out $(ASSETLISTS),$(patsubst src/%,$(ODIR)/%,$(ASSETLISTS:s.asset=o.asset)))
 
 BMPOBJS = $(patsubst %,$(ODIR)/%,$(BMPSRC:bmp=gtg.deflate))
 MIDOBJS = $(patsubst %,$(ODIR)/%,$(MIDSRC:mid=gtm2))
@@ -40,9 +41,9 @@ BINOBJS = $(patsubst %,$(ODIR)/%,$(BINSRC))
 SFXSRC = $(shell $(FIND) assets -name "*.sfx")
 SFXOBJS = $(patsubst %,$(ODIR)/%,$(SFXSRC))
 
-CFLAGS = -t none -Osr --cpu 65c02 --codesize 500 --static-locals -I src/gt
-AFLAGS = --cpu 65C02 --bin-include-dir lib --bin-include-dir $(ODIR)/assets
-LFLAGS = -C gametank-2M.cfg -m $(ODIR)/out.map -vm
+CFLAGS = -t none -Osr --cpu 65c02 --codesize 500 --static-locals -I src/gt -g
+AFLAGS = --cpu 65C02 --bin-include-dir lib --bin-include-dir $(ODIR)/assets -g
+LFLAGS = -C $(ODIR)/gametank-2M.cfg -m $(ODIR)/out.map -vm --dbgfile $(ODIR)/sourcemap.dbg
 LLIBS = lib/gametank.lib
 
 C_SRCS := $(shell $(FIND) src -name "*.c")
@@ -54,27 +55,27 @@ AOBJS = $(filter-out $(ASSETLISTS),$(patsubst src/%,$(ODIR)/%,$(A_SRCS:s=o)))
 _AUDIO_FW = audio_fw.bin.deflate
 AUDIO_FW = $(patsubst %,$(ODIR)/assets/%,$(_AUDIO_FW))
 
--include bankMakeList #sets _BANKS
+-include $(ODIR)/bankMakeList.inc #sets _BANKS
 _BANKS ?= bankFF
-BANKS = $(patsubst %,bin/$(TARGET).%,$(_BANKS))
+BANKS = $(patsubst %,$(ROMDIR)/$(TARGET).%,$(_BANKS))
 
-bin/$(TARGET): $(BANKS)
+$(ROMDIR)/$(TARGET): $(ODIR)/bankMakeList.inc $(BANKS)
 	cat $(BANKS) > $@
 
 $(info ASSETOBJS is $(ASSETOBJS))
 
-$(BANKS): $(ASSETOBJS) $(AOBJS) $(COBJS) $(LLIBS) gametank-2M.cfg
+$(BANKS): $(ODIR)/bankMakeList.inc $(ASSETOBJS) $(AOBJS) $(COBJS) $(LLIBS) $(ODIR)/gametank-2M.cfg
 	@mkdir -p $(@D)
-	$(LN) $(LFLAGS) $(ASSETOBJS) $(AOBJS) $(COBJS) -o bin/$(TARGET) $(LLIBS)
+	$(LN) $(LFLAGS) $(ASSETOBJS) $(AOBJS) $(COBJS) -o $(ROMDIR)/$(TARGET) $(LLIBS)
 
 .PRECIOUS: $(ODIR)/assets/%.gtg
-$(ODIR)/assets/%.gtg: assets/%.bmp | node_modules
+$(ODIR)/assets/%.gtg: assets/%.bmp | scripts/converters/node_modules
 	@mkdir -p $(@D)
 	cd scripts/converters ;\
 	zopfli --deflate $(shell cd scripts/converters && node sprite_convert.js ../../$< ../../$@)
 
 .PRECIOUS: $(ODIR)/assets/%.gtm2
-$(ODIR)/assets/%.gtm2: assets/%.mid | node_modules
+$(ODIR)/assets/%.gtm2: assets/%.mid | scripts/converters/node_modules
 	@mkdir -p $(@D)
 	cd scripts/converters ;\
 	node midiconvert.js ../../$< ../../$@
@@ -85,7 +86,7 @@ $(ODIR)/assets/%.deflate: $(ODIR)/assets/%
 	zopfli --deflate $<
 
 .PRECIOUS: $(ODIR)/assets/%.gsi
-$(ODIR)/assets/%.gsi: assets/%.json | node_modules
+$(ODIR)/assets/%.gsi: assets/%.json | scripts/converters/node_modules
 	@mkdir -p $(@D)
 	cd scripts/converters ;\
 	node sprite_metadata.js ../../$< ../../$@
@@ -101,38 +102,34 @@ $(ODIR)/assets/%.sfx: assets/%.sfx
 $(ODIR)/assets/audio_fw.bin.deflate: $(ODIR)/assets/audio_fw.bin
 	zopfli --deflate $<
 
-$(ODIR)/assets/audio_fw.bin: src/gt/audio_fw.asm gametank-acp.cfg
+$(ODIR)/assets/audio_fw.bin: src/gt/audio/audio_fw.asm gametank-acp.cfg
 	@mkdir -p $(@D)
-	$(AS) --cpu 65C02 src/gt/audio_fw.asm -o $(ODIR)/assets/audio_fw.o
+	$(AS) --cpu 65C02 src/gt/audio/audio_fw.asm -o $(ODIR)/assets/audio_fw.o
 	$(LN) -C gametank-acp.cfg $(ODIR)/assets/audio_fw.o -o $(ODIR)/assets/audio_fw.bin
 
-$(ODIR)/gen/assets/%.o: src/gen/assets/%.s.asset $(BMPOBJS) $(JSONOBJS) $(AUDIO_FW) $(MIDOBJS) $(BINOBJS) $(SFXOBJS)
+$(ODIR)/gen/assets/%.o.asset: src/gen/assets/%.s.asset $(BINOBJS) $(SFXOBJS)
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
-$(ODIR)/%.si: src/%.c src/%.h
+$(ODIR)/%.si: src/%.c src/%.h project.json
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $<
 
-$(ODIR)/%.si: src/%.c
+$(ODIR)/%.si: src/%.c project.json
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $<
 
-$(ODIR)/%.o: $(ODIR)/%.si
+$(ODIR)/%.o: $(ODIR)/%.si project.json
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
-$(ODIR)/%.o: src/%.s
+$(ODIR)/%.o: src/%.s project.json
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
-$(ODIR)/gt/crt0.o: src/gt/crt0.s build/assets/audio_fw.bin.deflate
+$(ODIR)/gt/crt0.o: src/gt/crt0.s $(ODIR)/assets/audio_fw.bin.deflate
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
-
-gametank-2M.cfg: import
-
-src/gen/assets/%: import
 
 scripts/%/node_modules:
 	cd scripts/$* ;\
@@ -141,22 +138,41 @@ scripts/%/node_modules:
 dummy%:
 	@:
 
-.PHONY: clean clean-node flash emulate import node_modules
+.PHONY: clean clean-node flash emulate import
 
 clean:
 	rm -rf $(ODIR)/*
-	rm -rf bin/*
+	rm -rf $(ROMDIR)/*
 
 clean-node:
 	rm -rf scripts/*/node_modules
 
-flash: $(BANKS)
-	$(FLASHTOOL)/bin/GTFO -p $(PORT) bin/$(TARGET).bank*
+flash: $(ODIR)/bankMakeList.inc $(BANKS)
+	$(FLASHTOOL)/bin/GTFO -p $(PORT) $(ROMDIR)/$(TARGET).bank*
 
-emulate: bin/$(TARGET)
-	$(EMUPATH)/build/GameTankEmulator bin/$(TARGET)
+emulate: $(ROMDIR)/$(TARGET)
+	$(EMUPATH)/build/GameTankEmulator $(ROMDIR)/$(TARGET)
 
-node_modules: scripts/build_setup/node_modules scripts/converters/node_modules
+scripts/build_setup/node_modules: scripts/build_setup/package.json
+	cd scripts/build_setup ;\
+	npm install
 
-import: node_modules
-	node ./scripts/build_setup/import_assets.js
+scripts/converters/node_modules: scripts/converters/package.json
+	cd scripts/converters ;\
+	npm install
+
+
+$(ODIR)/%.cfg $(ODIR)/%.inc src/gen/assets/%.s.asset: project.json scripts/build_setup/*.js scripts/build_setup/node_modules $(BMPOBJS) $(JSONOBJS) $(AUDIO_FW) $(MIDOBJS) $(BINOBJS) $(SFXOBJS)
+	mkdir -p $(ODIR)
+	find assets -type f -name '*:Zone.Identifier' -delete
+	node ./scripts/build_setup/build_setup.js
+	if [ -n "$(wildcard assets/*/*.json)" ]; then \
+		for json_file in assets/*/*.json; do \
+			inc_name=$$(basename $$json_file); \
+			dir_name=$$(dirname $$json_file); \
+			mkdir -p src/gen/$$dir_name; \
+			node ./scripts/build_setup/frame_import.js $$json_file src/gen/$$dir_name/$$inc_name.h; \
+		done \
+	fi
+
+import : $(ODIR)/gametank-2M.cfg $(ODIR)/bankMakeList.inc

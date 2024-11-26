@@ -29,7 +29,7 @@ if(midiFileConfig) {
 }
 
 const useVelocity = midiFileConfig ? midiFileConfig.useVelocity : false;
-var instrumentSettings = [0, 3, 4, 0]; //piano, slapbass, snare, piano
+var instrumentSettings = [1, 4, 5, 1]; //piano, slapbass, snare, piano
 if(Array.isArray(midiFileConfig?.instruments)) {
     instrumentSettings = midiFileConfig.instruments;
 }
