@@ -1,6 +1,6 @@
 {
-    "title" : "My GameTank Game",
-    "romname" : "game.gtr",
+    "title" : "Color Test",
+    "romname" : "colortest.gtr",
     "progbanks" : 1,
     "modules" : [
         "PERSIST",
