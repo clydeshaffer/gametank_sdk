@@ -17,9 +17,6 @@
 #define QUADRANT_2 16
 #define QUADRANT_3 24
 
-#define BG_COLOR 16
-#define WINDOW_COLOR 0
-
 #define BORDER_BOTTOM_HEIGHT 8
 #define BORDER_TOP_HEIGHT 7
 #define BORDER_LEFT_WIDTH 1
