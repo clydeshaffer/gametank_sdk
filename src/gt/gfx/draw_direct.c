@@ -38,6 +38,34 @@ void direct_prepare_box_mode() {
     *bank_reg = banksMirror;
 }
 
+void direct_prepare_array_mode() {
+    await_draw_queue();
+    await_drawing();
+    flagsMirror |= DMA_CPU_TO_VRAM;
+    flagsMirror &= ~DMA_ENABLE;
+    *dma_flags = flagsMirror;
+}
+
+void direct_prepare_sprite_ram_array_mode(SpriteSlot sprite) {
+    await_draw_queue();
+    await_drawing();
+
+    flagsMirror |= DMA_ENABLE | DMA_IRQ | DMA_GCARRY | DMA_COLORFILL_ENABLE;
+    flagsMirror &= ~(DMA_COLORFILL_ENABLE | DMA_OPAQUE);
+    *dma_flags = flagsMirror;
+    banksMirror &= ~(BANK_RAM_MASK | BANK_SECOND_FRAMEBUFFER | BANK_GRAM_MASK);
+    banksMirror |= bankflip | (sprite & BANK_GRAM_MASK) | BANK_CLIP_X | BANK_CLIP_Y;
+    *bank_reg = banksMirror;
+    direct_sprite_offset_x = SPRITE_OFFSET_X(sprite);
+    direct_sprite_offset_y = SPRITE_OFFSET_Y(sprite);
+
+    DIRECT_SET_COLOR(0);
+    DIRECT_DRAW_SPRITE(0, 0, 0, 0, 0, 0);
+
+    flagsMirror &= ~DMA_ENABLE;
+    *dma_flags = flagsMirror;
+}
+
 void direct_tiled_mode(bool enabled) {
     if(enabled) {
         flagsMirror &= ~DMA_GCARRY;

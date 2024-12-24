@@ -17,6 +17,8 @@
 #define SPRITE_OFFSET_X(slot) ((slot & SPRITE_OFFSET_X_MASK) ? 128 : 0)
 #define SPRITE_OFFSET_Y(slot) ((slot & SPRITE_OFFSET_Y_MASK) ? 128 : 0)
 
+#define CONSTRUCT_SPRITE_SLOT(slot, quadrant) ((slot) | (quadrant))
+
 typedef char SpriteSlot;
 
 typedef struct SpritePage {

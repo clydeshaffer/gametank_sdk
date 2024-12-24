@@ -6,8 +6,6 @@ char dx = 1, dy = 1;
 
 int main () {
  
-    init_graphics();
- 
     while (1) {                                     //  Run forever
         queue_clear_screen(3);
         queue_draw_box(box_x, box_y, 8, 8, 92);
