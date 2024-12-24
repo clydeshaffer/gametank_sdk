@@ -77,6 +77,7 @@ unsigned char music_mode = REPEAT_NONE;
 
 unsigned char music_channel_mask;
 unsigned char percussion_channel_mask;
+unsigned char note_held_mask;
 unsigned char* sound_effect_ptr[NUM_FM_CHANNELS];
 unsigned char sound_effect_bank[NUM_FM_CHANNELS];
 unsigned char sound_effect_length[NUM_FM_CHANNELS];
@@ -89,6 +90,7 @@ void init_music() {
     music_state.cursor = 0;
     music_state.delay = 0;
     music_channel_mask = 255;
+    note_held_mask = 0;
     for(i = 0; i < NUM_FM_CHANNELS; ++i) {
         sound_effect_length[i] = 0;
         sound_effect_priority[i] = 0;
@@ -193,8 +195,9 @@ void play_song(const unsigned char* song, char bank_num, char loop) {
 }
 
 void pause_music() {
-    push_song_stack();;
+    push_song_stack();
     music_state.cursor = 0;
+    note_held_mask = 0;
 }
 
 void unpause_music() {
@@ -251,7 +254,7 @@ void tick_music() {
     change_rom_bank(music_state.bank);
     op = 0;
     for(ch = 1; ch < 16; ch = ch << 1) {
-        if(ch & ~music_channel_mask) {
+        if(ch & ~(music_channel_mask & note_held_mask)) {
             op+=4;
             continue;
         }
@@ -282,6 +285,7 @@ void tick_music() {
                     } else if(channel_masks[ch] & music_channel_mask) {
                         op = ch << 2;
                         if(n > 0) {
+                            
                             set_note(op, n + channel_note_offset[ch]);
                             audio_amplitudes[op] = env_initial[op];
                             set_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
@@ -298,18 +302,14 @@ void tick_music() {
                                 audio_amplitudes[op] = env_initial[op];
                             set_audio_param(AMPLITUDE+op, (audio_amplitudes[op] >> 4) + sine_offset);
                         } else {
-                            audio_amplitudes[op] = 0;
-                            set_audio_param(AMPLITUDE+op, sine_offset);
-                            ++op;
-                            audio_amplitudes[op] = 0;
-                            set_audio_param(AMPLITUDE+op, sine_offset);
-                            ++op;
-                            audio_amplitudes[op] = 0;
-                            set_audio_param(AMPLITUDE+op, sine_offset);
-                            ++op;
-                            audio_amplitudes[op] = 0;
-                            set_audio_param(AMPLITUDE+op, sine_offset);
+                            audio_amplitudes[op+3] = 0;
+                            set_audio_param(AMPLITUDE+op+3, sine_offset);
                         }
+                    }
+                    if(n) {
+                        note_held_mask |= channel_masks[ch];
+                    } else {
+                        note_held_mask &= ~channel_masks[ch];
                     }
                 }
             }
@@ -343,6 +343,7 @@ void silence_all_channels() {
         audio_amplitudes[n] = 0;
         set_audio_param(AMPLITUDE+n, sine_offset);
     }
+    note_held_mask = 0;
 }
 
 void stop_music() {
