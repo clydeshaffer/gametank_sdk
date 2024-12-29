@@ -213,7 +213,7 @@ char check_tank_hit(char num, char x, char y) {
     return (dx < HITBOX_MANH_RADIUS) && (dy < HITBOX_MANH_RADIUS);
 }
 
-unsigned char hp_colors[10] = {124, 124, 124, 92, 92, 60, 60, 28, 28, 28};
+unsigned char hp_colors[10] = {91, 91, 91, 61, 61, 29, 29, 252, 252, 252};
 
 void draw_hp_bar(char num, char x) {
     char hp = tank_hp[num];
@@ -282,7 +282,7 @@ int tanks_main () {
 
         for(i = 0; i < BULLET_POOL_SIZE; ++i) {
             if(bullet_life[i] > 0) {
-                draw_box(bullet_x[i].b.msb - 1, bullet_y[i].b.msb - 1, 3, 3, 92);
+                draw_box(bullet_x[i].b.msb - 1, bullet_y[i].b.msb - 1, 3, 3, 60);
 
                 bullet_x[i].i += bullet_vx[i];
                 bullet_y[i].i += bullet_vy[i];

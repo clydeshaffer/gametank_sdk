@@ -1,7 +1,7 @@
 { "frames": [
    {
     "filename": "countdown 0.aseprite",
-    "frame": { "x": 0, "y": 33, "w": 35, "h": 45 },
+    "frame": { "x": 0, "y": 32, "w": 35, "h": 45 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 15, "y": 12, "w": 35, "h": 45 },
@@ -10,7 +10,7 @@
    },
    {
     "filename": "countdown 1.aseprite",
-    "frame": { "x": 65, "y": 0, "w": 40, "h": 45 },
+    "frame": { "x": 64, "y": 0, "w": 40, "h": 45 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 12, "y": 9, "w": 40, "h": 45 },
@@ -19,7 +19,7 @@
    },
    {
     "filename": "countdown 2.aseprite",
-    "frame": { "x": 36, "y": 33, "w": 25, "h": 45 },
+    "frame": { "x": 35, "y": 32, "w": 25, "h": 45 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 21, "y": 10, "w": 25, "h": 45 },
@@ -37,11 +37,11 @@
    }
  ],
  "meta": {
-  "app": "http://www.aseprite.org/",
-  "version": "1.3-beta21-x64",
+  "app": "https://www.aseprite.org/",
+  "version": "1.3.11-beta2-x64",
   "image": "countdown.bmp",
   "format": "I8",
-  "size": { "w": 128, "h": 78 },
+  "size": { "w": 128, "h": 77 },
   "scale": "1",
   "frameTags": [
   ],

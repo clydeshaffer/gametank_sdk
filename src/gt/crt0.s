@@ -5,7 +5,7 @@
 ; Startup code for cc65 (GameTank version)
 
 .export   _init, _exit
-.import   _main
+.import   _main, _sdk_init
 
 .export   __STARTUP__ : absolute = 1        ; Mark as startup
 .import   __RAM_START__, __RAM_SIZE__       ; Linker generated
@@ -14,7 +14,7 @@
 
 .import _romBankMirror
 .import _bankflip
-.export _SwitchRomBank
+.import _bank_shift_out
 
 .export _DynaWave
 
@@ -61,9 +61,9 @@ viaWakeup:
 	STA VIA+DDRA
     LDA #$FF
     STA VIA+ORAr
-	lda #$80
-	sta _romBankMirror
-	jsr ShiftHighBits
+	LDA #$80
+	jsr _bank_shift_out
+
 
 ; ---------------------------------------------------------------------------
 ; Set cc65 argument stack pointer
@@ -85,6 +85,10 @@ viaWakeup:
 ; ---------------------------------------------------------------------------
 ; Call main()
 
+		  LDA #$80
+		  jsr _bank_shift_out
+
+		  JSR	  _sdk_init
           JSR     _main
 
 ; ---------------------------------------------------------------------------
@@ -92,101 +96,6 @@ viaWakeup:
 
 _exit:    JSR     donelib              ; Run destructors
           BRK
-
-.proc _SwitchRomBank: near
-	PHP
-	SEI
-	JSR ShiftHighBits
-	PLP
-	RTS
-.endproc
-
-ShiftHighBits:
-	STA $0
-	LDA #$FF
-	STA VIA+ORAr
-
-	LDA $0
-	ROR
-	ROR
-	ROR
-	ROR
-	ROR
-	ROR
-	AND #2
-	ORA #%00000100
-	STA VIA+ORAr
-	ORA #1
-	STA VIA+ORAr
-
-	LDA $0
-	ROR
-	ROR
-	ROR
-	ROR
-	ROR
-	AND #2
-	ORA #%00000100
-	STA VIA+ORAr
-	ORA #1
-	STA VIA+ORAr
-
-	LDA $0
-	ROR
-	ROR
-	ROR
-	ROR
-	AND #2
-	ORA #%00000100
-	STA VIA+ORAr
-	ORA #1
-	STA VIA+ORAr
-
-	LDA $0
-	ROR
-	ROR
-	ROR
-	AND #2
-	ORA #%00000100
-	STA VIA+ORAr
-	ORA #1
-	STA VIA+ORAr
-
-	LDA $0
-	ROR
-	ROR
-	AND #2
-	ORA #%00000100
-	STA VIA+ORAr
-	ORA #1
-	STA VIA+ORAr
-	
-	LDA $0
-	ROR
-	AND #2
-	ORA #%00000100
-	STA VIA+ORAr
-	ORA #1
-	STA VIA+ORAr
-
-	LDA $0
-	AND #2
-	ORA #%00000100
-	STA VIA+ORAr
-	ORA #1
-	STA VIA+ORAr
-
-	LDA $0
-	ROL
-	AND #2
-	STA VIA+ORAr
-	ORA #1
-	STA VIA+ORAr
-
-	ORA #4
-	STA VIA+ORAr
-
-	RTS
 
 	.segment "COMMON"
 _DynaWave:
