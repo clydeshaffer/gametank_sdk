@@ -37,6 +37,7 @@ char did_init_music = 0;
 char music_cnt = 0;
 char game_state = GAME_STATE_TITLE;
 char mode_select = 0;
+char full_bg_draw = 0;
 int tetris_main() {
     auto_tick_music = 1;
     
@@ -77,6 +78,7 @@ int tetris_main() {
                     game_state = GAME_STATE_PLAY_SINGLE;
                 music_cnt = 0;
                 play_song(&ASSET__music__pizza_mid, REPEAT_LOOP);
+                full_bg_draw = 2;
                 for(i = 0; i < 220; ++i) {
                     playField_0[i] = 0;
                     playField_1[i] = 0;
@@ -95,7 +97,12 @@ int tetris_main() {
             
             draw_sprite_now(23, 73 + mode_select, 8, 7, 88, 113, 0);
         } else {
-            draw_sprite_now(0, 0, 127, 127, 0, 0, 2);
+            if(full_bg_draw) {
+                --full_bg_draw;
+                draw_sprite_now(0, 0, 127, 127, 0, 0, 2);
+            } else {
+                draw_sprite_now(9, 9, 111, 105, 9, 9, 2);
+            }
 
             if(game_state & STATE_FLAG_END) {
                 if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {

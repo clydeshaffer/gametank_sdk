@@ -12,7 +12,7 @@ extern const unsigned char* GameSprites;
 extern const unsigned char* BGSprite;
 extern const unsigned char* TitleSprite;
 
-const unsigned char tetro_colors[TET_COUNT+2] = { 0, 221, 179, 60, 30, 254, 122, 90, 5};
+const unsigned char tetro_colors[TET_COUNT+2] = { 0, 221, 179, 60, 30, 252, 122, 90, 5};
 
 extern void wait();
 extern void nop5();
