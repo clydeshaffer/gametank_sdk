@@ -34,7 +34,7 @@ void text_init() {
     text_color = TEXT_COLOR_BLACK;
 }
 
-SpriteSlot load_font() {
+SpriteSlot text_load_font() {
     font_slot = allocate_sprite(&ASSET__sdk_default__bios8_bmp_load_list);
     font_offset_x = SPRITE_OFFSET_X(font_slot);
     font_offset_y = SPRITE_OFFSET_Y(font_slot);
@@ -75,7 +75,7 @@ void text_print_string(char* str) {
                 text_cursor_x += TEXT_CHAR_WIDTH;
                 wait();
         }
-        
+
         ++str;
     }
 }

@@ -14,7 +14,7 @@
 
 void text_init();
 
-SpriteSlot load_font();
+SpriteSlot text_load_font();
 
 void text_print_string(char* text);
 void text_sprint_num(char* s, unsigned char num);
