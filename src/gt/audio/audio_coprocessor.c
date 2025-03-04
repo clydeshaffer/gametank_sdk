@@ -35,8 +35,8 @@ void init_audio_coprocessor()
 
     audio_params_index = 0;
     AUDIO_PARAM_INPUT_BUFFER[0] = 0;
-    *audio_rate = 255;
     *audio_reset = 0;
+    *audio_rate = 255;
     while(*WAVE_TABLE_LOCATION == 0) {
         
     }
