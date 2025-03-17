@@ -71,7 +71,7 @@ void print_text(char* text) {
     }
 }
 
-#pragma codeseg(push, "PROG0")
+#pragma code-name(push, "PROG0")
 static void _num_to_str(int num, char* buf, char len) {
     if(num) {
         i = num;
@@ -90,7 +90,7 @@ static void _num_to_str(int num, char* buf, char len) {
         buf[1] = 0;
     }
 }
-#pragma codeseg(pop)
+#pragma code-name(pop)
 
 void num_to_str(int num, char* buf, char len) {
     change_rom_bank(0xFE);

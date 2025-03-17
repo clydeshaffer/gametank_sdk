@@ -88,7 +88,7 @@ static void try_scan_ray(char pid) {
     }
 }
 
-#pragma codeseg(push, "PROG0")
+#pragma code-name(push, "PROG0")
 static char directions_held;
 static void _try_move_penguin(char pid, char dx, char dy) {
     if(dx | dy) {
@@ -256,7 +256,7 @@ static void _update_field_texts() {
     _print_num_tiles(14, level_num);
 }
 
-#pragma codeseg(pop)
+#pragma code-name(pop)
 
 static void try_move_penguin(char pid, char dx, char dy) {
     change_rom_bank(0xFE);

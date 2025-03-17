@@ -163,7 +163,7 @@ static void draw_enemies() {
     }
 }
 
-#pragma codeseg(push, "PROG0")
+#pragma code-name(push, "PROG0")
 
 static void move_enemies() {
     if(enemy_group_y != 0) ++enemy_group_y;
@@ -224,7 +224,7 @@ static void move_enemies() {
     
 }
 
-#pragma codeseg(pop)
+#pragma code-name(pop)
 
 static void init_player() {
     rotation = 16;

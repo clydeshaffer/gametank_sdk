@@ -35,7 +35,7 @@ void rnd_egg() {
     field[i] = SNAKE_TILE_EGG;
 }
 
-#pragma codeseg(push, "PROG0")
+#pragma code-name(push, "PROG0")
 
 void _init_snake_game() {
     game_state = SNAKE_STATE_TITLE;
@@ -124,7 +124,7 @@ char _skeletize_snake() {
     }
     return 0;
 }
-#pragma codeseg(pop)
+#pragma code-name(pop)
 
 void init_snake_game() {
     change_rom_bank(0xFE);

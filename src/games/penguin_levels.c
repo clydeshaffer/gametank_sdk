@@ -70,7 +70,7 @@ char is_bonus_stage() {
     return ((level_num + 2) % 5) == 0;
 }
 
-#pragma codeseg(push, "PROG0")
+#pragma code-name(push, "PROG0")
 
 static void load_default_layout(char side, char tilenum) {
     i = 0;
@@ -144,7 +144,7 @@ static void _load_level_num(char peng_sel) {
     
 }
 
-#pragma codeseg(pop)
+#pragma code-name(pop)
 
 void load_level_num(char peng_sel) {
     change_rom_bank(0xFE);
