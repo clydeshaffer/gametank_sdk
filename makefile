@@ -38,7 +38,7 @@ BINSRC = $(shell $(FIND) assets -name "*.bin")
 BINOBJS = $(patsubst %,$(ODIR)/%,$(BINSRC))
 
 CFLAGS = -t none -Osr --cpu 65c02 --codesize 500 --static-locals -I src/gt
-AFLAGS = --cpu 65C02 --bin-include-dir lib --bin-include-dir $(ODIR)/assets
+AFLAGS = --cpu W65C02 --bin-include-dir lib --bin-include-dir $(ODIR)/assets
 LFLAGS = -C gametank-2M.cfg -m $(ODIR)/out.map -vm
 LLIBS = lib/gametank.lib
 
@@ -96,7 +96,7 @@ $(ODIR)/assets/audio_fw.bin.deflate: $(ODIR)/assets/audio_fw.bin
 
 $(ODIR)/assets/audio_fw.bin: src/gt/audio_fw.asm gametank-acp.cfg
 	@mkdir -p $(@D)
-	$(AS) --cpu 65C02 src/gt/audio_fw.asm -o $(ODIR)/assets/audio_fw.o
+	$(AS) --cpu W65C02 src/gt/audio_fw.asm -o $(ODIR)/assets/audio_fw.o
 	$(LN) -C gametank-acp.cfg $(ODIR)/assets/audio_fw.o -o $(ODIR)/assets/audio_fw.bin
 
 $(ODIR)/gen/assets/%.o: src/gen/assets/%.s.asset $(BMPOBJS) $(JSONOBJS) $(AUDIO_FW) $(MIDOBJS) $(BINOBJS)
