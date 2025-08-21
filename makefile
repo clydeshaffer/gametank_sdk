@@ -42,7 +42,7 @@ SFXSRC = $(shell $(FIND) assets -name "*.sfx")
 SFXOBJS = $(patsubst %,$(ODIR)/%,$(SFXSRC))
 
 CFLAGS = -t none -Osr --cpu 65c02 --codesize 500 --static-locals -I src/gt -g
-AFLAGS = --cpu 65C02 --bin-include-dir lib --bin-include-dir $(ODIR)/assets -g
+AFLAGS = --cpu W65C02 --bin-include-dir lib --bin-include-dir $(ODIR)/assets -g
 LFLAGS = -C $(ODIR)/gametank-2M.cfg -m $(ODIR)/out.map -vm --dbgfile $(ODIR)/sourcemap.dbg
 LLIBS = --lib none.lib
 
@@ -104,7 +104,7 @@ $(ODIR)/assets/audio_fw.bin.deflate: $(ODIR)/assets/audio_fw.bin
 
 $(ODIR)/assets/audio_fw.bin: src/gt/audio/audio_fw.asm gametank-acp.cfg
 	@mkdir -p $(@D)
-	$(AS) --cpu 65C02 src/gt/audio/audio_fw.asm -o $(ODIR)/assets/audio_fw.o
+	$(AS) --cpu W65C02 src/gt/audio/audio_fw.asm -o $(ODIR)/assets/audio_fw.o
 	$(LN) -C gametank-acp.cfg $(ODIR)/assets/audio_fw.o -o $(ODIR)/assets/audio_fw.bin
 
 $(ODIR)/gen/assets/%.o.asset: src/gen/assets/%.s.asset $(BINOBJS) $(SFXOBJS)
