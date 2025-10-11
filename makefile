@@ -2,9 +2,22 @@ ifndef OS
 	OS=$(shell uname)
 endif
 
-CC = cc65
-AS = ca65
-LN = ld65
+ifneq ($(wildcard tools/cc65/*),)
+	CC = ./tools/cc65/bin/cc65
+	AS = ./tools/cc65/bin/ca65
+	LN = ./tools/cc65/bin/ld65
+else
+	CC = cc65
+	AS = ca65
+	LN = ld65
+endif
+
+ifneq ($(wildcard tools/zopfli/*),)
+	ZOP = ./tools/zopfli/zopfli
+else
+	ZOP = zopfli
+endif
+
 ifeq ($(OS), Windows_NT)
 	FIND = /bin/find
 else
@@ -72,7 +85,8 @@ $(BANKS): $(ODIR)/bankMakeList.inc $(ASSETOBJS) $(AOBJS) $(COBJS) $(ODIR)/gameta
 $(ODIR)/assets/%.gtg: assets/%.bmp | scripts/converters/node_modules
 	@mkdir -p $(@D)
 	cd scripts/converters ;\
-	zopfli --deflate $(shell cd scripts/converters && node sprite_convert.js ../../$< ../../$@)
+	cd ../.. ;\
+	$(ZOP) --deflate $(shell cd scripts/converters && node sprite_convert.js ../../$< ../../$@)
 
 .PRECIOUS: $(ODIR)/assets/%.gtm2
 $(ODIR)/assets/%.gtm2: assets/%.mid | scripts/converters/node_modules
@@ -83,7 +97,7 @@ $(ODIR)/assets/%.gtm2: assets/%.mid | scripts/converters/node_modules
 .PRECIOUS: $(ODIR)/assets/%.deflate
 $(ODIR)/assets/%.deflate: $(ODIR)/assets/%
 	@mkdir -p $(@D)
-	zopfli --deflate $<
+	$(ZOP) --deflate $<
 
 .PRECIOUS: $(ODIR)/assets/%.gsi
 $(ODIR)/assets/%.gsi: assets/%.json | scripts/converters/node_modules
@@ -100,7 +114,7 @@ $(ODIR)/assets/%.sfx: assets/%.sfx
 	cp $< $@
 
 $(ODIR)/assets/audio_fw.bin.deflate: $(ODIR)/assets/audio_fw.bin
-	zopfli --deflate $<
+	$(ZOP) --deflate $<
 
 $(ODIR)/assets/audio_fw.bin: src/gt/audio/audio_fw.asm gametank-acp.cfg
 	@mkdir -p $(@D)
@@ -176,3 +190,17 @@ $(ODIR)/%.cfg $(ODIR)/%.inc src/gen/assets/%.s.asset: project.json scripts/build
 	fi
 
 import : $(ODIR)/gametank-2M.cfg $(ODIR)/bankMakeList.inc
+
+prereqs:
+	mkdir tools ;\
+	cd tools ;\
+	git clone git@github.com:google/zopfli.git ;\
+	cd zopfli ;\
+	make ;\
+	cd .. ;\
+	git clone git@github.com:cc65/cc65.git ;\
+	cd cc65 ;\
+	git checkout 6efe447d14a31e98cb14e8a3d45621e844c89ebe ;\
+	make bin ;\
+	make lib ;\
+	echo 'DONE - built zopfli and cc65, install nodejs using your usual package manager'
