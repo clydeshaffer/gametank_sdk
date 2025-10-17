@@ -38,12 +38,14 @@ char music_cnt = 0;
 char game_state = GAME_STATE_TITLE;
 char mode_select = 0;
 char full_bg_draw = 0;
+char title_scroll = 0;
 int tetris_main() {
     auto_tick_music = 1;
     
     load_spritesheet(&ASSET__tetris__gamesprites_bmp, 0);
     load_spritesheet(&ASSET__tetris__title_bmp, 1);
     load_spritesheet(&ASSET__tetris__bg_bmp, 2);
+    load_spritesheet(&ASSET__tetris__title_bg_bmp, 3);
     change_rom_bank(0xFD);
     init_tetromino_minis();
 
@@ -70,6 +72,18 @@ int tetris_main() {
         update_inputs();
         
         if(game_state == GAME_STATE_TITLE) {
+            draw_sprite_now(1, 0, 63, 64, 0, title_scroll, 3);
+            await_drawing();
+            draw_sprite_now(64, 0, 63, 64, 0, title_scroll, 3);
+            await_drawing();
+            draw_sprite_now(1, 64, 63, 64, 0, title_scroll, 3);
+            await_drawing();
+            draw_sprite_now(64, 64, 63, 64, 0, title_scroll, 3);
+            ++title_scroll;
+            title_scroll &= 63;
+            await_drawing();
+            draw_box_now(0, 120, 127, 8, 32);
+            await_drawing();
             draw_sprite_now(0, 0, 127, 127, 0, 0, 1);
             if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
                 if(mode_select)
@@ -96,6 +110,7 @@ int tetris_main() {
             await_drawing();
             
             draw_sprite_now(23, 73 + mode_select, 8, 7, 88, 113, 0);
+            await_drawing();
         } else {
             if(full_bg_draw) {
                 --full_bg_draw;
