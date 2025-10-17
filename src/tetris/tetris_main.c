@@ -79,7 +79,7 @@ int tetris_main() {
             draw_sprite_now(1, 64, 63, 64, 0, title_scroll, 3);
             await_drawing();
             draw_sprite_now(64, 64, 63, 64, 0, title_scroll, 3);
-            ++title_scroll;
+            --title_scroll;
             title_scroll &= 63;
             await_drawing();
             draw_box_now(0, 120, 127, 8, 32);
