@@ -10,6 +10,8 @@ src/main.c contains the code that will run after the console powers on
 
 ## Build requirements:
 
+EXPERIMENTAL: You can hopefully install cc65 and Zopfli into the SDK directory with 'make prereqs'. Use your package manager if you need to install nodeJS
+
 * cc65 https://cc65.github.io/
 
   * recommended to use a snapshot build or build from source as their last tagged release and apt package are outdated
@@ -19,6 +21,7 @@ src/main.c contains the code that will run after the console powers on
 * Zopfli https://github.com/google/zopfli
 
 * GNU Make
+
 
 ## Testing requirements:
 
