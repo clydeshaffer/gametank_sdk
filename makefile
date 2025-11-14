@@ -44,7 +44,7 @@ SFXOBJS = $(patsubst %,$(ODIR)/%,$(SFXSRC))
 CFLAGS = -t none -Osr --cpu 65c02 --codesize 500 --static-locals -I src/gt -g
 AFLAGS = --cpu 65C02 --bin-include-dir lib --bin-include-dir $(ODIR)/assets -g
 LFLAGS = -C $(ODIR)/gametank-2M.cfg -m $(ODIR)/out.map -vm --dbgfile $(ODIR)/sourcemap.dbg
-LLIBS = lib/gametank.lib
+LLIBS = none.lib
 
 C_SRCS := $(shell $(FIND) src -name "*.c")
 COBJS = $(patsubst src/%,$(ODIR)/%,$(C_SRCS:c=o))
@@ -64,7 +64,7 @@ $(ROMDIR)/$(TARGET): $(ODIR)/bankMakeList.inc $(BANKS)
 
 $(info ASSETOBJS is $(ASSETOBJS))
 
-$(BANKS): $(ODIR)/bankMakeList.inc $(ASSETOBJS) $(AOBJS) $(COBJS) $(LLIBS) $(ODIR)/gametank-2M.cfg
+$(BANKS): $(ODIR)/bankMakeList.inc $(ASSETOBJS) $(AOBJS) $(COBJS) $(ODIR)/gametank-2M.cfg
 	@mkdir -p $(@D)
 	$(LN) $(LFLAGS) $(ASSETOBJS) $(AOBJS) $(COBJS) -o $(ROMDIR)/$(TARGET) $(LLIBS)
 
