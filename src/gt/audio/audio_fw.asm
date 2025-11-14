@@ -41,7 +41,7 @@ RESET:
     LDA #>Sine
     STA WavePTR+1
 Forever:
-    WAI
+    .byte $CB ;WAI
 	JMP Forever
 
 .macro tickWave chn
