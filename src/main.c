@@ -4,8 +4,7 @@
 char box_x = 30, box_y = 20;
 char dx = 1, dy = 1;
 
-int main () {
- 
+void main () {
     while (1) {                                     //  Run forever
         queue_clear_screen(3);
         queue_draw_box(box_x, box_y, 8, 8, 92);
@@ -29,6 +28,4 @@ int main () {
         flip_pages();
  
     }
- 
-  return (0);                                     //  We should never get here!
 }

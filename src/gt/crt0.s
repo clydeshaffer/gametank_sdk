@@ -69,9 +69,9 @@ viaWakeup:
 ; Set cc65 argument stack pointer
 
           LDA     #<(__RAM_START__ + __RAM_SIZE__)
-          STA     sp
+          STA     c_sp
           LDA     #>(__RAM_START__ + __RAM_SIZE__)
-          STA     sp+1
+          STA     c_sp+1
 
 ; ---------------------------------------------------------------------------
 ; Initialize memory storage

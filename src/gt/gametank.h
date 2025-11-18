@@ -9,22 +9,22 @@ typedef char bool;
 #define true 1
 #define false 0
 
-#define audio_reset ((volatile char *) 0x2000)
-#define audio_nmi ((volatile char *) 0x2001)
-#define audio_rate ((volatile char *) 0x2006)
-#define dma_flags ((volatile char *) 0x2007)
-#define bank_reg ((volatile char *) 0x2005)
-#define via ((volatile char*) 0x2800)
-#define aram ((volatile char *) 0x3000)
-#define vram ((volatile char *) 0x4000)
-#define vram_VX ((volatile char *) 0x4000)
-#define vram_VY ((volatile char *) 0x4001)
-#define vram_GX ((volatile char *) 0x4002)
-#define vram_GY ((volatile char *) 0x4003)
-#define vram_WIDTH ((volatile char *) 0x4004)
-#define vram_HEIGHT ((volatile char *) 0x4005)
-#define vram_COLOR ((volatile char *) 0x4007)
-#define vram_START ((volatile char *) 0x4006)
+#define audio_reset ((char *) 0x2000)
+#define audio_nmi ((char *) 0x2001)
+#define audio_rate ((char *) 0x2006)
+#define dma_flags ((char *) 0x2007)
+#define bank_reg ((char *) 0x2005)
+#define via ((char*) 0x2800)
+#define aram ((unsigned char *) 0x3000)
+#define vram ((unsigned char *) 0x4000)
+#define vram_VX ((char *) 0x4000)
+#define vram_VY ((char *) 0x4001)
+#define vram_GX ((char *) 0x4002)
+#define vram_GY ((char *) 0x4003)
+#define vram_WIDTH ((char *) 0x4004)
+#define vram_HEIGHT ((char *) 0x4005)
+#define vram_COLOR ((char *) 0x4007)
+#define vram_START ((char *) 0x4006)
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 128

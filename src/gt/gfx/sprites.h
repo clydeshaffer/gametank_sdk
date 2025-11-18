@@ -22,19 +22,19 @@
 typedef char SpriteSlot;
 
 typedef struct SpritePage {
-    void* data;
+    const unsigned char* data;
     char bank;
-    void* next;
+    const struct SpritePage* next;
 } SpritePage;
 
 extern Frame sprite_temp_frame;
 
-void load_spritesheet(char* spriteData, char srcBank, char ramBank);
+void load_spritesheet(const unsigned char* spriteData, char srcBank, char ramBank);
 void clear_spritebank(char bank);
 
 void sprite_fetch_frame(SpriteSlot sprite, char frame);
 
-SpriteSlot allocate_sprite(SpritePage* sprite);
+SpriteSlot allocate_sprite(const SpritePage* sprite);
 void set_sprite_frametable(SpriteSlot sprite, const Frame *frametable, char frametable_bank);
 void free_sprite(SpriteSlot slot);
 

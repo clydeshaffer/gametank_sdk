@@ -46,7 +46,7 @@ void sdk_init() {
         flip_pages();
         await_vsync(1);
         if(logo_state == 3) {
-            play_song(&ASSET__sdk_default__jingle_mid, REPEAT_NONE);
+            play_song(ASSET__sdk_default__jingle_mid, REPEAT_NONE);
         }
         if(logo_state > 2) {
             tick_music();

@@ -29,7 +29,7 @@ static char frametable_B[SPRITE_SLOT_COUNT];
 #define HEAD_CORNER_SW 64
 #define HEAD_CORNER_SE 128
 
-void load_spritesheet(char* spriteData, char srcBank, char ramBank) {
+void load_spritesheet(const unsigned char* spriteData, char srcBank, char ramBank) {
     char oldFlags = flagsMirror;
     char oldBanks = banksMirror;
     char bankNum = ramBank & 7;
@@ -91,8 +91,8 @@ void clear_spritebank(char bank) {
     *bank_reg = banksMirror;
 }
 
-SpriteSlot allocate_sprite(SpritePage* sprite) {
-    register SpritePage* current;
+SpriteSlot allocate_sprite(const SpritePage* sprite) {
+    register const SpritePage* current;
     register char mask, i, free_page;
     push_rom_bank();
     change_rom_bank(BANK_LOADERS);

@@ -7,13 +7,13 @@
 #include "../../gen/assets/assets_index.h"
 
 typedef struct music_state_t {
-    unsigned char* cursor;
+    const unsigned char* cursor;
     unsigned char bank;
     unsigned char cfg; //file flags
     unsigned char delay;
-    unsigned char* repeat_ptr;
+    const unsigned char* repeat_ptr;
     unsigned char flags; //playback flags
-    Instrument* instruments[NUM_FM_CHANNELS];
+    const Instrument* instruments[NUM_FM_CHANNELS];
 } music_state_t;
 
 #define MUSIC_STACK_SIZE 8
@@ -69,7 +69,7 @@ unsigned char op_transpose[NUM_FM_OPS] = { 0, 0, 0, 0,
 
 #define MUSIC_FLAG_POP_AT_END 1
 
-unsigned char* paused_cursor = 0;
+const unsigned char* paused_cursor = 0;
 unsigned char paused_bank = 0;
 unsigned char paused_cfg = 0;
 unsigned char paused_delay;
@@ -78,7 +78,7 @@ unsigned char music_mode = REPEAT_NONE;
 unsigned char music_channel_mask;
 unsigned char percussion_channel_mask;
 unsigned char note_held_mask;
-unsigned char* sound_effect_ptr[NUM_FM_CHANNELS];
+const unsigned char* sound_effect_ptr[NUM_FM_CHANNELS];
 unsigned char sound_effect_bank[NUM_FM_CHANNELS];
 unsigned char sound_effect_length[NUM_FM_CHANNELS];
 unsigned char saved_feedback_value[NUM_FM_CHANNELS];
@@ -98,8 +98,8 @@ void init_music() {
     stop_music();
 }
 
-void load_instrument(char channel, Instrument* instr) {
-    if(instr == 0xFFFF) {
+void load_instrument(char channel, const Instrument* instr) {
+    if(instr == ((Instrument*) 0xFFFF)) {
         percussion_channel_mask |= channel_masks[channel];
         return;
     }
@@ -244,7 +244,7 @@ void tick_music() {
             } else {
                 op = n << 2;
                 set_audio_param(AMPLITUDE+(op+3), sine_offset);
-                aram[FEEDBACK_AMT + n] = saved_feedback_value;
+                aram[FEEDBACK_AMT + n] = saved_feedback_value[n];
                 music_channel_mask |= channel_masks[n];
                 sound_effect_priority[n] = 0;
             }

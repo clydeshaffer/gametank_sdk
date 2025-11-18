@@ -142,7 +142,6 @@ Op2:
 	LDA Sine, x
 	CLC
 	BRA Op3Param ;;cutoff point betweeb single 4-op and dual 2-op FM
-:
 	ADC AccBuf
 	STA AccBuf
 	CLC
@@ -186,7 +185,7 @@ NMI_Done:
     PLY
 	RTI
 
-	.align 256
+	.segment "WAVES"
 Sine:
 	.incbin "scaled_sines.raw"
 

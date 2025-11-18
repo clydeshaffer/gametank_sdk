@@ -4,6 +4,12 @@
 #include "../../../gen/bank_nums.h"
 #include "../../../gen/modules_enabled.h"
 
+#define MAGIC_SAVE_NUM 0x42
+
+#pragma rodata-name (push, "SAVE")
+const char save_canary = MAGIC_SAVE_NUM;
+#pragma rodata-name (pop)
+
 #ifdef ENABLE_MODULE_PERSIST
 
 char executing_from_rom() {
