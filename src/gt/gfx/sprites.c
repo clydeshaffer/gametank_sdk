@@ -23,6 +23,7 @@ typedef union PointerUnion {
 static char frametable_L[SPRITE_SLOT_COUNT];
 static char frametable_H[SPRITE_SLOT_COUNT];
 static char frametable_B[SPRITE_SLOT_COUNT];
+static char sprite_size_cache[SPRITE_SLOT_COUNT];
 
 #define HEAD_CORNER_NW 16
 #define HEAD_CORNER_NE 32
@@ -143,7 +144,10 @@ SpriteSlot allocate_sprite(const SpritePage* sprite) {
         return 0xFF;
     }
 
+    sprite_size_cache[free_page] = mask;
+
     i = 1;
+
     mask = (free_page & SPRITE_OFFSET_XY_MASK);
     for(current = sprite; current != 0; current = current->next) {
         if(current->data != 0) {
@@ -171,17 +175,23 @@ void free_sprite(SpriteSlot slot) {
         case 0:
             clear_mask &= 0b1111;
             clear_mask |= 1;
-            if((clear_mask & 0b0110) != 0b110) {
+            if((clear_mask & 0b0110) != 0b0110) {
                 clear_mask &= 7;
             }
             break;
         case SPRITE_OFFSET_X_MASK:
             clear_mask &= 0b1010;
             clear_mask |= 2;
+            if(sprite_size_cache[slot] == 1) {
+                clear_mask &= 7;
+            }
             break;
         case SPRITE_OFFSET_Y_MASK:
             clear_mask &= 0b1100;
             clear_mask |= 4;
+            if(sprite_size_cache[slot] == 1) {
+                clear_mask &= 7;
+            }
             break;
         case SPRITE_OFFSET_XY_MASK:
             clear_mask = 0b1000;
