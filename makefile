@@ -54,7 +54,7 @@ BINOBJS = $(patsubst %,$(ODIR)/%,$(BINSRC))
 SFXSRC = $(shell $(FIND) assets -name "*.sfx")
 SFXOBJS = $(patsubst %,$(ODIR)/%,$(SFXSRC))
 
-CFLAGS = -t none -Osr --cpu 65c02 --codesize 500 --static-locals -I src/gt -g
+CFLAGS = -t none -Osr --cpu 65c02 --codesize 500 --static-locals -I src/gt -g $(CDEFS)
 AFLAGS = --cpu W65C02 --bin-include-dir lib --bin-include-dir $(ODIR)/assets -g
 LFLAGS = -C $(ODIR)/gametank-2M.cfg -m $(ODIR)/out.map -vm --dbgfile $(ODIR)/sourcemap.dbg
 LLIBS = --lib none.lib
