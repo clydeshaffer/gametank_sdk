@@ -17,23 +17,30 @@ WaveStatesH = $50
 WaveStatesL = $60
 Inputs = $70
 	.zeropage
-	.byte 0, 0, 0, 0, >Sine, >Sine, >Sine+8, >Sine, $80, $80, $80, $80, 0, 0, 0, 0
+	;AccBuf
+	.byte 0, 0
+	;WavePTR
+	.byte 0, 0
+	;Feedback
+	.byte $80, $80, $80, $80
+	;UNUSED
+	.repeat 8
+	.byte 0
+	.endrep
+	;Frequencies
     .repeat $20
     .byte 0
     .endrep
+	;Amplitudes
 	.repeat $10
-	.byte >Sine
+	.byte $80
 	.endrep
+	;Wave States
 	.repeat $80
 	.byte 0
 	.endrep
+
 	.code
-Amplitudes:
-	.repeat 24
-	.byte >Sine
-	.endrep
-ScratchPad:
-	.byte 0
 RESET:
 	CLI
     LDA #<Sine
@@ -44,72 +51,134 @@ Forever:
     WAI
 	JMP Forever
 
-.macro tickWave chn
+.macro tickWave op, out
 	CLC
-	LDA WaveStatesL+chn
-	ADC FreqsL+chn
-	STA WaveStatesL+chn
-	LDA WaveStatesH+chn
-	ADC FreqsH+chn
-	STA WaveStatesH+chn
-.endmacro
-
-.macro tickChannel ch
-	tickWave (ch * 4)
-
-	BCC :+
-	LDA BufferedAmplitudes+(ch*4)+0
-	STA Amplitudes+(ch*4)+0
-	LDA BufferedAmplitudes+(ch*4)+1
-	STA Amplitudes+(ch*4)+1
-	LDA BufferedAmplitudes+(ch*4)+2
-	STA Amplitudes+(ch*4)+2
-	LDA BufferedAmplitudes+(ch*4)+3
-	STA Amplitudes+(ch*4)+3
-:
-	tickWave (ch*4)+1
-	tickWave (ch*4)+2
-	tickWave (ch*4)+3
+	LDA WaveStatesL+op
+	ADC FreqsL+op
+	STA WaveStatesL+op
+	LDA out
+	ADC FreqsH+op
+	STA out
 .endmacro
 
 .macro doChannel ch
-	LDA WaveStatesH+(ch*4)+3
-	STA Op4Param+1
-	LDA WaveStatesH+(ch*4)+2
-	STA Op3Param+1
-	LDA WaveStatesH+(ch*4)+1
-	STA Op2Param+1
-	;CLC
-	LDA WaveStatesH+(ch*4)+0
-	ADC LastSample+ch
-	SEC
-	SBC #$80
-	STA Op1Param+1
+.local Op1
+.local Op1State
+.local Op1Param
+.local Op2
+.local Op2Param
+.local Op3
+.local Op3Param
+.local Op4
+.local Op4Param
+.local SaveFeedback
+.local SampleFeedback
+.local LastSample
 
-	LDA Amplitudes+(ch*4)+0
-	STA Op1+2
-	LDA Amplitudes+(ch*4)+1
-	STA Op2+2
-	LDA Amplitudes+(ch*4)+2
-	STA Op3+2
-	LDA Amplitudes+(ch*4)+3
-	STA Op4+2
-	LDA #LastSample+ch
-	STA SaveFeedback+1
-	LDA FeedbackAmount+ch
-	STA SampleFeedback+2
-	JSR FMChannel
+	LDA BufferedAmplitudes+(ch*4)+0
+	STA Op1+1
+	LDA BufferedAmplitudes+(ch*4)+1
+	STA Op2+1
+	LDA BufferedAmplitudes+(ch*4)+2
+	STA Op3+1
+	LDA BufferedAmplitudes+(ch*4)+3
+	STA Op4+1
+
+	tickWave (ch*4)+1, Op2Param+1
+	tickWave (ch*4)+2, Op3Param+1
+	tickWave (ch*4)+3, Op4Param+1
+
+	tickWave (ch * 4), Op1State+1
+Op1State:
+	LDA #0
+LastSample:
+	ADC #0
+	
+	TAY
+	CLC
+SampleFeedback:
+	ADC FeedbackAmount+ch
+	TAX
+	CLC
+	LDA Sine, y
+	ADC Sine, x 
+
+SaveFeedback:
+	STA LastSample+1
+	TYA
+
+	CLC
+Op1:
+	ADC #0
+	TAX
+	CLC
+	LDA Sine, y
+	ADC Sine, x 
+
+	CLC
+Op2Param:
+	ADC #0
+	TAY
+	CLC
+Op2:
+	ADC #0
+	TAX
+	CLC
+	LDA Sine, y
+	ADC Sine, x 
+
+	CLC
+Op3Param:
+	ADC #0
+	TAY
+	CLC
+Op3:
+	ADC #0
+	TAX
+	CLC
+	LDA Sine, y
+	ADC Sine, x 
+
+	CLC
+Op4Param:
+	ADC #0
+	TAY
+	CLC
+Op4:
+	ADC #0
+	TAX
+	CLC
+	LDA Sine, y
+	ADC Sine, x 
+
+	CMP #$80
+	ROR
+	CMP #$80
+	ROR
+
+	CLC
+	ADC AccBuf
+	STA AccBuf
 .endmacro
+
+.macro GetSine
+.local ScaleConstant
+	; Returns sin(Acc + X) + sin(Acc - X)
+	TAY
+	STX ScaleConstant+1
+	CLC
+ScaleConstant:
+	ADC #0
+	TAX
+	CLC
+	LDA Sine, y
+	ADC Sine, x 
+.endmacro
+
 
 IRQ:
 	;Clear sum buffer
 	STZ AccBuf
-
-	;Update all wavestates
-	tickChannel 0
-	tickChannel 1
-	tickChannel 2
-	tickChannel 3
 
 	doChannel 0
 	doChannel 1
@@ -122,47 +191,6 @@ IRQ:
 	STA DAC
 
 	RTI ;6
-
-FMChannel:
-	CLC
-Op1Param:
-	LDA #0
-	TAX
-SampleFeedback:	
-	LDA Sine, x
-SaveFeedback:
-	STA LastSample+0
-Op1:
-	LDA Sine, x
-	CLC
-Op2Param:
-	ADC #0
-	TAX
-Op2:
-	LDA Sine, x
-	CLC
-	BRA Op3Param ;;cutoff point betweeb single 4-op and dual 2-op FM
-	ADC AccBuf
-	STA AccBuf
-	CLC
-	LDA #0
-Op3Param:
-	ADC #0
-	TAX
-
-Op3:
-	LDA Sine, x
-	CLC
-Op4Param:
-	ADC #0
-	TAX
-
-Op4:
-	LDA Sine, x
-	CLC
-	ADC AccBuf
-	STA AccBuf
-	RTS 
 
 ;Read inputs addr, val until addr=0
 NMI_handler:
@@ -187,7 +215,7 @@ NMI_Done:
 
 	.segment "WAVES"
 Sine:
-	.incbin "scaled_sines.raw"
+	.incbin "sine_256_-63_63.bin"
 
 	.segment "VECTORS"
 	.addr NMI_handler
