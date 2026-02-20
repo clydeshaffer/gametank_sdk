@@ -62,7 +62,10 @@ typedef char bool;
 #define ORA 1
 #define DDRB 2
 #define DDRA 3
-#define T1C 5
+#define T1CL 4
+#define T1CH 5
+#define T1LL 6
+#define T1LH 7
 #define ACR 11
 #define PCR 12
 #define IFR 13

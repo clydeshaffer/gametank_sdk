@@ -10,10 +10,11 @@
 
 .import   _frameflag
 .import   _draw_busy
+.import   _scanline_flips
 .export   _irq_int, _nmi_int
 
 .ifdef ENABLE_MODULE_DRAWQUEUE
-.import _next_draw_queue, _queue_end, _queue_pending, _queue_start
+.import _next_draw_queue, _queue_end, _queue_pending, _queue_start, _flip_pages, _flagsMirror
 .endif
 
 .pc02
@@ -44,7 +45,15 @@ _irq_int:
         PHX                    ; Save X register contents to stack
         PHA
         PHY
-
+        LDA _scanline_flips
+        BEQ not_timer_irq
+        LDA $2804
+        LDA _flagsMirror
+        EOR #2
+        STA _flagsMirror
+        STA $2007
+        JMP finish_irq
+not_timer_irq:
         ;make sure DMA isn't running then compare head and tail of queue
         ;to determine whether there is more to process
         STZ DMA_Start
