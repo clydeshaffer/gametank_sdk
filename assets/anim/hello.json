@@ -1,0 +1,36 @@
+{ "frames": [
+   {
+    "filename": "Sprite-0006 0.",
+    "frame": { "x": 0, "y": 0, "w": 103, "h": 9 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 13, "y": 60, "w": 103, "h": 9 },
+    "sourceSize": { "w": 128, "h": 128 },
+    "duration": 100
+   },
+   {
+    "filename": "Sprite-0006 1.",
+    "frame": { "x": 103, "y": 0, "w": 25, "h": 21 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 56, "y": 53, "w": 25, "h": 21 },
+    "sourceSize": { "w": 128, "h": 128 },
+    "duration": 100
+   }
+ ],
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.3.13-x64",
+  "image": "hello.bmp",
+  "format": "I8",
+  "size": { "w": 128, "h": 21 },
+  "scale": "1",
+  "frameTags": [
+  ],
+  "layers": [
+   { "name": "Layer 1", "opacity": 255, "blendMode": "normal" }
+  ],
+  "slices": [
+  ]
+ }
+}
