@@ -11,6 +11,8 @@ unsigned char queue_start = 0;
 unsigned char queue_end = 0;
 unsigned char queue_count = 0;
 unsigned char queue_pending = 0;
+unsigned char sprite_flags_override = 0;
+unsigned char clip_override = 0;
 
 void queue_draw_sprite_rect() {
     if(queue_count >= QUEUE_MAX) {
@@ -21,8 +23,10 @@ void queue_draw_sprite_rect() {
     asm("SEI");
     if(rect.b & SPRITE_OFFSET_X_MASK) { rect.gx |= 128; }
     if(rect.b & SPRITE_OFFSET_Y_MASK) { rect.gy |= 128; }
-    rect.b = (rect.b & BANK_GRAM_MASK) | bankflip | CLIP_MODE_XY;
-    queue_flags_param = DMA_GCARRY;
+    rect.b = (rect.b & BANK_GRAM_MASK) | bankflip | (CLIP_MODE_XY ^ clip_override);
+    queue_flags_param = DMA_GCARRY ^ sprite_flags_override;
+    sprite_flags_override = 0;
+    clip_override = 0;
     pushRect();
 
     if(queue_pending == 0) {

@@ -10,6 +10,7 @@
 
 extern unsigned char queue_start, queue_end, queue_pending, queue_count;
 extern unsigned char queue_flags_param; //defined in draw_util.s
+extern unsigned char sprite_flags_override, clip_override;
 
 void queue_draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned char h, unsigned char c);
 void queue_draw_sprite_rect();
