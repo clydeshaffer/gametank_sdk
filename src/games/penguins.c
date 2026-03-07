@@ -45,6 +45,7 @@ static char ctrl_penguin;
 static char last_dx[2];
 static char last_dy[2];
 static int countdown;
+static char cheat_mode;
 
 #define MAX_SPIDERS 4
 static char spider_x[MAX_SPIDERS];
@@ -324,6 +325,7 @@ void run_penguins_game() {
     load_spritesheet(&ASSET__gfx6__penguins_bmp, 0);
     load_spritesheet(&ASSET__gfx6__peng_title_bmp, 1);
     load_spritesheet(&ASSET__gfx6__peng_end_bmp, 2);
+    cheat_mode = 0;
 
     rnd_seed = 234;
     global_tick = 0;
@@ -370,6 +372,12 @@ void run_penguins_game() {
             }
             if(player1_buttons & ~player1_old_buttons & INPUT_MASK_UP) {
                 ctrl_penguin = 0;
+            }
+            if(player1_buttons & ~player1_old_buttons & INPUT_MASK_LEFT) {
+                --cheat_mode;
+            }
+            if(player1_buttons & ~player1_old_buttons & INPUT_MASK_RIGHT) {
+                ++cheat_mode;
             }
         } else if(game_state == GAME_STATE_LEVEL_INTRO) {
             clear_border(0);    
@@ -472,10 +480,12 @@ void run_penguins_game() {
                         play_song(&ASSET__music__odetojoy_mid, REPEAT_NONE);
                     }
                 
-                if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
-                    ++level_num;
-                    init_field();
-                    init_penguins();
+                if(cheat_mode == 16) {
+                        if(player1_buttons & ~player1_old_buttons & INPUT_MASK_START) {
+                        ++level_num;
+                        init_field();
+                        init_penguins();
+                    }
                 }
             }
 
@@ -529,13 +539,13 @@ void run_penguins_game() {
             draw_tiles_now(4, 24, 120, 8, 96, 0, 0);
             wait();
             //Bottom
-            draw_tiles_now(4, SCREEN_HEIGHT-16, 120, 16, 96, 0, 0);
+            draw_tiles_now(4, SCREEN_HEIGHT-16, 120, 8, 96, 0, 0);
             wait();
             //Left
-            draw_tiles_now(0, 24, 4, 104, 96, 0, 0);
+            draw_tiles_now(0, 24, 4, 96, 96, 0, 0);
             wait();
             //Right
-            draw_tiles_now(SCREEN_WIDTH-4, 24, 4, 104, 96, 0, 0);
+            draw_tiles_now(SCREEN_WIDTH-4, 24, 4, 96, 96, 0, 0);
             wait();
 
             draw_field(0);
@@ -560,6 +570,10 @@ void run_penguins_game() {
             }
         }
         PROFILER_END(0);
+        draw_box_now(SCREEN_WIDTH-1, 0, 1, 64, 32);
+        wait();
+        draw_box_now(SCREEN_WIDTH-1, 64, 1, 64, 32);
+        wait();
         sleep(1);
         flip_pages();
         ++global_tick;
