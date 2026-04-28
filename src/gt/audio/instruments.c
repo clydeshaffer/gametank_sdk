@@ -70,7 +70,8 @@ Instrument* instrument_table[] = {
     &guitar2,
     &slapbass,
     &snare,
-    &sitar
+    &sitar,
+    &horn
 };
 
 Instrument* get_instrument_ptr(char idx) {
