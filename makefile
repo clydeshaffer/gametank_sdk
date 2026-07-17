@@ -14,8 +14,10 @@ endif
 
 ifneq ($(wildcard tools/zopfli/*),)
 	ZOP = ./tools/zopfli/zopfli
+	ZOP2 = ../../tools/zopfli/zopfli
 else
 	ZOP = zopfli
+	ZOP2 = zopfli
 endif
 
 ifeq ($(OS), Windows_NT)
@@ -85,8 +87,7 @@ $(BANKS): $(ODIR)/bankMakeList.inc $(ASSETOBJS) $(AOBJS) $(COBJS) $(ODIR)/gameta
 $(ODIR)/assets/%.gtg: assets/%.bmp | scripts/converters/node_modules
 	@mkdir -p $(@D)
 	cd scripts/converters ;\
-	cd ../.. ;\
-	$(ZOP) --deflate $(shell cd scripts/converters && node sprite_convert.js ../../$< ../../$@)
+	$(ZOP2) --deflate $(shell cd scripts/converters && node sprite_convert.js ../../$< ../../$@)
 
 .PRECIOUS: $(ODIR)/assets/%.gtm2
 $(ODIR)/assets/%.gtm2: assets/%.mid | scripts/converters/node_modules
