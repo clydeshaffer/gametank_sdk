@@ -11,7 +11,8 @@ OutBits = $2801
 
 .proc	_bank_shift_out: near
     sta _romBankMirror;
-    stz OutBits
+    ldx #%11111000
+    stx OutBits
     clc
     rol
     rol
@@ -20,6 +21,7 @@ OutBits = $2801
 
 .repeat 7
     and #2
+    ora #%11111000
     sta OutBits
     ora #1
     sta OutBits
@@ -29,12 +31,14 @@ OutBits = $2801
 .endrepeat
 
     and #2
+    ora #%11111000
     sta OutBits
     ora #1
     sta OutBits
     ora #4
     sta OutBits
-    stz OutBits
+    ldx #%11111000
+    stx OutBits
     
     rts
 

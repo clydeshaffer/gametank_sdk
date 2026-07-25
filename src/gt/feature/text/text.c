@@ -26,6 +26,7 @@ char text_cursor_x, text_cursor_y;
 char text_print_width, text_print_line_start;
 unsigned char text_color;
 char font_offset_x, font_offset_y;
+static char last_x, last_y;
 
 void text_init() {
     text_cursor_x = 0;
@@ -43,14 +44,22 @@ SpriteSlot text_load_font() {
 }
 
 char text_tmp;
+
+void text_back() {
+    text_cursor_x = last_x;
+    text_cursor_y = last_y;
+}
+
 void text_print_string(char* str) {
-    *dma_flags = (flagsMirror | DMA_GCARRY) & ~(DMA_COLORFILL_ENABLE | DMA_OPAQUE);
+    *dma_flags = (flagsMirror | DMA_GCARRY | DMA_OPAQUE) & ~(DMA_COLORFILL_ENABLE);
     banksMirror = bankflip | GRAM_PAGE(font_slot);
     *bank_reg = banksMirror;
     vram[WIDTH] = TEXT_CHAR_WIDTH;
     vram[HEIGHT] = TEXT_CHAR_HEIGHT;
     vram[VY] = text_cursor_y;
     while(*str != 0) {
+        last_x = text_cursor_x;
+        last_y = text_cursor_y;
         switch(*str) {
             case ' ':
                 text_cursor_x += TEXT_CHAR_WIDTH;
@@ -81,7 +90,6 @@ void text_print_string(char* str) {
     }
 }
 
-#pragma rodata-name (push, "PROG0")
 
 const unsigned char decimal_conversion_table[100] = {
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09,
@@ -96,16 +104,15 @@ const unsigned char decimal_conversion_table[100] = {
     0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x97, 0x98, 0x99
 };
 
-#pragma rodata-name (pop)
 
 void text_sprint_num(char* s, unsigned char num) {
     if(num > 99) return;
-    push_rom_bank();
-    change_rom_bank(BANK_PROG0);
+    //push_rom_bank();
+    //change_rom_bank(BANK_PROG0);
     num = decimal_conversion_table[num];
     *s = (num >> 4) + '0';
     *(s+1) = (num & 0xF) + '0';
-    pop_rom_bank();
+    //pop_rom_bank();
 }
 
 #endif
