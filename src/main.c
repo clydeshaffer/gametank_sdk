@@ -35,6 +35,8 @@ extern const char ps2_set2_to_upper_char[256];
 
 #define LINE_MAX 64
 char line_buf[64];
+char debug_buf[256];
+char debug_buf_idx = 0;
 char line_buf_idx;
 char response_buf[8] = {0};
 char printbuf[8] = {0, '_', 0, 0, 0, 0, 0, 0};
@@ -107,13 +109,13 @@ char scramble(char b) {
 }
 
 char read_byte() {
-    via[ORA] &= ~READ_STROBE;
-    via[ORA] |= READ_STROBE;
-    via[ORA] &= ~READ_STROBE;
+    CLEAR(READ_STROBE);
+    SET(READ_STROBE);
+    CLEAR(READ_STROBE);
     tmp = via[ORB];
-    via[ORA] |= READ_STROBE;
-    via[ORA] &= ~CLEAR_INHIBIT;
-    via[ORA] |= CLEAR_INHIBIT;
+    SET(READ_STROBE);
+    CLEAR(CLEAR_INHIBIT);
+    SET(CLEAR_INHIBIT);
     return tmp;
 }
 
@@ -189,23 +191,25 @@ void handle_led_keys(unsigned char lastRead) {
     }
 }
 
-void mainloop_keyboard () {
-    
-    text_init();
-    text_sprite = text_load_font();
-    text_cursor_y = 16;
-    text_color = TEXT_COLOR_WHITE;
+void print_hex_to_debug_buf(char c) {
+    debug_buf[debug_buf_idx++] = hexchar(c >> 4);
+    debug_buf[debug_buf_idx++] = hexchar(c);
+    debug_buf[debug_buf_idx++] = ' ';
+    debug_buf[debug_buf_idx++] = ' ';
+    debug_buf[debug_buf_idx] = 0;
+}
 
-    text_print_string("GTOS v0.1\n\rReady\n\r");
-    await_drawing();
-    text_cursor_x = 0;
-    text_cursor_y = 16;
-    await_vsync(1);
-    flip_pages();
-    text_print_string("GTOS v0.1\n\rReady\n\r");
-    await_drawing();
-    await_vsync(1);
-    flip_pages();
+char di;
+void debug_print_resp() {
+    for(di = 0; di < resb; ++di) {
+        print_hex_to_debug_buf(response_buf[di]);
+    }
+    debug_buf[debug_buf_idx++] = '|';
+    debug_buf[debug_buf_idx++] = ' ';
+    debug_buf[debug_buf_idx] = 0;
+}
+
+void mainloop_keyboard () {
     
     while (1) {                                     //  Run forever
         queue_clear_border(0);
@@ -424,17 +428,58 @@ void main () {
     via[ORA] |= (CLEAR_INHIBIT | WRITE_STROBE | READ_STROBE);
     via[DDRB] = 0;
 
-    tmp = send_byte_and_get_response(0xFF, response_buf, 8);
-    
+    resb = send_byte_and_get_response(0xFF, response_buf, 8);
+    debug_print_resp();
+
+    delayMicroseconds(100);
+
     resb = send_byte_and_get_response(0xF5, response_buf, 8);
+    debug_print_resp();
+
+    delayMicroseconds(100);
+
     resb = send_byte_and_get_response(0xF2, response_buf, 8);
     if((resb == 2) && ((response_buf[1] == 0) || (response_buf[1] == 3) || (response_buf[1] == 4))) {
         isMouse = 1;
     }
 
+    debug_print_resp();
+
+    delayMicroseconds(100);
+
     resb = send_byte_and_get_response(0xF4, response_buf, 8);
+    debug_print_resp();
+
+    
+    delayMicroseconds(100);
+
+    text_init();
+    text_sprite = text_load_font();
+    text_cursor_y = 16;
+    text_color = TEXT_COLOR_WHITE;
+
+    text_print_string("GTOS v0.1\n\rReady\n\r");
+    text_print_string(debug_buf);
+    text_print_string("\n\r-");
+    await_drawing();
+    text_cursor_x = 0;
+    text_cursor_y = 16;
+    await_vsync(1);
+    flip_pages();
+    text_print_string("GTOS v0.1\n\rReady\n\r");
+    text_print_string(debug_buf);
+    text_print_string("\n\r-");
+    await_drawing();
+    await_vsync(1);
+    flip_pages();
+
+    debug_buf_idx = 0;
+    debug_buf[0] = 0;
 
     if(isMouse) {
+        text_print_string("Mouse detected\r\nLoading GUI...");
+        await_drawing();
+        flip_pages();
         mainloop_mouse();
     } else {
         mainloop_keyboard();
