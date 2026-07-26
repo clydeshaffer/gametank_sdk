@@ -18,6 +18,15 @@ char dragging_index = 255;
 char drag_rel_x = 0;
 char drag_rel_y = 0;
 
+char window_open = 1;
+char window_x = 32;
+char window_y = 24;
+char window_w = 66;
+char window_h = 75;
+char drag_in_window = 0;
+char draw_color = 32;
+char sample_pixel = 0;
+
 #define CLEAR_INHIBIT (1<<3)
 #define WRITE_STROBE (1<<4)
 #define READ_STROBE (1<<5)
@@ -31,6 +40,7 @@ char box_color = 92;
 SpriteSlot text_sprite;
 SpriteSlot bg_sprite;
 SpriteSlot icons_sprite;
+SpriteSlot window_sprite;
 extern const char ps2_set2_to_char[256];
 extern const char ps2_set2_to_upper_char[256];
 
@@ -89,6 +99,25 @@ void to_lower(char *c) {
         c++;
     }
 }
+
+char window_rect_test() {
+    if(!window_open) return 0;
+    if(box_x < window_x) return 0;
+    if(box_x > (window_x+window_w)) return 0;
+    if(box_y < window_y) return 0;
+    if(box_y > (window_y+window_h)) return 0;
+    return 1;
+}
+
+char subwindow_rect_test() {
+    if(!window_open) return 0;
+    if(box_x < (window_x+1)) return 0;
+    if(box_x > (window_x+window_w-1)) return 0;
+    if(box_y < (window_y+4)) return 0;
+    if(box_y > (window_y+window_h-7)) return 0;
+    return 1;
+}
+
 
 //0, 1, 2, 3, 4, 5, 6, 7
 //0, 7, 6, 5, 4, 1, 2, 3
@@ -343,6 +372,7 @@ void mainloop_mouse() {
 
     bg_sprite = allocate_sprite(&ASSET__gfx__desktop_bmp_load_list);
     icons_sprite = allocate_sprite(&ASSET__gfx__icons_bmp_load_list);
+    window_sprite = allocate_sprite(&ASSET__gfx__draw_bmp_load_list);
     set_sprite_frametable(icons_sprite, ASSET__gfx__icons_json);
 
     while(1) {
@@ -363,20 +393,36 @@ void mainloop_mouse() {
                 mouseStatus = lastRead;
 
                 if(mouseStatus & ~oldMouseStatus & 1) {
-                    for(tmp = 0; tmp < MAX_ICONS; tmp++) {
-                        if(icons_f[tmp]) {
-                            if(cabs(icons_x[tmp] - box_x) < 8) {
-                                if(cabs(icons_y[tmp] - box_y) < 8) {
-                                    dragging_index = tmp;
-                                    drag_rel_x = icons_x[tmp] - box_x;
-                                    drag_rel_y = icons_y[tmp] - box_y;
-                                    break;
+                    if(window_rect_test()) {
+                        if((box_y - window_y) < 3) {
+                            if((box_x - window_x < 3)) {
+                                window_open = 0;
+                            } else {
+                                dragging_index = 'w';
+                                drag_rel_x = window_x - box_x;
+                                drag_rel_y = window_y - box_y;
+                            }
+                        } else if((box_y - window_y > 69)) {
+                            sample_pixel = 1;
+                        } else {
+                            drag_in_window = 1;
+                        }
+                    } else {
+                        for(tmp = 0; tmp < MAX_ICONS; tmp++) {
+                            if(icons_f[tmp]) {
+                                if(cabs(icons_x[tmp] - box_x) < 8) {
+                                    if(cabs(icons_y[tmp] - box_y) < 8) {
+                                        dragging_index = tmp;
+                                        drag_rel_x = icons_x[tmp] - box_x;
+                                        drag_rel_y = icons_y[tmp] - box_y;
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
                 } else if(~mouseStatus & oldMouseStatus & 1) {
-                    if(dragging_index != 0) {
+                    if((dragging_index != 0) && (dragging_index < MAX_ICONS)) {
                          if(cabs(icons_x[dragging_index] - icons_x[0]) < 8) {
                             if(cabs(icons_y[dragging_index] - icons_y[0]) < 8) {
                                 icons_f[dragging_index] = 0;
@@ -384,6 +430,7 @@ void mainloop_mouse() {
                         }   
                     }
                     dragging_index = 255;
+                    drag_in_window = 0;
                 }
 
                 oldMouseStatus = mouseStatus;
@@ -411,9 +458,12 @@ void mainloop_mouse() {
             delayMicroseconds(255);
         }
 
-        if(dragging_index != 255) {
+        if(dragging_index < MAX_ICONS) {
             icons_x[dragging_index] = drag_rel_x + box_x;
             icons_y[dragging_index] = drag_rel_y + box_y;
+        } else if(dragging_index == 'w') {
+            window_x = drag_rel_x + box_x;
+            window_y = drag_rel_y + box_y;
         }
 
         for(tmp = 0; tmp < MAX_ICONS; ++tmp) {
@@ -421,9 +471,27 @@ void mainloop_mouse() {
                 queue_draw_sprite_frame(icons_sprite, icons_x[tmp], icons_y[tmp], icons_f[tmp], 0);
             }
         }
+
+        if(window_open) {
+            queue_draw_sprite(window_x, window_y, 66, 75, 0, 0, window_sprite);
+        }
+
         queue_draw_sprite_frame(icons_sprite, box_x, box_y, 0, 0);
         queue_clear_border(0);
         await_draw_queue();
+
+        if(drag_in_window) {
+            if(subwindow_rect_test()) {
+                direct_prepare_sprite_ram_array_mode(window_sprite);
+                vram[((box_y - window_y) << 7) + (box_x - window_x)] = draw_color;
+            }
+        }
+        if(sample_pixel) {
+            sample_pixel = 0;
+            direct_prepare_sprite_ram_array_mode(window_sprite);
+            draw_color = vram[((box_y - window_y) << 7) + (box_x - window_x)];
+        }
+
         await_vsync(1);
         flip_pages();
     }
