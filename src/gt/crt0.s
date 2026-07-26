@@ -57,9 +57,9 @@ viaWakeup:
 	STZ BankReg
 	STZ $1FFF
 
-	LDA #%00111111
+	LDA #%01111111
 	STA VIA+DDRA
-    LDA #%11011111
+    LDA #%10011111
     STA VIA+ORAr
 	LDA #$FD
 	jsr _bank_shift_out

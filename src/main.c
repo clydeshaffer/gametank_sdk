@@ -120,13 +120,18 @@ char read_byte() {
 }
 
 void send_byte(char b) {
-  via[DDRB] = 0xFF;
-  via[ORB] = scramble(b);
-  CLEAR(WRITE_STROBE);
-  CLEAR(CLEAR_INHIBIT);
-  SET(CLEAR_INHIBIT);
-  SET(WRITE_STROBE);
-  via[DDRB] = 0;
+    via[ORA] |= PACKET_DONE;
+    via[DDRA] |= PACKET_DONE;
+    via[DDRB] = 0xFF;
+    via[ORB] = scramble(b);
+    delayMicroseconds(100);
+    CLEAR(WRITE_STROBE);
+    via[DDRA] &= ~PACKET_DONE;
+    via[ORA] &= ~PACKET_DONE;;
+    SET(WRITE_STROBE);
+    CLEAR(CLEAR_INHIBIT);
+    SET(CLEAR_INHIBIT);
+    via[DDRB] = 0;
 }
 
 char wait_for_packet() {
@@ -169,7 +174,6 @@ void handle_led_keys(unsigned char lastRead) {
 
     if((lastRead & 0xFF) == 0x58) {
         ledMask ^= 4;
-        shiftMask ^= 4;
     }
 
     if((lastRead & 0xFF) == 0x7E) {
@@ -184,6 +188,7 @@ void handle_led_keys(unsigned char lastRead) {
         //Serial.println(lastRead & 0xFF, HEX);
         clear_clock_inhibit();
         wait_for_packet();
+        clear_clock_inhibit();
         send_byte(ledMask);
         wait_for_packet();
         lastRead = read_byte();
@@ -240,7 +245,7 @@ void mainloop_keyboard () {
                 isBreak = 1;
             } else {
                 if(!isBreak) {
-                    if(shiftMask) {
+                    if(!!shiftMask ^ !!(ledMask&4)) {
                         printbuf[0] = ps2_set2_to_upper_char[lastRead];
                     } else {
                         printbuf[0] = ps2_set2_to_char[lastRead];
@@ -425,6 +430,7 @@ void mainloop_mouse() {
 void main () {
 
     via[DDRA] |= (CLEAR_INHIBIT | WRITE_STROBE | READ_STROBE);
+    via[DDRA] &= ~PACKET_DONE;
     via[ORA] |= (CLEAR_INHIBIT | WRITE_STROBE | READ_STROBE);
     via[DDRB] = 0;
 
