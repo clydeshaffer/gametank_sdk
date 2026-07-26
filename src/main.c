@@ -10,6 +10,7 @@ char dx = 1, dy = 1;
 int mouse_x = 64 << 3, mouse_y = 64 << 3;
 
 #define MAX_ICONS 5
+#define MOUSE_SHIFT_BITS 2
 char icons_x[MAX_ICONS] = { 24, 64, 72, 32, 80};
 char icons_y[MAX_ICONS] = { 24, 64, 36, 72, 90};
 char icons_f[MAX_ICONS] = {  3,  1,  2,  1,  2};
@@ -232,7 +233,7 @@ void mainloop_keyboard () {
             dy = -1;
         }*/
  
-        if(via[ORA] & PACKET_DONE) {
+        while(via[ORA] & PACKET_DONE) {
             via[ORA] &= ~READ_STROBE;
             via[ORA] |= READ_STROBE;
             via[ORA] &= ~READ_STROBE;
@@ -349,17 +350,14 @@ void mainloop_mouse() {
         //queue_clear_screen(0);
         queue_draw_sprite(0,0,127,127,0,0,bg_sprite);
 
-        if(via[ORA] & PACKET_DONE) {
-            via[ORA] &= ~READ_STROBE;
-            via[ORA] |= READ_STROBE;
-            via[ORA] &= ~READ_STROBE;
-            lastRead = via[ORB];
-            via[ORA] |= READ_STROBE;
-            via[ORA] &= ~CLEAR_INHIBIT;
-            via[ORA] |= CLEAR_INHIBIT;
+        if(!via[ORA] & PACKET_DONE) {
+            byteParity = 0;
+        }
+        while(via[ORA] & PACKET_DONE) {
+            lastRead = read_byte();
 
-            box_x = mouse_x >> 3;
-            box_y = mouse_y >> 3;
+            box_x = mouse_x >> MOUSE_SHIFT_BITS;
+            box_y = mouse_y >> MOUSE_SHIFT_BITS;
 
             if(byteParity == 0) {
                 mouseStatus = lastRead;
@@ -395,18 +393,22 @@ void mainloop_mouse() {
                     mouse_rel_x |= 0xFF00;
                 }
                 mouse_x += mouse_rel_x;
+                if(mouse_x < 0) mouse_x = 0;
+                if(mouse_x > (127 << MOUSE_SHIFT_BITS)) mouse_x = (127 << MOUSE_SHIFT_BITS);
             } else if(byteParity == 2) {
                 mouse_rel_y = lastRead;
                 if(mouseStatus & 32) {
                     mouse_rel_y |= 0xFF00;
                 }
                 mouse_y -= mouse_rel_y;
+                if(mouse_y < 0) mouse_y = 0;
+                if(mouse_y > (127 << MOUSE_SHIFT_BITS)) mouse_y = (127 << MOUSE_SHIFT_BITS);
             }
 
             byteParity++;
             if(byteParity == 3) byteParity = 0;
-        } else {
-            byteParity = 0;
+            delayMicroseconds(255);
+            delayMicroseconds(255);
         }
 
         if(dragging_index != 255) {
@@ -419,7 +421,7 @@ void mainloop_mouse() {
                 queue_draw_sprite_frame(icons_sprite, icons_x[tmp], icons_y[tmp], icons_f[tmp], 0);
             }
         }
-        queue_draw_sprite_frame(icons_sprite, (mouse_x >> 3) & 255, (mouse_y >> 3) & 255, 0, 0);
+        queue_draw_sprite_frame(icons_sprite, box_x, box_y, 0, 0);
         queue_clear_border(0);
         await_draw_queue();
         await_vsync(1);
