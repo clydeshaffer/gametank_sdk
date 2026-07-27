@@ -3,6 +3,7 @@
 #include "../gt/gfx/draw_direct.h"
 #include "../desktop.h"
 #include "../mouse.h"
+#include "../util.h"
 #include "../gen/assets/gfx.h"
 
 char draw_color = 32;
@@ -14,10 +15,10 @@ char drag_in_window = 0xFF;
 
 static char subwindow_rect_test() {
     if(!my(window_open)) return 0;
-    if(mouse_display_x < (my(window_x)+1)) return 0;
-    if(mouse_display_x > (my(window_x)+my(window_w)-1)) return 0;
-    if(mouse_display_y < (my(window_y)+4)) return 0;
-    if(mouse_display_y > (my(window_y)+my(window_h)-7)) return 0;
+
+    if(u(mouse_display_x - (my(window_x)+1)) > u(my(window_w)-2)) return 0;
+    if(u(mouse_display_y - (my(window_y)+4)) > u(my(window_h)-11)) return 0;
+
     return 1;
 }
 
@@ -32,13 +33,13 @@ static void draw_app_handler(char e) {
             if(drag_in_window == current_app) {
                 if(subwindow_rect_test()) {
                     direct_prepare_sprite_ram_array_mode(my(window_sprite));
-                    vram[((mouse_display_y - my(window_y)) << 7) + (mouse_display_x - my(window_x))] = draw_color;
+                    vram[((mouse_display_y - my(window_y)) << 7) + ((mouse_display_x - my(window_x)) & 0x7F)] = draw_color;
                 }
             }
             if(sample_pixel == current_app) {
                 sample_pixel = 0xFF;
                 direct_prepare_sprite_ram_array_mode(my(window_sprite));
-                draw_color = vram[((mouse_display_y - my(window_y)) << 7) + (mouse_display_x - my(window_x))];
+                draw_color = vram[((mouse_display_y - my(window_y)) << 7) + ((mouse_display_x - my(window_x)) & 0x7F)];
             }
             break;
         case WINDOW_EVENT_MOUSE_CLICK:

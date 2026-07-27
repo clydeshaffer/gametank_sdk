@@ -64,10 +64,8 @@ void bump_to_top(char appslot) {
 
 char window_rect_test(char wi) {
     if(!window_open[wi]) return 0;
-    if(mouse_display_x < window_x[wi]) return 0;
-    if(mouse_display_x > (window_x[wi]+window_w[wi])) return 0;
-    if(mouse_display_y < window_y[wi]) return 0;
-    if(mouse_display_y > (window_y[wi]+window_h[wi])) return 0;
+    if(u(mouse_display_x - window_x[wi]) > window_w[wi]) return 0;
+    if(u(mouse_display_y - window_y[wi]) > window_h[wi]) return 0;
     return 1;
 }
 
@@ -108,8 +106,8 @@ void desktop_update() {
             if(window_draw_order[app_draw_index] == 0xFF) continue;
             current_app = window_draw_order[app_draw_index];
             if(window_rect_test(current_app)) {
-                if((mouse_display_y - window_y[current_app]) < 4) {
-                    if((mouse_display_x - window_x[current_app] < 3)) {
+                if(u(mouse_display_y - window_y[current_app]) < 4) {
+                    if(u(mouse_display_x - window_x[current_app]) < 3) {
                         window_handler[current_app](WINDOW_EVENT_EXIT);
                         window_open[current_app] = 0;
                         window_to_close = current_app;
@@ -127,16 +125,6 @@ void desktop_update() {
                 }
                 break;
             }
-        }
-
-        if(window_to_close != 0xFF) {
-            remove_from_draw_order(window_to_close);
-            window_to_close = 0xFF;
-        }
-
-        if(window_to_bump != 0xFF) {
-            bump_to_top(window_to_bump);
-            window_to_bump = 0xFF;
         }
 
         if(app_draw_index == 255) {
@@ -158,6 +146,17 @@ void desktop_update() {
                 }
             }
         }
+
+        if(window_to_close != 0xFF) {
+            remove_from_draw_order(window_to_close);
+            window_to_close = 0xFF;
+        }
+
+        if(window_to_bump != 0xFF) {
+            bump_to_top(window_to_bump);
+            window_to_bump = 0xFF;
+        }
+
         frames_since_click = 0;
     } else if((~mouseStatus) & oldMouseStatus & 1) {
         if(last_window_clicked < MAX_APPS) {
