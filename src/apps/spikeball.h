@@ -1,0 +1,1 @@
+void spike_app_launch();

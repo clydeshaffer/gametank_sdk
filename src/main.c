@@ -80,8 +80,9 @@ void debug_print_resp() {
     debug_buf[debug_buf_idx] = 0;
 }
 
+#pragma code-name (push, "PROG0")
 void mainloop_keyboard () {
-    
+
     while (1) {                                     //  Run forever
         queue_clear_border(0);
         
@@ -178,6 +179,7 @@ void mainloop_keyboard () {
  
     }
 }
+#pragma code-name(pop)
 
 void mainloop_mouse() {
 

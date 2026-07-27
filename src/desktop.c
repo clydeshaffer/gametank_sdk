@@ -6,6 +6,7 @@
 #include "gen/assets/gfx.h"
 
 #include "apps/draw.h"
+#include "apps/spikeball.h"
 
 #define MAX_ICONS 5
 char icons_x[MAX_ICONS] = { 24, 64, 72, 32, 80};
@@ -132,9 +133,12 @@ void desktop_update() {
             for(tmp = 0; tmp < MAX_ICONS; tmp++) {
                 if(icons_f[tmp]) {
                     if(cabs(icons_x[tmp] - mouse_display_x) < 8) {
-                        if(cabs(icons_y[tmp] - mouse_display_y) < 8) {
+                        if(cabs(icons_y[tmp ] - mouse_display_y) < 8) {
                             if((icons_f[tmp] == 4) && (frames_since_click < 15)) {
                                 app_to_launch = 1;
+                                break;
+                            } else if((icons_f[tmp] == 2) && (frames_since_click < 15)) {
+                                app_to_launch = 2;
                                 break;
                             } else {
                                 dragging_index = tmp;
@@ -220,8 +224,10 @@ void desktop_late_update() {
         }
     }
 
-    if(app_to_launch) {
-        draw_app_launch();
-        app_to_launch = 0;
+    switch(app_to_launch) {
+        case 0: break;
+        case 1: draw_app_launch(); break;
+        case 2: spike_app_launch(); break; 
     }
+    app_to_launch = 0;
 }
