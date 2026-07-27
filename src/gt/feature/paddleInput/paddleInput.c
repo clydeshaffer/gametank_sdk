@@ -1,9 +1,9 @@
 #include "../../input.h"
-#include "paddleInput.h"
 #include "../../../gen/modules_enabled.h"
 #include "../../gametank.h"
 
 #ifdef ENABLE_MODULE_PADDLEINPUT
+#include "paddleInput.h"
 
 #pragma optimize (push, off)
 void update_paddle_inputs(){

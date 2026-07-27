@@ -4,6 +4,7 @@
 #include "keyboard.h"
 #include "mouse.h"
 #include "desktop.h"
+#include "mem.h"
 #include "gt/gfx/draw_queue.h"
 #include "gt/feature/text/text.h"
 #include "gt/gfx/draw_direct.h"
@@ -198,6 +199,8 @@ void mainloop_mouse() {
 
 void main () {
 
+    mem_init();
+    
     ps2_init();
 
     resb = send_byte_and_get_response(0xFF, response_buf, 8);

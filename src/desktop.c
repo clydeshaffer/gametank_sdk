@@ -28,6 +28,7 @@ char window_x[MAX_APPS];
 char window_y[MAX_APPS];
 char window_w[MAX_APPS];
 char window_h[MAX_APPS];
+void* window_context[MAX_APPS];
 char frames_since_click = 255;
 char last_window_clicked = MAX_APPS;
 SpriteSlot window_sprite[MAX_APPS];

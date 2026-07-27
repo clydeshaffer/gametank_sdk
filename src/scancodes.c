@@ -1,3 +1,5 @@
+#pragma rodata-name("PROG0")
+
 const char ps2_set2_to_char[256] = {
 /* 0x00 */ 0,    0,    0,    0,    0,    0,    0,    0,
 /* 0x08 */ 0,    0,    0,    0,    0,    0,    '`',  0,

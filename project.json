@@ -6,7 +6,6 @@
         "PERSIST",
         "RANDOM",
         "TEXT",
-        "DRAWQUEUE",
-        "PADDLEINPUT"
+        "DRAWQUEUE"
     ]
 }

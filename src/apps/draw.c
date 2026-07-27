@@ -4,9 +4,15 @@
 #include "../desktop.h"
 #include "../mouse.h"
 #include "../util.h"
+#include "../mem.h"
 #include "../gen/assets/gfx.h"
 
-char draw_color = 32;
+typedef struct {
+char draw_color;
+} draw_app_context;
+
+#define ctx ((draw_app_context*)my(window_context))
+
 char sample_pixel = 0xFF;
 char drag_in_window = 0xFF;
 
@@ -33,13 +39,13 @@ static void draw_app_handler(char e) {
             if(drag_in_window == current_app) {
                 if(subwindow_rect_test()) {
                     direct_prepare_sprite_ram_array_mode(my(window_sprite));
-                    vram[((mouse_display_y - my(window_y)) << 7) + ((mouse_display_x - my(window_x)) & 0x7F)] = draw_color;
+                    vram[((mouse_display_y - my(window_y)) << 7) + ((mouse_display_x - my(window_x)) & 0x7F)] = ctx->draw_color;
                 }
             }
             if(sample_pixel == current_app) {
                 sample_pixel = 0xFF;
                 direct_prepare_sprite_ram_array_mode(my(window_sprite));
-                draw_color = vram[((mouse_display_y - my(window_y)) << 7) + ((mouse_display_x - my(window_x)) & 0x7F)];
+                ctx->draw_color = vram[((mouse_display_y - my(window_y)) << 7) + ((mouse_display_x - my(window_x)) & 0x7F)];
             }
             break;
         case WINDOW_EVENT_MOUSE_CLICK:
@@ -54,6 +60,7 @@ static void draw_app_handler(char e) {
             break;
         case WINDOW_EVENT_EXIT:
                 free_sprite(my(window_sprite));
+                mem_free(my(window_context));
             break;
         default:
             break;
@@ -62,10 +69,12 @@ static void draw_app_handler(char e) {
 
 void draw_app_launch() {
     if(desktop_launch_app(draw_app_handler) != 255) {
+        my(window_context) = mem_alloc(sizeof(draw_app_context));
         my(window_sprite) = allocate_sprite(&ASSET__gfx__draw_bmp_load_list);
         my(window_x) = 32;
         my(window_y) = 24;
         my(window_w) = DRAW_APP_W;
         my(window_h) = DRAW_APP_H;
+        ctx->draw_color = 32;
     }
 }
