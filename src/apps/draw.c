@@ -15,6 +15,7 @@ char draw_color;
 
 char sample_pixel = 0xFF;
 char drag_in_window = 0xFF;
+char draw_app_open_count = 0;
 
 #define DRAW_APP_W 66
 #define DRAW_APP_H 75
@@ -61,6 +62,7 @@ static void draw_app_handler(char e) {
         case WINDOW_EVENT_EXIT:
                 free_sprite(my(window_sprite));
                 mem_free(my(window_context));
+                --draw_app_open_count;
             break;
         default:
             break;
@@ -71,10 +73,11 @@ void draw_app_launch() {
     if(desktop_launch_app(draw_app_handler) != 255) {
         my(window_context) = mem_alloc(sizeof(draw_app_context));
         my(window_sprite) = allocate_sprite(&ASSET__gfx__draw_bmp_load_list);
-        my(window_x) = 32;
-        my(window_y) = 24;
+        my(window_x) = 32 + (draw_app_open_count<<2);
+        my(window_y) = 24 + (draw_app_open_count<<2);
         my(window_w) = DRAW_APP_W;
         my(window_h) = DRAW_APP_H;
         ctx->draw_color = 32;
+        ++draw_app_open_count;
     }
 }
