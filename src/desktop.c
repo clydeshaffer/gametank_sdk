@@ -1,0 +1,173 @@
+#include "desktop.h"
+#include "mouse.h"
+#include "gt/gfx/draw_queue.h"
+#include "gt/gfx/draw_direct.h"
+#include "util.h"
+#include "gen/assets/gfx.h"
+
+#include "apps/draw.h"
+
+#define MAX_ICONS 5
+char icons_x[MAX_ICONS] = { 24, 64, 72, 32, 80};
+char icons_y[MAX_ICONS] = { 24, 64, 36, 72, 90};
+char icons_f[MAX_ICONS] = {  3,  1,  2,  1,  4};
+char dragging_index = 255;
+char dragged_app = 0;
+char drag_rel_x = 0;
+char drag_rel_y = 0;
+
+SpriteSlot bg_sprite;
+SpriteSlot icons_sprite;
+
+char app_to_launch = 0;
+char current_app = 0;
+char window_open[MAX_APPS] = {0};
+char window_x[MAX_APPS];
+char window_y[MAX_APPS];
+char window_w[MAX_APPS];
+char window_h[MAX_APPS];
+char frames_since_click = 255;
+char last_window_clicked = MAX_APPS;
+SpriteSlot window_sprite[MAX_APPS];
+
+void (*window_handler[MAX_APPS]) (char);
+static char tmp = 0;
+
+
+
+char window_rect_test(char wi) {
+    if(!window_open[wi]) return 0;
+    if(mouse_display_x < window_x[wi]) return 0;
+    if(mouse_display_x > (window_x[wi]+window_w[wi])) return 0;
+    if(mouse_display_y < window_y[wi]) return 0;
+    if(mouse_display_y > (window_y[wi]+window_h[wi])) return 0;
+    return 1;
+}
+
+void desktop_init() {
+    bg_sprite = allocate_sprite(&ASSET__gfx__desktop_bmp_load_list);
+    icons_sprite = allocate_sprite(&ASSET__gfx__icons_bmp_load_list);
+    set_sprite_frametable(icons_sprite, ASSET__gfx__icons_json);
+}
+
+char find_window_under_cursor() {
+
+}
+
+char desktop_launch_app(void(*handler)(char)) {
+    for(current_app = 0; current_app < MAX_APPS; current_app++) {
+        if(!window_open[current_app]) {
+            window_open[current_app] = 1;
+            window_handler[current_app] = handler;
+            return current_app;
+        }
+    }
+    return 255;
+}
+
+void desktop_update() {
+    if(mouseStatus & (~oldMouseStatus) & 1) {
+        //Iterate backwards from draw order
+        for(current_app = MAX_APPS-1; current_app != 255; --current_app) {
+            if(window_rect_test(current_app)) {
+                if((mouse_display_y - window_y[current_app]) < 4) {
+                    if((mouse_display_x - window_x[current_app] < 3)) {
+                        window_handler[current_app](WINDOW_EVENT_EXIT);
+                        window_open[current_app] = 0;
+                    } else {
+                        dragging_index = 'w';
+                        dragged_app = current_app;
+                        drag_rel_x = window_x[current_app] - mouse_display_x;
+                        drag_rel_y = window_y[current_app] - mouse_display_y;
+                    }
+                } else {
+                    last_window_clicked = current_app;
+                    window_handler[current_app](WINDOW_EVENT_MOUSE_CLICK);
+                }
+                break;
+            }
+        }
+        if(current_app == 255) {
+            for(tmp = 0; tmp < MAX_ICONS; tmp++) {
+                if(icons_f[tmp]) {
+                    if(cabs(icons_x[tmp] - mouse_display_x) < 8) {
+                        if(cabs(icons_y[tmp] - mouse_display_y) < 8) {
+                            if((icons_f[tmp] == 4) && (frames_since_click < 15)) {
+                                app_to_launch = 1;
+                                break;
+                            } else {
+                                dragging_index = tmp;
+                                drag_rel_x = icons_x[tmp] - mouse_display_x;
+                                drag_rel_y = icons_y[tmp] - mouse_display_y;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        frames_since_click = 0;
+    } else if((~mouseStatus) & oldMouseStatus & 1) {
+        if(last_window_clicked < MAX_APPS) {
+            window_handler[last_window_clicked](WINDOW_EVENT_MOUSE_RELEASE);
+            last_window_clicked = MAX_APPS;
+        } else if((dragging_index != 0) && (dragging_index < MAX_ICONS)) {
+                if(cabs(icons_x[dragging_index] - icons_x[0]) < 8) {
+                if(cabs(icons_y[dragging_index] - icons_y[0]) < 8) {
+                    icons_f[dragging_index] = 0;
+                }
+            }   
+        }
+        dragging_index = 255;
+    }
+    
+    if(dragging_index < MAX_ICONS) {
+        icons_x[dragging_index] = drag_rel_x + mouse_display_x;
+        icons_y[dragging_index] = drag_rel_y + mouse_display_y;
+    } else if(dragging_index == 'w') {
+        window_x[dragged_app] = drag_rel_x + mouse_display_x;
+        window_y[dragged_app] = drag_rel_y + mouse_display_y;
+    }
+
+    for(current_app = 0; current_app < MAX_APPS; ++current_app) {
+        if(window_open[current_app]) {
+            window_handler[current_app](WINDOW_EVENT_TICK);
+        }
+    }
+    if(frames_since_click < 255) ++frames_since_click;
+}
+
+void desktop_early_draw() {
+    queue_draw_sprite(0,0,127,127,0,0,bg_sprite);
+}
+
+void desktop_draw() {
+    for(tmp = 0; tmp < MAX_ICONS; ++tmp) {
+        if(icons_f[tmp]) {
+            queue_draw_sprite_frame(icons_sprite, icons_x[tmp], icons_y[tmp], icons_f[tmp], 0);
+        }
+    }
+
+    for(current_app = 0; current_app < MAX_APPS; ++current_app) {
+        if(window_open[current_app]) {
+            window_handler[current_app](WINDOW_EVENT_DRAW);
+        }
+    }
+
+    queue_draw_sprite_frame(icons_sprite, mouse_display_x, mouse_display_y, 0, 0);
+    queue_clear_border(0);
+    await_draw_queue();
+}
+
+void desktop_late_update() {
+    for(current_app = 0; current_app < MAX_APPS; ++current_app) {
+        if(window_open[current_app]) {
+            window_handler[current_app](WINDOW_EVENT_LATE_TICK);
+        }
+    }
+
+    if(app_to_launch) {
+        draw_app_launch();
+        app_to_launch = 0;
+    }
+}

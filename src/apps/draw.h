@@ -1,0 +1,1 @@
+void draw_app_launch();
