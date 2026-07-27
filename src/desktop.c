@@ -21,7 +21,9 @@ SpriteSlot icons_sprite;
 
 char app_to_launch = 0;
 char current_app = 0;
+char app_draw_index = 0;
 char window_open[MAX_APPS] = {0};
+char window_draw_order[MAX_APPS];
 char window_x[MAX_APPS];
 char window_y[MAX_APPS];
 char window_w[MAX_APPS];
@@ -29,11 +31,36 @@ char window_h[MAX_APPS];
 char frames_since_click = 255;
 char last_window_clicked = MAX_APPS;
 SpriteSlot window_sprite[MAX_APPS];
+char window_to_bump = 0xFF;
+char window_to_close = 0xFF;
 
 void (*window_handler[MAX_APPS]) (char);
 static char tmp = 0;
 
+void remove_from_draw_order(char appslot) {
+    char hit = 0xFF;
+    for(app_draw_index = 0; app_draw_index < MAX_APPS; ++app_draw_index) {
+        if(window_draw_order[app_draw_index] == appslot) {
+            hit = app_draw_index;
+            break;
+        }
+    }
+    if(hit == 0xFF) return;
+    for(app_draw_index = hit; app_draw_index < MAX_APPS-1; ++app_draw_index) {
+        window_draw_order[app_draw_index] = window_draw_order[app_draw_index+1];
+    }
+    window_draw_order[MAX_APPS-1] = 0xFF;
+}
 
+void bump_to_top(char appslot) {
+    remove_from_draw_order(appslot);
+    for(app_draw_index = 0; app_draw_index < MAX_APPS; ++app_draw_index) {
+        if(window_draw_order[app_draw_index] == 0xFF) {
+            window_draw_order[app_draw_index] = appslot;
+            return;
+        }
+    }
+}
 
 char window_rect_test(char wi) {
     if(!window_open[wi]) return 0;
@@ -48,6 +75,9 @@ void desktop_init() {
     bg_sprite = allocate_sprite(&ASSET__gfx__desktop_bmp_load_list);
     icons_sprite = allocate_sprite(&ASSET__gfx__icons_bmp_load_list);
     set_sprite_frametable(icons_sprite, ASSET__gfx__icons_json);
+    for(app_draw_index = 0; app_draw_index < MAX_APPS; ++app_draw_index) {
+        window_draw_order[app_draw_index] = 0xFF;
+    }
 }
 
 char find_window_under_cursor() {
@@ -55,11 +85,17 @@ char find_window_under_cursor() {
 }
 
 char desktop_launch_app(void(*handler)(char)) {
-    for(current_app = 0; current_app < MAX_APPS; current_app++) {
+    for(current_app = 0; current_app < MAX_APPS; ++current_app) {
         if(!window_open[current_app]) {
             window_open[current_app] = 1;
             window_handler[current_app] = handler;
-            return current_app;
+            for(app_draw_index = 0; app_draw_index < MAX_APPS; ++app_draw_index) {
+                if(window_draw_order[app_draw_index] == 0xFF) {
+                    window_draw_order[app_draw_index] = current_app;
+                    return current_app;
+                }
+            }
+            //should not be possible to get past this inner for loop
         }
     }
     return 255;
@@ -68,26 +104,42 @@ char desktop_launch_app(void(*handler)(char)) {
 void desktop_update() {
     if(mouseStatus & (~oldMouseStatus) & 1) {
         //Iterate backwards from draw order
-        for(current_app = MAX_APPS-1; current_app != 255; --current_app) {
+        for(app_draw_index = MAX_APPS-1; app_draw_index != 255; --app_draw_index) {
+            if(window_draw_order[app_draw_index] == 0xFF) continue;
+            current_app = window_draw_order[app_draw_index];
             if(window_rect_test(current_app)) {
                 if((mouse_display_y - window_y[current_app]) < 4) {
                     if((mouse_display_x - window_x[current_app] < 3)) {
                         window_handler[current_app](WINDOW_EVENT_EXIT);
                         window_open[current_app] = 0;
+                        window_to_close = current_app;
                     } else {
                         dragging_index = 'w';
                         dragged_app = current_app;
                         drag_rel_x = window_x[current_app] - mouse_display_x;
                         drag_rel_y = window_y[current_app] - mouse_display_y;
+                        window_to_bump = current_app;
                     }
                 } else {
+                    window_to_bump = current_app;
                     last_window_clicked = current_app;
                     window_handler[current_app](WINDOW_EVENT_MOUSE_CLICK);
                 }
                 break;
             }
         }
-        if(current_app == 255) {
+
+        if(window_to_close != 0xFF) {
+            remove_from_draw_order(window_to_close);
+            window_to_close = 0xFF;
+        }
+
+        if(window_to_bump != 0xFF) {
+            bump_to_top(window_to_bump);
+            window_to_bump = 0xFF;
+        }
+
+        if(app_draw_index == 255) {
             for(tmp = 0; tmp < MAX_ICONS; tmp++) {
                 if(icons_f[tmp]) {
                     if(cabs(icons_x[tmp] - mouse_display_x) < 8) {
@@ -148,7 +200,9 @@ void desktop_draw() {
         }
     }
 
-    for(current_app = 0; current_app < MAX_APPS; ++current_app) {
+    for(app_draw_index = 0; app_draw_index < MAX_APPS; ++app_draw_index) {
+        if(window_draw_order[app_draw_index] == 0xFF) continue;
+        current_app = window_draw_order[app_draw_index];
         if(window_open[current_app]) {
             window_handler[current_app](WINDOW_EVENT_DRAW);
         }
