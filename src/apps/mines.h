@@ -1,0 +1,1 @@
+void mines_app_launch();

@@ -9,6 +9,8 @@
 #include "gt/feature/text/text.h"
 #include "gt/gfx/draw_direct.h"
 #include "gt/gfx/sprites.h"
+#include "banking.h"
+#include "gen/bank_nums.h"
 
 static char tmp = 0;
 
@@ -200,6 +202,7 @@ void mainloop_mouse() {
 }
 
 void main () {
+    change_rom_bank(BANK_PROG0);
 
     mem_init();
     

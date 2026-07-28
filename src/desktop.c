@@ -2,16 +2,20 @@
 #include "mouse.h"
 #include "gt/gfx/draw_queue.h"
 #include "gt/gfx/draw_direct.h"
+#include "gt/feature/random/random.h"
 #include "util.h"
 #include "gen/assets/gfx.h"
 
 #include "apps/draw.h"
 #include "apps/spikeball.h"
+#include "apps/mines.h"
 
-#define MAX_ICONS 5
-char icons_x[MAX_ICONS] = { 24, 64, 72, 32, 80};
-char icons_y[MAX_ICONS] = { 24, 64, 36, 72, 90};
-char icons_f[MAX_ICONS] = {  3,  1,  2,  1,  4};
+
+#define MAX_ICONS 6
+char icons_x[MAX_ICONS] = { 24, 64, 72, 32, 80, 90};
+char icons_y[MAX_ICONS] = { 24, 64, 36, 72, 90, 64};
+char icons_f[MAX_ICONS] = {  3,  1,  2,  1,  4,  5};
+char icons_app[MAX_ICONS] = {0, 0, 2, 0, 1, 3};
 char dragging_index = 255;
 char dragged_app = 0;
 char drag_rel_x = 0;
@@ -102,7 +106,8 @@ char desktop_launch_app(void(*handler)(char)) {
 }
 
 void desktop_update() {
-    if(mouseStatus & (~oldMouseStatus) & 1) {
+    rnd();
+    if(mouseStatus & (~oldMouseStatus) & 3) {
         //Iterate backwards from draw order
         for(app_draw_index = MAX_APPS-1; app_draw_index != 255; --app_draw_index) {
             if(window_draw_order[app_draw_index] == 0xFF) continue;
@@ -123,22 +128,22 @@ void desktop_update() {
                 } else {
                     window_to_bump = current_app;
                     last_window_clicked = current_app;
-                    window_handler[current_app](WINDOW_EVENT_MOUSE_CLICK);
+                    if(mouseStatus & (~oldMouseStatus) & 1)
+                        window_handler[current_app](WINDOW_EVENT_MOUSE_CLICK);
+                    if(mouseStatus & (~oldMouseStatus) & 2)
+                        window_handler[current_app](WINDOW_EVENT_RIGHT_CLICK);
                 }
                 break;
             }
         }
 
         if(app_draw_index == 255) {
-            for(tmp = 0; tmp < MAX_ICONS; tmp++) {
+            for(tmp = MAX_ICONS-1; tmp != 0xFF; --tmp) {
                 if(icons_f[tmp]) {
                     if(cabs(icons_x[tmp] - mouse_display_x) < 8) {
-                        if(cabs(icons_y[tmp ] - mouse_display_y) < 8) {
-                            if((icons_f[tmp] == 4) && (frames_since_click < 15)) {
-                                app_to_launch = 1;
-                                break;
-                            } else if((icons_f[tmp] == 2) && (frames_since_click < 15)) {
-                                app_to_launch = 2;
+                        if(cabs(icons_y[tmp] - mouse_display_y) < 8) {
+                            if(icons_app[tmp] && (frames_since_click < 15)) {
+                                app_to_launch = icons_app[tmp];
                                 break;
                             } else {
                                 dragging_index = tmp;
@@ -227,7 +232,8 @@ void desktop_late_update() {
     switch(app_to_launch) {
         case 0: break;
         case 1: draw_app_launch(); break;
-        case 2: spike_app_launch(); break; 
+        case 2: spike_app_launch(); break;
+        case 3: mines_app_launch(); break;
     }
     app_to_launch = 0;
 }

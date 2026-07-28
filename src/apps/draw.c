@@ -7,6 +7,8 @@
 #include "../mem.h"
 #include "../gen/assets/gfx.h"
 
+#pragma code-name (push, "PROG0")
+
 typedef struct {
 char draw_color;
 } draw_app_context;
