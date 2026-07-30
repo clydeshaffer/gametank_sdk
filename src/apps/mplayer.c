@@ -130,6 +130,7 @@ static void mplayer_app_handler(char e) {
                         break;
                     case 3: 
                         if(ctx->music_playing) stop_music();
+                        ctx->music_playing = 0;
                         break;
                     default:
                         break;
