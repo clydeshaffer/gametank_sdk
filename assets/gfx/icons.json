@@ -1,7 +1,7 @@
 { "frames": [
    {
     "filename": "icons 0.aseprite",
-    "frame": { "x": 56, "y": 0, "w": 5, "h": 7 },
+    "frame": { "x": 68, "y": 0, "w": 5, "h": 7 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 12, "y": 12, "w": 5, "h": 7 },
@@ -19,7 +19,7 @@
    },
    {
     "filename": "icons 2.aseprite",
-    "frame": { "x": 36, "y": 0, "w": 10, "h": 11 },
+    "frame": { "x": 48, "y": 0, "w": 10, "h": 11 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 7, "y": 8, "w": 10, "h": 11 },
@@ -37,7 +37,7 @@
    },
    {
     "filename": "icons 4.aseprite",
-    "frame": { "x": 46, "y": 0, "w": 10, "h": 11 },
+    "frame": { "x": 58, "y": 0, "w": 10, "h": 11 },
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 7, "y": 8, "w": 10, "h": 11 },
@@ -50,6 +50,15 @@
     "rotated": false,
     "trimmed": true,
     "spriteSourceSize": { "x": 6, "y": 6, "w": 12, "h": 13 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 100
+   },
+   {
+    "filename": "icons 6.aseprite",
+    "frame": { "x": 36, "y": 0, "w": 12, "h": 12 },
+    "rotated": false,
+    "trimmed": true,
+    "spriteSourceSize": { "x": 6, "y": 7, "w": 12, "h": 12 },
     "sourceSize": { "w": 24, "h": 24 },
     "duration": 100
    }

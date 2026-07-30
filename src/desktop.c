@@ -9,13 +9,14 @@
 #include "apps/draw.h"
 #include "apps/spikeball.h"
 #include "apps/mines.h"
+#include "apps/mplayer.h"
 
 
-#define MAX_ICONS 6
-char icons_x[MAX_ICONS] = { 24, 64, 72, 32, 80, 90};
-char icons_y[MAX_ICONS] = { 24, 64, 36, 72, 90, 64};
-char icons_f[MAX_ICONS] = {  3,  1,  2,  1,  4,  5};
-char icons_app[MAX_ICONS] = {0, 0, 2, 0, 1, 3};
+#define MAX_ICONS 7
+char icons_x[MAX_ICONS] = { 24, 64, 72, 32, 80, 90, 24};
+char icons_y[MAX_ICONS] = { 24, 64, 36, 72, 90, 64, 64};
+char icons_f[MAX_ICONS] = {  3,  1,  2,  1,  4,  5, 6};
+char icons_app[MAX_ICONS] = {0, 0, 2, 0, 1, 3, 4};
 char dragging_index = 255;
 char dragged_app = 0;
 char drag_rel_x = 0;
@@ -234,6 +235,7 @@ void desktop_late_update() {
         case 1: draw_app_launch(); break;
         case 2: spike_app_launch(); break;
         case 3: mines_app_launch(); break;
+        case 4: mplayer_app_launch(); break;
     }
     app_to_launch = 0;
 }

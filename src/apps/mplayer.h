@@ -1,0 +1,1 @@
+void mplayer_app_launch();
