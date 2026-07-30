@@ -13,7 +13,7 @@
 
 
 #define MAX_ICONS 7
-char icons_x[MAX_ICONS] = { 24, 64, 72, 32, 80, 90, 24};
+char icons_x[MAX_ICONS] = { 24, 64, 72, 32, 80, 90, 18};
 char icons_y[MAX_ICONS] = { 24, 64, 36, 72, 90, 64, 64};
 char icons_f[MAX_ICONS] = {  3,  1,  2,  1,  4,  5, 6};
 char icons_app[MAX_ICONS] = {0, 0, 2, 0, 1, 3, 4};
@@ -201,6 +201,12 @@ void desktop_update() {
 
 void desktop_early_draw() {
     queue_draw_sprite(0,0,127,127,0,0,bg_sprite);
+
+    for(current_app = 0; current_app < MAX_APPS; ++current_app) {
+        if(window_open[current_app]) {
+            window_handler[current_app](WINDOW_EVENT_EARLY_TICK);
+        }
+    }
 }
 
 void desktop_draw() {

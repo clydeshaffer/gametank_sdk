@@ -110,6 +110,7 @@ static void mplayer_app_handler(char e) {
                         ctx->track_number--;
                         if(ctx->track_number == 255) ctx->track_number = TRACK_COUNT-1;
                         if(ctx->music_playing) {
+                            stop_music();
                             play_track_by_num(ctx->track_number);
                         }
                         ctx->change_title = 1;
@@ -124,6 +125,7 @@ static void mplayer_app_handler(char e) {
                         ctx->track_number++;
                         if(ctx->track_number == TRACK_COUNT) ctx->track_number = 0;
                         if(ctx->music_playing) {
+                            stop_music();
                             play_track_by_num(ctx->track_number);
                         }
                         ctx->change_title = 1;

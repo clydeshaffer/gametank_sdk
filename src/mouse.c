@@ -49,7 +49,7 @@ char update_mouse() {
         byteParity++;
         if(byteParity == 3) byteParity = 0;
         delayMicroseconds(255);
-        delayMicroseconds(255);
+        //delayMicroseconds(255);
     }
     return mouseChanged;
 }

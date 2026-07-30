@@ -7,6 +7,7 @@
 #define WINDOW_EVENT_LATE_TICK 4
 #define WINDOW_EVENT_EXIT 5
 #define WINDOW_EVENT_RIGHT_CLICK 6
+#define WINDOW_EVENT_EARLY_TICK 7
 
 #define MAX_APPS 5
 extern char current_app;
