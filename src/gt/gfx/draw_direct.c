@@ -87,6 +87,7 @@ void direct_transparent_mode(bool enabled) {
 void direct_clip_mode(clip_mode_t mode) {
     banksMirror &= ~CLIP_MODE_XY;
     banksMirror |= mode;
+    *bank_reg = banksMirror;
 }
 
 void direct_draw_sprite_frame(SpriteSlot sprite, char x, char y, char frame, char flip) {
