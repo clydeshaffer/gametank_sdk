@@ -65,10 +65,9 @@ void text_print_string(char* str) {
                 text_cursor_x += TEXT_CHAR_WIDTH;
                 break;
             case '\n':
+            case '\r':
                 text_cursor_y += TEXT_CHAR_HEIGHT;
                 vram[VY] = text_cursor_y;
-                break;
-            case '\r':
                 text_cursor_x = text_print_line_start;
                 break;
             default:

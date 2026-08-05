@@ -20,12 +20,15 @@ extern const char ps2_set2_to_char[256];
 extern const char ps2_set2_to_upper_char[256];
 
 #define LINE_MAX 64
+#define PRINTBUF_MAX 32
 char line_buf[64];
 char debug_buf[256];
 char debug_buf_idx = 0;
-char line_buf_idx;
+char line_buf_idx = 0;
 char response_buf[8] = {0};
-char printbuf[8] = {0, '_', 0, 0, 0, 0, 0, 0};
+char printbuf[PRINTBUF_MAX] = {0};
+char printbuf_idx = 0;
+char printbuf_len = 0;
 char isBreak = 0;
 char lastRead = 0;
 char shiftMask = 0;
@@ -88,6 +91,8 @@ void mainloop_keyboard () {
     while (1) {                                     //  Run forever
         queue_clear_border(0);
         
+        printbuf_len = 0;
+
         while(ps2_data_ready()) {
             lastRead = read_byte();
 
@@ -96,10 +101,11 @@ void mainloop_keyboard () {
             } else {
                 if(!isBreak) {
                     if(!!shiftMask ^ !!(ledMask&4)) {
-                        printbuf[0] = ps2_set2_to_upper_char[lastRead];
+                        printbuf[printbuf_len++] = ps2_set2_to_upper_char[lastRead];
                     } else {
-                        printbuf[0] = ps2_set2_to_char[lastRead];
+                        printbuf[printbuf_len++] = ps2_set2_to_char[lastRead];
                     }
+                    if(printbuf_len == PRINTBUF_MAX) printbuf_len = PRINTBUF_MAX-1;
                     
                     //printbuf[0] = hexchar(lastRead >> 4);
                     //printbuf[1] = hexchar(lastRead);
@@ -116,24 +122,32 @@ void mainloop_keyboard () {
 
                 isBreak = 0;
             }
+            delayMicroseconds(255);
+            delayMicroseconds(255);
         }
 
         if(printbuf[0]) {
+            if(printbuf_len >= PRINTBUF_MAX-1) printbuf_len = PRINTBUF_MAX-2;
+            printbuf[printbuf_len++] = '_';
+            printbuf[printbuf_len++] = 0;
+
             queue_draw_box(text_cursor_x, text_cursor_y, 8, 8, 32);
-            if(printbuf[0] == '\n') {
-                line_buf[line_buf_idx] = 0;
-                to_lower(line_buf);
-                if(str_equals(line_buf, "clear")) {
-                    queue_clear_screen(0);
-                    doubleclear = 1;
-                    text_cursor_x = 0;
-                    text_cursor_y = 8;
-                }
-                line_buf_idx = 0;
-            } else {
-                if(line_buf_idx < (LINE_MAX-1)) {
-                    line_buf[line_buf_idx] = printbuf[0];
-                    ++line_buf_idx;
+            for(printbuf_idx = 0; printbuf_idx < (printbuf_len-2); ++printbuf_idx) {
+                if(printbuf[printbuf_idx] == '\n') {
+                    line_buf[line_buf_idx] = 0;
+                    to_lower(line_buf);
+                    if(str_equals(line_buf, "clear")) {
+                        queue_clear_screen(0);
+                        doubleclear = 1;
+                        text_cursor_x = 0;
+                        text_cursor_y = 8;
+                    }
+                    line_buf_idx = 0;
+                } else {
+                    if(line_buf_idx < (LINE_MAX-1)) {
+                        line_buf[line_buf_idx] = printbuf[printbuf_idx];
+                        ++line_buf_idx;
+                    }
                 }
             }
         }
@@ -144,9 +158,7 @@ void mainloop_keyboard () {
         if(printbuf[0]) {{
             old_text_x = text_cursor_x;
             old_text_y = text_cursor_y;
-            if(printbuf[0] == '\n') text_cursor_x = 0;
             text_print_string(printbuf);
-
         }}
 
         await_vsync(1);
@@ -168,7 +180,6 @@ void mainloop_keyboard () {
         if(printbuf[0]) {{
             text_cursor_x = old_text_x;
             text_cursor_y = old_text_y;
-            if(printbuf[0] == '\n') text_cursor_x = 0;
             text_print_string(printbuf);
             text_back();
             printbuf[0] = 0;
