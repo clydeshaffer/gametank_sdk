@@ -59,7 +59,7 @@ viaWakeup:
 
 	LDA #%01111111
 	STA VIA+DDRA
-    LDA #%10011111
+    LDA #%10110111
     STA VIA+ORAr
 	LDA #$FD
 	jsr _bank_shift_out

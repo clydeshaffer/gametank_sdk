@@ -2,9 +2,9 @@
 #include "ps2.h"
 #include "util.h"
 
-#define CLEAR_INHIBIT (1<<3)
+#define CLEAR_INHIBIT (1<<5)
 #define WRITE_STROBE (1<<4)
-#define READ_STROBE (1<<5)
+#define READ_STROBE (1<<3)
 #define PACKET_DONE (1<<6)
 
 #define SET(bit) via[ORA] |= bit
@@ -14,7 +14,18 @@ char ledMask = 0;
 char oldLedMask = 0;
 static char tmp;
 
+void exbus_select_device(char addr) {
+    via[0x0C] = 0b11101110;
+    tmp = via[DDRB];
+    via[DDRB] = 0xFF;
+    via[ORB] = addr;
+    via[0x0C] = 0b11001100;
+    via[DDRB] = tmp;
+}
+
 void ps2_init() {
+    exbus_select_device(0);
+
     via[DDRA] |= (CLEAR_INHIBIT | WRITE_STROBE | READ_STROBE);
     via[DDRA] &= ~PACKET_DONE;
     via[ORA] |= (CLEAR_INHIBIT | WRITE_STROBE | READ_STROBE);
@@ -55,7 +66,7 @@ void send_byte(char b) {
     via[ORA] |= PACKET_DONE;
     via[DDRA] |= PACKET_DONE;
     via[DDRB] = 0xFF;
-    via[ORB] = scramble(b);
+    via[ORB] = b;//scramble(b);
     delayMicroseconds(100);
     CLEAR(WRITE_STROBE);
     via[DDRA] &= ~PACKET_DONE;
