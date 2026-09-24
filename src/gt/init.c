@@ -2,7 +2,6 @@
 #include "./gfx/draw_direct.h"
 #include "./audio/music.h"
 #include "../gen/bank_nums.h"
-#include "../gen/assets/sdk_default.h"
 
 #pragma code-name (push, "LOADERS")
 #pragma rodata-name (push, "LOADERS")
@@ -46,7 +45,7 @@ void sdk_init() {
         flip_pages();
         await_vsync(1);
         if(logo_state == 3) {
-            play_song(ASSET__sdk_default__jingle_mid, REPEAT_NONE);
+            play_boot_jingle();
         }
         if(logo_state > 2) {
             tick_music();

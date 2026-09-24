@@ -5,6 +5,10 @@
 
 #include "../../gen/bank_nums.h"
 #include "../../gen/assets/assets_index.h"
+#include "../../gen/assets/sdk_default.h"
+#include "../../gen/modules_enabled.h"
+
+#ifdef ENABLE_MODULE_AUDIO_DEFAULT_FM
 
 typedef struct music_state_t {
     const unsigned char* cursor;
@@ -368,3 +372,22 @@ void play_sound_effect(char sfx_id, char channel) {
     music_channel_mask &= ~(channel_masks[channel]);
     pop_rom_bank();
 }
+
+void play_boot_jingle() {
+    play_song(ASSET__sdk_default__jingle_mid, REPEAT_NONE);
+}
+#endif
+
+#ifdef ENABLE_MODULE_AUDIO_NONE
+void tick_music() {}
+
+void init_music() {}
+
+void play_sound_effect(char sfx_id, char channel) {}
+
+void stop_music() {}
+
+void play_song(const unsigned char* song, char bank_num, char loop) {}
+
+void play_boot_jingle() {}
+#endif

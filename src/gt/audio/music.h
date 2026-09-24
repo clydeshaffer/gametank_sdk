@@ -32,4 +32,6 @@ void load_instrument(char channel, const Instrument* instr);
 
 void play_sound_effect(char sfx_id, char channel);
 
+void play_boot_jingle();
+
 #endif

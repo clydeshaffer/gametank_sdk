@@ -16,7 +16,11 @@
 .import _bankflip
 .import _bank_shift_out
 
+.include "../gen/modules_enabled.inc"
+
+.ifdef ENABLE_MODULE_AUDIO_DEFAULT_FM
 .export _AudioFWPkg
+.endif
 
 .PC02
 
@@ -98,5 +102,7 @@ _exit:    JSR     donelib              ; Run destructors
           BRK
 
 	.segment "COMMON"
+.ifdef ENABLE_MODULE_AUDIO_DEFAULT_FM
 _AudioFWPkg:
     .incbin "build/assets/audio_fw.bin.deflate"
+.endif

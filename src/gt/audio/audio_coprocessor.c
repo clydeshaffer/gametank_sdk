@@ -3,6 +3,9 @@
 #include "gametank.h"
 #include "banking.h"
 #include "../../gen/bank_nums.h"
+#include "../../gen/modules_enabled.h"
+
+#ifdef ENABLE_MODULE_AUDIO_DEFAULT_FM
 
 char pitch_table[216] = {
     0x00, 0x4D, 0x00, 0x51, 0x00, 0x56, 0x00, 0x5B, 0x00, 0x61, 0x00, 0x66, 0x00, 0x6C, 0x00, 0x73, 0x00, 0x7A, 0x00, 0x81, 0x00, 0x89, 0x00, 0x91,
@@ -53,3 +56,11 @@ void flush_audio_params() {
     *audio_nmi = 1;
     audio_params_index = 0;
 }
+
+#endif
+
+#ifdef ENABLE_MODULE_AUDIO_NONE
+void init_audio_coprocessor() {
+
+}
+#endif
