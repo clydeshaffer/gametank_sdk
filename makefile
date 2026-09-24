@@ -56,6 +56,9 @@ BINOBJS = $(patsubst %,$(ODIR)/%,$(BINSRC))
 SFXSRC = $(shell $(FIND) assets -name "*.sfx")
 SFXOBJS = $(patsubst %,$(ODIR)/%,$(SFXSRC))
 
+RAWSRC = $(shell $(FIND) assets -name "*.raw")
+RAWOBJS = $(patsubst %,$(ODIR)/%,$(RAWSRC))
+
 CFLAGS = -t none -Osr --cpu 65c02 --codesize 500 --static-locals -I src/gt -g
 AFLAGS = --cpu W65C02 --bin-include-dir lib --bin-include-dir $(ODIR)/assets -g
 LFLAGS = -C $(ODIR)/gametank-2M.cfg -m $(ODIR)/out.map -vm --dbgfile $(ODIR)/sourcemap.dbg
@@ -69,6 +72,9 @@ AOBJS = $(filter-out $(ASSETLISTS),$(patsubst src/%,$(ODIR)/%,$(A_SRCS:s=o)))
 
 _AUDIO_FW = audio_fw.bin.deflate
 AUDIO_FW = $(patsubst %,$(ODIR)/assets/%,$(_AUDIO_FW))
+
+_WAVETABLE_FW = wavetable.bin.deflate
+WAVETABLE_FW = $(patsubst %,$(ODIR)/assets/%,$(_WAVETABLE_FW))
 
 -include $(ODIR)/bankMakeList.inc #sets _BANKS
 _BANKS ?= bankFF
@@ -114,6 +120,10 @@ $(ODIR)/assets/%.sfx: assets/%.sfx
 	@mkdir -p $(@D)
 	cp $< $@
 
+$(ODIR)/assets/%.raw: assets/%.raw
+	@mkdir -p $(@D)
+	cp $< $@
+
 $(ODIR)/assets/audio_fw.bin.deflate: $(ODIR)/assets/audio_fw.bin
 	$(ZOP) --deflate $<
 
@@ -122,7 +132,11 @@ $(ODIR)/assets/audio_fw.bin: src/gt/audio/audio_fw.asm gametank-acp.cfg
 	$(AS) --cpu W65C02 src/gt/audio/audio_fw.asm -o $(ODIR)/assets/audio_fw.o
 	$(LN) -C gametank-acp.cfg $(ODIR)/assets/audio_fw.o -o $(ODIR)/assets/audio_fw.bin
 
-$(ODIR)/gen/assets/%.o.asset: src/gen/assets/%.s.asset $(BINOBJS) $(SFXOBJS)
+$(ODIR)/assets/wavetable.bin: src/gt/feature/gttAudio/wavetable.bin
+	@mkdir -p $(@D)
+	cp $< $@
+
+$(ODIR)/gen/assets/%.o.asset: src/gen/assets/%.s.asset $(BINOBJS) $(SFXOBJS) $(RAWOBJS)
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
@@ -143,6 +157,10 @@ $(ODIR)/%.o: src/%.s project.json
 	$(AS) $(AFLAGS) -o $@ $<
 
 $(ODIR)/gt/crt0.o: src/gt/crt0.s $(ODIR)/assets/audio_fw.bin.deflate
+	@mkdir -p $(@D)
+	$(AS) $(AFLAGS) -o $@ $<
+
+$(ODIR)/gt/feature/gttAudio/wavetable_fw.o: src/gt/feature/gttAudio/wavetable_fw.s $(WAVETABLE_FW)
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
@@ -177,7 +195,7 @@ scripts/converters/node_modules: scripts/converters/package.json
 	npm install
 
 
-$(ODIR)/%.cfg $(ODIR)/%.inc src/gen/assets/%.s.asset: project.json scripts/build_setup/*.js scripts/build_setup/node_modules $(BMPOBJS) $(JSONOBJS) $(AUDIO_FW) $(MIDOBJS) $(BINOBJS) $(SFXOBJS)
+$(ODIR)/%.cfg $(ODIR)/%.inc src/gen/assets/%.s.asset: project.json scripts/build_setup/*.js scripts/build_setup/node_modules $(BMPOBJS) $(JSONOBJS) $(AUDIO_FW) $(WAVETABLE_FW) $(MIDOBJS) $(BINOBJS) $(SFXOBJS) $(RAWOBJS)
 	mkdir -p $(ODIR)
 	find assets -type f -name '*:Zone.Identifier' -delete
 	node ./scripts/build_setup/build_setup.js

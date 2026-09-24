@@ -34,8 +34,8 @@ DMA_HEIGHT = $4005
 DMA_Start = $4006
 DMA_Color = $4007
 
-_queue_flags_param = $3200
-_rect = $3201 ;borrow unbanked Audio RAM memory
+_queue_flags_param = $30A4 ;unused ACP RAM gap, after gttAudio's voice registers and before vol_table
+_rect = $30A5 ;Frame struct
 
 .ifdef ENABLE_MODULE_DRAWQUEUE
 ; ---------------------------------------------------------------
