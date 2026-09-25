@@ -64,17 +64,13 @@ LLIBS = --lib none.lib
 C_SRCS := $(shell $(FIND) src -name "*.c")
 COBJS = $(patsubst %,$(ODIR)/%,$(C_SRCS:c=o))
 
-MOD_C_SRCS := $(shell $(FIND) modules/*/src -name "*.c")
-MOD_COBJS = $(patsubst modules/%,$(ODIR)/modules/%,$(MOD_C_SRCS:c=o))
-
 A_SRCS := $(shell $(FIND) src -name "*.s")
 AOBJS = $(filter-out $(ASSETLISTS),$(patsubst %,$(ODIR)/%,$(A_SRCS:s=o)))
 
 ACP_SRCS := $(shell $(FIND) src -name "*.acp.asm")
 ACP_OBJS = $(patsubst %,$(ODIR)/%,$(ACP_SRCS:asm=bin.deflate))
 
-MOD_ACP_SRCS := $(shell $(FIND) modules/*/src -name "*.acp.asm")
-MOD_ACP_OBJS = $(patsubst modules/%,$(ODIR)/modules/%,$(MOD_ACP_SRCS:asm=bin.deflate))
+-include modules/modules.mk
 
 -include $(ODIR)/bankMakeList.inc #sets _BANKS
 _BANKS ?= bankFF
@@ -85,38 +81,35 @@ $(ROMDIR)/$(TARGET): $(ODIR)/bankMakeList.inc $(BANKS)
 
 $(info ASSETOBJS is $(ASSETOBJS))
 
-$(BANKS): $(ODIR)/bankMakeList.inc $(ASSETOBJS) $(AOBJS) $(COBJS) $(MOD_COBJS) $(ACP_OBJS) $(MOD_ACP_OBJS) $(ODIR)/gametank-2M.cfg
+$(BANKS): $(ODIR)/bankMakeList.inc $(ASSETOBJS) $(AOBJS) $(COBJS) $(ACP_OBJS) $(ODIR)/gametank-2M.cfg
 	@mkdir -p $(@D)
-	$(LN) $(LFLAGS) $(ASSETOBJS) $(AOBJS) $(COBJS) $(MOD_COBJS) -o $(ROMDIR)/$(TARGET) $(LLIBS)
+	$(LN) $(LFLAGS) $(ASSETOBJS) $(AOBJS) $(COBJS) -o $(ROMDIR)/$(TARGET) $(LLIBS)
 
-.PRECIOUS: $(ODIR)/assets/%.gtg
-$(ODIR)/assets/%.gtg: assets/%.bmp | scripts/converters/node_modules
+$(ODIR)/%.gtg: %.bmp | scripts/converters/node_modules
 	@mkdir -p $(@D)
 	cd scripts/converters ;\
 	$(ZOP2) --deflate $(shell cd scripts/converters && node sprite_convert.js ../../$< ../../$@)
 
-.PRECIOUS: $(ODIR)/assets/%.gtm2
-$(ODIR)/assets/%.gtm2: assets/%.mid | scripts/converters/node_modules
+$(ODIR)/%.gtm2: %.mid | scripts/converters/node_modules
 	@mkdir -p $(@D)
+	echo 'MIDI CONVERTING'
 	cd scripts/converters ;\
 	node midiconvert.js ../../$< ../../$@
 
-.PRECIOUS: $(ODIR)/assets/%.deflate
-$(ODIR)/assets/%.deflate: $(ODIR)/assets/%
+$(ODIR)/%.deflate: $(ODIR)/%
 	@mkdir -p $(@D)
 	$(ZOP) --deflate $<
 
-.PRECIOUS: $(ODIR)/assets/%.gsi
-$(ODIR)/assets/%.gsi: assets/%.json | scripts/converters/node_modules
+$(ODIR)/%.gsi: %.json | scripts/converters/node_modules
 	@mkdir -p $(@D)
 	cd scripts/converters ;\
 	node sprite_metadata.js ../../$< ../../$@
 
-$(ODIR)/assets/%.bin: assets/%.bin
+$(ODIR)/%.bin: %.bin
 	@mkdir -p $(@D)
 	cp $< $@
 
-$(ODIR)/assets/%.sfx: assets/%.sfx
+$(ODIR)/%.sfx: %.sfx
 	@mkdir -p $(@D)
 	cp $< $@
 
@@ -131,7 +124,7 @@ $(ODIR)/src/%.acp.o: src/%.acp.asm
 	@mkdir -p $(@D)
 	$(AS) --cpu W65C02 $< -o $@
 
-$(ODIR)/src/gen/assets/%.o.asset: src/gen/assets/%.s.asset $(BINOBJS) $(SFXOBJS)
+$(ODIR)/%.o.asset: %.s.asset $(BMPOBJS) $(JSONOBJS) $(MIDOBJS) $(BINOBJS) $(SFXOBJS)
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
@@ -205,7 +198,7 @@ scripts/converters/node_modules: scripts/converters/package.json
 	npm install
 
 
-$(ODIR)/%.cfg $(ODIR)/%.inc src/gen/assets/%.s.asset: project.json scripts/build_setup/*.js scripts/build_setup/node_modules $(BMPOBJS) $(JSONOBJS) $(MIDOBJS) $(BINOBJS) $(SFXOBJS)
+$(ODIR)/%.cfg $(ODIR)/%.inc src/gen/assets/%.s.asset: project.json scripts/build_setup/*.js scripts/build_setup/node_modules
 	mkdir -p $(ODIR)
 	find assets -type f -name '*:Zone.Identifier' -delete
 	node ./scripts/build_setup/build_setup.js

@@ -4,6 +4,7 @@ const AssetAssembly = require('./assets_asm');
 const fs = require('fs');
 
 const assetsDir = './assets';
+const modulesDir = './modules';
 const linkerConfigFileName = './build/gametank-2M.cfg';
 const bankMakeListFileName = './build/bankMakeList.inc';
 const bankNumHeaderFileName = './src/gen/bank_nums.h';
@@ -29,14 +30,24 @@ if(hadError) {
     throw new Error('Project config was missing one or more required properties');
 }
 
+const modulesInfo = fs.readdirSync(modulesDir).filter((p) => fs.statSync(modulesDir + '/' + p).isDirectory());
+const modulesWithAssets = modulesInfo.filter((p) => (fs.existsSync(modulesDir + '/' + p + '/assets')) && fs.statSync(modulesDir + '/' + p + '/assets').isDirectory());
+
+const moduleAssetBanks = modulesWithAssets.flatMap((modName) => fs.readdirSync(modulesDir + '/' + modName + '/assets').filter((p) => fs.statSync(modulesDir + '/' + modName + '/assets/' + p).isDirectory()).map((bankName) => ({module : modName, bank : bankName})));
+const moduleAssetBankNames = moduleAssetBanks.map((mab) => `${mab.module}_${mab.bank}`);
+
+
 const dirInfo = fs.readdirSync(assetsDir).filter((p) => fs.statSync(assetsDir + '/' + p).isDirectory());
 
-const buildCfg = LinkerConfig.generateLinkerConfig(dirInfo, projectConfig.progbanks);
+
+const allAssetBanks = [...dirInfo, ...moduleAssetBankNames];
+
+const buildCfg = LinkerConfig.generateLinkerConfig(allAssetBanks, projectConfig.progbanks);
 
 fs.writeFileSync(linkerConfigFileName, buildCfg.linker);
 fs.writeFileSync(bankMakeListFileName, buildCfg.bankMakeList);
 
-AssetAssembly.generateAssetAssemblyFiles(dirInfo, buildCfg.folderBankMap);
+AssetAssembly.generateAssetAssemblyFiles(dirInfo, moduleAssetBanks, buildCfg.folderBankMap);
 
 fs.writeFileSync(bankNumHeaderFileName, 
     `//@generated

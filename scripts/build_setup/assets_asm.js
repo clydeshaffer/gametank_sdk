@@ -86,13 +86,17 @@ function sliceLargeBitmaps(dir) {
     }
 }
 
-function generateAssetsAssemblyFile(dir) {
+function generateAssetsAssemblyFile(assetBank) {
+    const currentAssetsDir = (assetBank.module == null) ? assetsDir : `modules/${assetBank.module}/assets`;
+    const dir = `${currentAssetsDir}/${assetBank.bank}`;
+
     const nameList = fs.readdirSync(dir).flatMap(sliceLargeBitmaps(dir));
     console.log(nameList);
     const path = dir.split('/');
     const dirName = path[path.length - 1];
+    const segmentName = (assetBank.module == null) ? dirName : `${assetBank.module}_${assetBank.bank}`;
 
-    const segmentLine = `    .segment "${dirName}"`;
+    const segmentLine = `    .segment "${segmentName}"`;
     const exportLines = [];
     const incbinLines = [];
 
@@ -100,7 +104,14 @@ function generateAssetsAssemblyFile(dir) {
         const symName = filenameToSymbolName(dirName, x.loadName);
         exportLines.push(`    .export ${symName}_ptr`);
         incbinLines.push(`${symName}_ptr:`)
-        incbinLines.push(`    .incbin "build/assets/${dirName}/${transformFilename(x.loadName)}"`);
+
+        if(assetBank.module == null) {
+            incbinLines.push(`    .incbin "build/assets/${dirName}/${transformFilename(x.loadName)}"`);
+        } else {
+            incbinLines.push(`    .incbin "build/modules/${assetBank.module}/assets/${assetBank.bank}/${transformFilename(x.loadName)}"`);
+        }
+
+
         incbinLines.push('');
     });
 
@@ -147,7 +158,7 @@ function generateAssetsHeaderFile(dir, bankNumber, pushFileHandles) {
         `#ifndef ${gate_define}`,
         `#define ${gate_define}`,
         '',
-        '#include "../../gt/gfx/sprites.h"',
+        '#include "gfx/sprites.h"',
         '',
         `#define BANK_${dirName} ${bankNumber}`,
         '',
@@ -184,7 +195,7 @@ function generateAssetsCFile(dir, bankNumber, folder) {
         `//@generated`,
         '//Editing this manually is not recommended, run "make import" instead!',
         '',
-        '#include "../../gt/gfx/sprites.h"',
+        '#include "gfx/sprites.h"',
         `#include "${folder}.h"`,
         '#pragma rodata-name (push, "LOADERS")',
         '',
@@ -219,7 +230,7 @@ extern const unsigned char ASSET__${ext}_bank_table[];
     ].join('\n');
 }
 
-function generateAssetAssemblyFiles(assetFolderNames, folderBankMap) {
+function generateAssetAssemblyFiles(assetFolderNames, moduleAssetBanks, folderBankMap) {
 
     if (fs.existsSync(srcGenDir)){
         fs.rmSync(srcGenDir, { recursive: true });
@@ -242,21 +253,37 @@ function generateAssetAssemblyFiles(assetFolderNames, folderBankMap) {
         return assetsByExtension[ext].length - 1;
     }
 
-    assetFolderNames.forEach((folder) => {
-        if(fs.lstatSync(`./${assetsDir}/${folder}`).isDirectory()) {
-            const assetsAsm = generateAssetsAssemblyFile(`./${assetsDir}/${folder}`);
+    const allAssetBanks = [...assetFolderNames.map((a) => ({module : null, bank : a})), ...moduleAssetBanks];
+
+    moduleAssetBanks.forEach((mab) => {
+        if(!fs.existsSync( `./modules/${mab.module}/src/gen/assets`)) {
+            fs.mkdirSync( `./modules/${mab.module}/src/gen/assets`, {recursive : true});
+        }
+    });
+
+    allAssetBanks.forEach((assetBank) => {
+        const folder = assetBank.bank;
+        const currentAssetsDir = (assetBank.module == null) ? assetsDir : `modules/${assetBank.module}/assets`;
+        if(fs.lstatSync(`./${currentAssetsDir}/${folder}`).isDirectory()) {
+            const assetsAsm = generateAssetsAssemblyFile(assetBank);
             const assetsFileName = `${folder}.s.asset`;
 
-            const assetsHeader = generateAssetsHeaderFile(`./${assetsDir}/${folder}`, folderBankMap[folder], collectFunc);
-            const assetsCFile = generateAssetsCFile(`./${assetsDir}/${folder}`, folderBankMap[folder],
+            const bankNumber = (assetBank.module == null) ? folderBankMap[folder] : folderBankMap[assetBank.module + '_' + folder];
+            const assetsHeader = generateAssetsHeaderFile(`./${currentAssetsDir}/${folder}`, bankNumber, collectFunc);
+            const assetsCFile = generateAssetsCFile(`./${currentAssetsDir}/${folder}`, folderBankMap[folder],
             folder);
             
-            const assetsHeaderName = `${folder}.h`
+            const assetsHeaderName = `${folder}.h`;
             const assetsCName = `${folder}__loaders.c`
-            fs.writeFileSync(srcGenDir + '/' + assetsFileName, assetsAsm);
-            fs.writeFileSync(srcGenDir + '/' + assetsHeaderName, assetsHeader);
-            fs.writeFileSync(srcGenDir + '/' + assetsCName, assetsCFile);
-            allIncludes.push(assetsHeaderName);
+            const genDir = (assetBank.module == null) ? srcGenDir : `./modules/${assetBank.module}/src/gen/assets`;
+            fs.writeFileSync(genDir + '/' + assetsFileName, assetsAsm);
+            fs.writeFileSync(genDir + '/' + assetsHeaderName, assetsHeader);
+            fs.writeFileSync(genDir + '/' + assetsCName, assetsCFile);
+            if(assetBank.module == null) {
+                allIncludes.push(assetsHeaderName);
+            } else {
+                allIncludes.push(`../../../modules/${assetBank.module}/src/gen/assets/${assetBank.bank}.h`);
+            }
         }
     });
 
