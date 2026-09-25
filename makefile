@@ -44,7 +44,7 @@ $(info bmpsrc is $(BMPSRC))
 MIDSRC := $(shell $(FIND) assets -name "*.mid")
 JSONSRC := $(shell $(FIND) assets -name "*.json")
 ASSETLISTS := $(shell $(FIND) src/gen/assets -name "*.s.asset")
-ASSETOBJS = $(filter-out $(ASSETLISTS),$(patsubst src/%,$(ODIR)/%,$(ASSETLISTS:s.asset=o.asset)))
+ASSETOBJS = $(filter-out $(ASSETLISTS),$(patsubst %,$(ODIR)/%,$(ASSETLISTS:s.asset=o.asset)))
 
 BMPOBJS = $(patsubst %,$(ODIR)/%,$(BMPSRC:bmp=gtg.deflate))
 MIDOBJS = $(patsubst %,$(ODIR)/%,$(MIDSRC:mid=gtm2))
@@ -62,13 +62,19 @@ LFLAGS = -C $(ODIR)/gametank-2M.cfg -m $(ODIR)/out.map -vm --dbgfile $(ODIR)/sou
 LLIBS = --lib none.lib
 
 C_SRCS := $(shell $(FIND) src -name "*.c")
-COBJS = $(patsubst src/%,$(ODIR)/%,$(C_SRCS:c=o))
+COBJS = $(patsubst %,$(ODIR)/%,$(C_SRCS:c=o))
+
+MOD_C_SRCS := $(shell $(FIND) modules/*/src -name "*.c")
+MOD_COBJS = $(patsubst modules/%,$(ODIR)/modules/%,$(MOD_C_SRCS:c=o))
 
 A_SRCS := $(shell $(FIND) src -name "*.s")
-AOBJS = $(filter-out $(ASSETLISTS),$(patsubst src/%,$(ODIR)/%,$(A_SRCS:s=o)))
+AOBJS = $(filter-out $(ASSETLISTS),$(patsubst %,$(ODIR)/%,$(A_SRCS:s=o)))
 
-_AUDIO_FW = audio_fw.bin.deflate
-AUDIO_FW = $(patsubst %,$(ODIR)/assets/%,$(_AUDIO_FW))
+ACP_SRCS := $(shell $(FIND) src -name "*.acp.asm")
+ACP_OBJS = $(patsubst %,$(ODIR)/%,$(ACP_SRCS:asm=bin.deflate))
+
+MOD_ACP_SRCS := $(shell $(FIND) modules/*/src -name "*.acp.asm")
+MOD_ACP_OBJS = $(patsubst modules/%,$(ODIR)/modules/%,$(MOD_ACP_SRCS:asm=bin.deflate))
 
 -include $(ODIR)/bankMakeList.inc #sets _BANKS
 _BANKS ?= bankFF
@@ -79,9 +85,9 @@ $(ROMDIR)/$(TARGET): $(ODIR)/bankMakeList.inc $(BANKS)
 
 $(info ASSETOBJS is $(ASSETOBJS))
 
-$(BANKS): $(ODIR)/bankMakeList.inc $(ASSETOBJS) $(AOBJS) $(COBJS) $(ODIR)/gametank-2M.cfg
+$(BANKS): $(ODIR)/bankMakeList.inc $(ASSETOBJS) $(AOBJS) $(COBJS) $(MOD_COBJS) $(ACP_OBJS) $(MOD_ACP_OBJS) $(ODIR)/gametank-2M.cfg
 	@mkdir -p $(@D)
-	$(LN) $(LFLAGS) $(ASSETOBJS) $(AOBJS) $(COBJS) -o $(ROMDIR)/$(TARGET) $(LLIBS)
+	$(LN) $(LFLAGS) $(ASSETOBJS) $(AOBJS) $(COBJS) $(MOD_COBJS) -o $(ROMDIR)/$(TARGET) $(LLIBS)
 
 .PRECIOUS: $(ODIR)/assets/%.gtg
 $(ODIR)/assets/%.gtg: assets/%.bmp | scripts/converters/node_modules
@@ -114,23 +120,26 @@ $(ODIR)/assets/%.sfx: assets/%.sfx
 	@mkdir -p $(@D)
 	cp $< $@
 
-$(ODIR)/assets/audio_fw.bin.deflate: $(ODIR)/assets/audio_fw.bin
+$(ODIR)/%.acp.bin.deflate: $(ODIR)/%.acp.bin
 	$(ZOP) --deflate $<
 
-$(ODIR)/assets/audio_fw.bin: src/gt/audio/audio_fw.asm gametank-acp.cfg
+$(ODIR)/%.acp.bin: $(ODIR)/%.acp.o gametank-acp.cfg
 	@mkdir -p $(@D)
-	$(AS) --cpu W65C02 src/gt/audio/audio_fw.asm -o $(ODIR)/assets/audio_fw.o
-	$(LN) -C gametank-acp.cfg $(ODIR)/assets/audio_fw.o -o $(ODIR)/assets/audio_fw.bin
+	$(LN) -C gametank-acp.cfg $< -o $@
 
-$(ODIR)/gen/assets/%.o.asset: src/gen/assets/%.s.asset $(BINOBJS) $(SFXOBJS)
+$(ODIR)/src/%.acp.o: src/%.acp.asm
+	@mkdir -p $(@D)
+	$(AS) --cpu W65C02 $< -o $@
+
+$(ODIR)/src/gen/assets/%.o.asset: src/gen/assets/%.s.asset $(BINOBJS) $(SFXOBJS)
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
-$(ODIR)/%.si: src/%.c src/%.h project.json
+$(ODIR)/src/%.si: src/%.c src/%.h project.json
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $<
 
-$(ODIR)/%.si: src/%.c project.json
+$(ODIR)/src/%.si: src/%.c project.json
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) -o $@ $<
 
@@ -138,11 +147,30 @@ $(ODIR)/%.o: $(ODIR)/%.si project.json
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
-$(ODIR)/%.o: src/%.s project.json
+$(ODIR)/src/%.o: src/%.s project.json
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
-$(ODIR)/gt/crt0.o: src/gt/crt0.s $(ODIR)/assets/audio_fw.bin.deflate
+$(ODIR)/modules/%.acp.bin.deflate: $(ODIR)/modules/%.acp.bin
+	$(ZOP) --deflate $<
+
+$(ODIR)/modules/%.acp.bin: $(ODIR)/modules/%.acp.o gametank-acp.cfg
+	@mkdir -p $(@D)
+	$(LN) -C gametank-acp.cfg $< -o $@
+
+$(ODIR)/modules/%.acp.o: modules/%.acp.asm
+	@mkdir -p $(@D)
+	$(AS) --cpu W65C02 $< -o $@
+
+$(ODIR)/modules/%.si: modules/%.c project.json
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) -o $@ $<
+
+$(ODIR)/modules/%.o: $(ODIR)/modules/%.si project.json
+	@mkdir -p $(@D)
+	$(AS) $(AFLAGS) -o $@ $<
+
+$(ODIR)/src/gt/crt0.o: src/gt/crt0.s $(ODIR)/src/gt/audio/sdk_default_fm.acp.bin.deflate
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
@@ -177,7 +205,7 @@ scripts/converters/node_modules: scripts/converters/package.json
 	npm install
 
 
-$(ODIR)/%.cfg $(ODIR)/%.inc src/gen/assets/%.s.asset: project.json scripts/build_setup/*.js scripts/build_setup/node_modules $(BMPOBJS) $(JSONOBJS) $(AUDIO_FW) $(MIDOBJS) $(BINOBJS) $(SFXOBJS)
+$(ODIR)/%.cfg $(ODIR)/%.inc src/gen/assets/%.s.asset: project.json scripts/build_setup/*.js scripts/build_setup/node_modules $(BMPOBJS) $(JSONOBJS) $(MIDOBJS) $(BINOBJS) $(SFXOBJS)
 	mkdir -p $(ODIR)
 	find assets -type f -name '*:Zone.Identifier' -delete
 	node ./scripts/build_setup/build_setup.js

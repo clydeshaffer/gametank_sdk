@@ -104,5 +104,5 @@ _exit:    JSR     donelib              ; Run destructors
 	.segment "COMMON"
 .ifdef ENABLE_MODULE_AUDIO_DEFAULT_FM
 _AudioFWPkg:
-    .incbin "build/assets/audio_fw.bin.deflate"
+    .incbin "build/src/gt/audio/sdk_default_fm.acp.bin.deflate"
 .endif
