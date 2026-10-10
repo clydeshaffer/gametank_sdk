@@ -26,3 +26,9 @@ EXPERIMENTAL: You can hopefully install cc65 and Zopfli into the SDK directory w
 ## Testing requirements:
 
 * GameTank Emulator https://github.com/clydeshaffer/GameTankEmulator
+
+## Contributor modules:
+
+Extensions to the SDK that can be dropped into the "modules" folder:
+
+* [jaythomas/gttAudio](https://codeberg.org/jaythomas/gttAudio) - wavetable music and tracker
