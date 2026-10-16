@@ -75,6 +75,7 @@ void queue_draw_box(unsigned char x, unsigned char y, unsigned char w, unsigned 
 }
 
 void queue_clear_border(char c) {
+    //top
     queue_draw_box(
         0,
         0,
@@ -82,6 +83,7 @@ void queue_clear_border(char c) {
         BORDER_TOP_HEIGHT,
         c
     );
+    //left
     queue_draw_box(
         0,
         BORDER_TOP_HEIGHT,
@@ -89,6 +91,7 @@ void queue_clear_border(char c) {
         SCREEN_HEIGHT-BORDER_TOP_HEIGHT,
         c
     );
+    //bottom
     queue_draw_box(
         BORDER_LEFT_WIDTH,
         SCREEN_HEIGHT-BORDER_BOTTOM_HEIGHT,
@@ -96,6 +99,7 @@ void queue_clear_border(char c) {
         BORDER_BOTTOM_HEIGHT,
         c
     );
+    //right
     queue_draw_box(
         SCREEN_WIDTH-BORDER_RIGHT_WIDTH,
         0,
