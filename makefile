@@ -70,7 +70,7 @@ AOBJS = $(filter-out $(ASSETLISTS),$(patsubst %,$(ODIR)/%,$(A_SRCS:s=o)))
 ACP_SRCS := $(shell $(FIND) src -name "*.acp.asm")
 ACP_OBJS = $(patsubst %,$(ODIR)/%,$(ACP_SRCS:asm=bin.deflate))
 
--include modules/modules.mk
+-include modules/module_defs.mk
 
 -include $(ODIR)/bankMakeList.inc #sets _BANKS
 _BANKS ?= bankFF
@@ -144,24 +144,7 @@ $(ODIR)/src/%.o: src/%.s project.json
 	@mkdir -p $(@D)
 	$(AS) $(AFLAGS) -o $@ $<
 
-$(ODIR)/modules/%.acp.bin.deflate: $(ODIR)/modules/%.acp.bin
-	$(ZOP) --deflate $<
-
-$(ODIR)/modules/%.acp.bin: $(ODIR)/modules/%.acp.o gametank-acp.cfg
-	@mkdir -p $(@D)
-	$(LN) -C gametank-acp.cfg $< -o $@
-
-$(ODIR)/modules/%.acp.o: modules/%.acp.asm
-	@mkdir -p $(@D)
-	$(AS) --cpu W65C02 $< -o $@
-
-$(ODIR)/modules/%.si: modules/%.c project.json
-	@mkdir -p $(@D)
-	$(CC) $(CFLAGS) -o $@ $<
-
-$(ODIR)/modules/%.o: $(ODIR)/modules/%.si project.json
-	@mkdir -p $(@D)
-	$(AS) $(AFLAGS) -o $@ $<
+-include modules/module_rules.mk
 
 $(ODIR)/src/gt/crt0.o: src/gt/crt0.s $(ODIR)/src/gt/audio/sdk_default_fm.acp.bin.deflate
 	@mkdir -p $(@D)
