@@ -1,10 +1,12 @@
 #include "gt/gametank.h"
+#include "gt/audio/music.h"
 #include "gt/gfx/draw_queue.h"
-
+#include "gen/assets/music.h"
 char box_x = 30, box_y = 20;
 char dx = 1, dy = 1;
 
 void main () {
+    play_song(&ASSET__music__doom_bin, REPEAT_LOOP);
     while (1) {                                     //  Run forever
         queue_clear_screen(3);
         queue_draw_box(box_x, box_y, 8, 8, 92);
@@ -26,6 +28,6 @@ void main () {
         await_draw_queue();
         await_vsync(1);
         flip_pages();
- 
+        tick_music();
     }
 }
