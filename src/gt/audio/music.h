@@ -1,37 +1,23 @@
-#ifndef MUSIC_H
-#define MUSIC_H
+#include "../../gen/modules_enabled.h"
 
-#include "audio_coprocessor.h"
-#include "instruments.h"
+#ifdef ENABLE_MODULE_SDK_TRACKER_FM_BACKEND
+#include "backends/tracker_fm/music.h"
+#endif
 
-#define REPEAT_NONE 0
-#define REPEAT_LOOP 1
-#define REPEAT_RESUME 2
+#ifdef ENABLE_MODULE_LEGACY_MIDI_FM_BACKEND
+#include "backends/legacy_midi_fm/music.h"
+#endif
 
-#define SFX_PRIORITY(x) (x<<4)
+#ifdef ENABLE_MODULE_AUDIO_NONE
+void tick_music();
 
 void init_music();
 
-void play_song(const unsigned char* song, char bank_num, char loop);
-
-void tick_music();
-
-void silence_all_channels();
+void play_sound_effect(char sfx_id, char channel);
 
 void stop_music();
 
-void pause_music();
-
-void unpause_music();
-
-void set_note(char ch, char n);
-
-extern unsigned char audio_amplitudes[NUM_FM_OPS];
-
-void load_instrument(char channel, const Instrument* instr);
-
-void play_sound_effect(char sfx_id, char channel);
+void play_song(const unsigned char* song, char bank_num, char loop);
 
 void play_boot_jingle();
-
 #endif

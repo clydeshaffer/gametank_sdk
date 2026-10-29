@@ -18,7 +18,7 @@
 
 .include "../gen/modules_enabled.inc"
 
-.ifdef ENABLE_MODULE_AUDIO_DEFAULT_FM
+.ifdef ENABLE_MODULE_AUDIO_DEFAULT_FM_FIRMWARE
 .export _AudioFWPkg
 .endif
 
@@ -102,7 +102,7 @@ _exit:    JSR     donelib              ; Run destructors
           BRK
 
 	.segment "COMMON"
-.ifdef ENABLE_MODULE_AUDIO_DEFAULT_FM
+.ifdef ENABLE_MODULE_AUDIO_DEFAULT_FM_FIRMWARE
 _AudioFWPkg:
     .incbin "build/src/gt/audio/sdk_default_fm.acp.bin.deflate"
 .endif

@@ -1,14 +1,15 @@
+#include "../../../../gen/modules_enabled.h"
+
+#ifdef ENABLE_MODULE_LEGACY_MIDI_FM_BACKEND
+
 #include "music.h"
 #include "gametank.h"
-#include "note_numbers.h"
 #include "banking.h"
 
-#include "../../gen/bank_nums.h"
-#include "../../gen/assets/assets_index.h"
-#include "../../gen/assets/sdk_default.h"
-#include "../../gen/modules_enabled.h"
-
-#ifdef ENABLE_MODULE_AUDIO_DEFAULT_FM
+#include "../../../../gen/bank_nums.h"
+#include "../../../../gen/assets/assets_index.h"
+#include "../../../../gen/assets/sdk_default.h"
+#include "../../../../gen/modules_enabled.h"
 
 typedef struct music_state_t {
     const unsigned char* cursor;

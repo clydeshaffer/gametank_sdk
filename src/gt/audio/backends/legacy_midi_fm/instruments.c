@@ -1,3 +1,7 @@
+#include "../../../../gen/modules_enabled.h"
+
+#ifdef ENABLE_MODULE_LEGACY_MIDI_FM_BACKEND
+
 #include "instruments.h"
 
 const Instrument piano = {
@@ -77,3 +81,5 @@ Instrument* instrument_table[] = {
 Instrument* get_instrument_ptr(char idx) {
     return instrument_table[idx];
 }
+
+#endif

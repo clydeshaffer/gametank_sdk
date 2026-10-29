@@ -1,7 +1,11 @@
 #ifndef INSTRUMENTS_H
 #define INSTRUMENTS_H
 
-#include "audio_coprocessor.h"
+#include "../../../../gen/modules_enabled.h"
+
+#ifdef ENABLE_MODULE_LEGACY_MIDI_FM_BACKEND
+
+#include "../../audio_coprocessor.h"
 
 typedef struct {
     unsigned char env_initial[OPS_PER_CHANNEL];
@@ -21,5 +25,7 @@ typedef struct {
 #define INSTR_IDX_HORN 7
 
 Instrument* get_instrument_ptr(char idx);
+
+#endif
 
 #endif
