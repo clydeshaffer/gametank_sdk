@@ -1,4 +1,4 @@
-.import _channelStates, _setEnvChannel, _setEnvInst, _env_ptr_cache
+.import _channelStates, _setEnvChannel, _setEnvInst, _env_ptr_cache, _music_channel_mask
 .export _setEnvelopeFetchers, _fetchEnvelopes
 .export ch0op3, ch1op3
 
@@ -15,6 +15,9 @@ _instrument_table:
 .segment "DATA"
 _fetchEnvelopes:
 ch0:
+	lda _music_channel_mask
+	and #1
+	beq ch1
 	ldy _channelStates+0
 	bmi ch1
 	ch0op0:
@@ -31,6 +34,9 @@ ch0:
 	sta $3033
 	
 ch1:
+	lda _music_channel_mask
+	and #2
+	beq ch2
 	ldy _channelStates+1
 	bmi ch2
 	ch1op0:
@@ -47,6 +53,9 @@ ch1:
 	sta $3037
 	
 ch2:
+	lda _music_channel_mask
+	and #4
+	beq ch3
 	ldy _channelStates+2
 	bmi ch3
 	ch2op0:
@@ -63,6 +72,9 @@ ch2:
 	sta $303B
 
 ch3:
+	lda _music_channel_mask
+	and #8
+	beq fetchEnd
 	ldy _channelStates+3
 	bmi fetchEnd
 	ch3op0:

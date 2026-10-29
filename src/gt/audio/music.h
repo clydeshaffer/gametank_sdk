@@ -31,6 +31,8 @@ typedef struct track_header_t {
 
 void init_music();
 
+void init_song_data();
+
 void play_song(const track_header_t* song, char bank_num, char loop);
 
 void tick_music();

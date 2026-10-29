@@ -26,7 +26,7 @@ char channelStates[4];
 char* channelSequences[4];
 char sequenceLength;
 char channelCurrentPattern[4];
-
+char last_note[4];
 #define MUSIC_STACK_SIZE 8
 
 track_header_t track_header;
@@ -40,17 +40,31 @@ void push_song_stack() {
     if(music_stack_idx == MUSIC_STACK_SIZE) { music_stack_idx = 0; }
 }
 
-void pop_song_stack() { 
+void pop_song_stack() {
+    char n;
     if(music_stack_idx == 0) {
         music_stack_idx = MUSIC_STACK_SIZE-1;
     } else { 
         --music_stack_idx;
     }
     music_state = music_stack[music_stack_idx];
-    load_instrument(0, music_state.instruments_idx[0]);
-    load_instrument(0, music_state.instruments_idx[1]);
-    load_instrument(0, music_state.instruments_idx[2]);
-    load_instrument(0, music_state.instruments_idx[3]);
+    change_rom_bank(music_state.bank);
+
+    track_header = *music_state.song_base;
+
+    last_note[0] = 0;
+    last_note[1] = 0;
+    last_note[2] = 0;
+    last_note[3] = 0;
+    channelStates[0] = 255;
+    channelStates[1] = 255;
+    channelStates[2] = 255;
+    channelStates[3] = 255;
+
+    for(n = 0; n < NUM_FM_OPS; ++n) {
+        set_audio_param(AMPLITUDE+n, 128);
+    }
+    init_song_data();
 }
 
 unsigned char channel_masks[NUM_FM_CHANNELS] = {1, 2, 4, 8};
@@ -71,7 +85,6 @@ const unsigned char* paused_cursor = 0;
 unsigned char paused_bank = 0;
 unsigned char paused_cfg = 0;
 unsigned char paused_delay;
-unsigned char music_mode = REPEAT_NONE;
 
 unsigned char music_channel_mask;
 unsigned char percussion_channel_mask;
@@ -146,12 +159,33 @@ void set_note(char ch, char n) {
     set_audio_param(PITCH_LSB + ch, pitch_table[n_mul + 1]);
 }
 
+void init_song_data() {
+    char n;
+    char* envelopePtrArray;
+    for(n = 0; n < track_header.instrument_count; ++n) {
+        instruments[n] = ((instrument_header_t*)(((char*) music_state.song_base->instruments[n]) + (int) music_state.song_base));
+        envelopePtrArray = instruments[n]->envelopes;
+        env_ptr_cache[n<<2]     = instruments[n]->envelopes[0] + ((int)music_state.song_base);
+        env_ptr_cache[(n<<2)+1] = instruments[n]->envelopes[1] + ((int)music_state.song_base);
+        env_ptr_cache[(n<<2)+2] = instruments[n]->envelopes[2] + ((int)music_state.song_base);
+        env_ptr_cache[(n<<2)+3] = instruments[n]->envelopes[3] + ((int)music_state.song_base);
+    }
+
+    
+    for(n = 0; n < NUM_FM_CHANNELS; ++n) {
+        track_header.channel_datas[n] = (channel_header_t*)(((char*)(track_header.channel_datas[n])) + ((int) music_state.song_base));
+        channelSequences[n] = track_header.channel_datas[n]->patternHeads[0] + ((int)music_state.song_base);
+        channelCurrentPattern[n] = channelSequences[n][music_state.sequence_idx];
+        load_instrument(n, music_state.instruments_idx[n]);
+    }
+    sequenceLength = track_header.channel_datas[0]->sequenceLength;
+}
+
 char evt;
 char ins;
 
 void play_song(const track_header_t* song, char bank_num, char loop) {
     char n;
-    char* envelopePtrArray;
     push_song_stack();
     music_state.bank = bank_num;
     push_rom_bank();
@@ -161,6 +195,14 @@ void play_song(const track_header_t* song, char bank_num, char loop) {
     music_state.sequence_idx = 0;
     music_state.delay = track_header.step_frames;
     music_state.step_idx = 0;
+    last_note[0] = 0;
+    last_note[1] = 0;
+    last_note[2] = 0;
+    last_note[3] = 0;
+    channelStates[0] = 255;
+    channelStates[1] = 255;
+    channelStates[2] = 255;
+    channelStates[3] = 255;
 
     for(n = 0; n < NUM_FM_OPS; ++n) {
         set_audio_param(AMPLITUDE+n, 128);
@@ -168,11 +210,9 @@ void play_song(const track_header_t* song, char bank_num, char loop) {
 
     switch(loop) {
         case REPEAT_NONE: 
-            music_mode = REPEAT_NONE;
             music_state.flags = 0;
             break;
         case REPEAT_LOOP:
-            music_mode = REPEAT_LOOP;
             music_state.flags = MUSIC_FLAG_REPEAT;
             break;
         case REPEAT_RESUME:
@@ -180,27 +220,7 @@ void play_song(const track_header_t* song, char bank_num, char loop) {
             break;
     }
 
-    
-    
-    for(n = 0; n < track_header.instrument_count; ++n) {
-        instruments[n] = ((instrument_header_t*)(((char*) song->instruments[n]) + (int) song));
-        envelopePtrArray = instruments[n]->envelopes;
-        env_ptr_cache[n<<2]     = instruments[n]->envelopes[0] + ((int)song);
-        env_ptr_cache[(n<<2)+1] = instruments[n]->envelopes[1] + ((int)song);
-        env_ptr_cache[(n<<2)+2] = instruments[n]->envelopes[2] + ((int)song);
-        env_ptr_cache[(n<<2)+3] = instruments[n]->envelopes[3] + ((int)song);
-    }
-
-    
-    for(n = 0; n < NUM_FM_CHANNELS; ++n) {
-        track_header.channel_datas[n] = (channel_header_t*)(((char*)(track_header.channel_datas[n])) + ((int) song));
-        channelSequences[n] = track_header.channel_datas[n]->patternHeads[0] + ((int)song);
-        channelCurrentPattern[n] = channelSequences[n][0];
-        load_instrument(n, 0);
-    }
-    sequenceLength = track_header.channel_datas[0]->sequenceLength;
-
-    
+    init_song_data();
 
     for(n = 0; n < NUM_FM_CHANNELS; ++n) {
         evt = (track_header.channel_datas[n]->patternHeads[channelCurrentPattern[n]+1] + ((int) music_state.song_base))[(music_state.step_idx) << 1];
@@ -210,7 +230,10 @@ void play_song(const track_header_t* song, char bank_num, char loop) {
             if(ins != music_state.instruments_idx[n]) {
                 load_instrument(n, ins);
             }
-            set_note(n, evt);
+            last_note[n] = evt;
+            if(music_channel_mask & channel_masks[n]) {
+                set_note(n, evt);
+            }
             channelStates[n] = 1;
         } else {
             channelStates[n] = 255;
@@ -231,7 +254,7 @@ void unpause_music() {
 }
 
 void tick_music() {
-    static unsigned char n, noteMask, ch;
+    static unsigned char n;
     register unsigned char a, op;
     push_rom_bank();
     for(n = 0; n < NUM_FM_CHANNELS; ++n) {
@@ -270,9 +293,12 @@ void tick_music() {
             } else {
                 op = n << 2;
                 set_audio_param(AMPLITUDE+(op+3), 128);
-                aram[FEEDBACK_AMT + n] = saved_feedback_value[n];
+                aram[FEEDBACK_AMT + n] = 128;//saved_feedback_value[n];
                 music_channel_mask |= channel_masks[n];
                 sound_effect_priority[n] = 0;
+                if(channelStates[n] != 255) {
+                    set_note(n, last_note[n]);
+                }
             }
         }
     }
@@ -292,6 +318,8 @@ void tick_music() {
                 if(music_state.sequence_idx == sequenceLength) {
                     if(music_state.flags & MUSIC_FLAG_REPEAT) {
                         music_state.sequence_idx = 0;
+                    } else if(music_state.flags & MUSIC_FLAG_POP_AT_END) {
+                        pop_song_stack();
                     } else {
                         music_state.flags |= MUSIC_FLAG_STOPPED;
                     }
@@ -308,7 +336,10 @@ void tick_music() {
                         if(ins != music_state.instruments_idx[n]) {
                             load_instrument(n, ins);
                         }
-                        set_note(n, evt);
+                        last_note[n] = evt;
+                        if(music_channel_mask & channel_masks[n]) {
+                            set_note(n, evt);
+                        }
                         channelStates[n] = 0;
                     }
                 }
@@ -344,6 +375,10 @@ void silence_all_channels() {
 void stop_music() {
     music_state.flags |= MUSIC_FLAG_STOPPED;
     silence_all_channels();
+    channelStates[0] = 255;
+    channelStates[1] = 255;
+    channelStates[2] = 255;
+    channelStates[3] = 255;
 }
 
 void play_sound_effect(char sfx_id, char channel) { 
