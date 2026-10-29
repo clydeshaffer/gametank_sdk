@@ -22,8 +22,10 @@ typedef struct instrument_header_t {
 } instrument_header_t;
 
 typedef struct track_header_t {
+    char track_fmt_version;
     char step_frames;
     char pattern_length;
+    char reserved[4];
     channel_header_t* channel_datas[4];
     char instrument_count;
     instrument_header_t* instruments[];

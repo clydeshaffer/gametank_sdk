@@ -47,7 +47,9 @@ void main () {
             play_song(&ASSET__sdk_default__jingle_bin, REPEAT_RESUME);
         }
 
+        PROFILER_START(0);
         tick_music();
+        PROFILER_END(0);
 
         await_draw_queue();
         await_vsync(1);
