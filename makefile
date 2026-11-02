@@ -199,12 +199,12 @@ import : $(ODIR)/gametank-2M.cfg $(ODIR)/bankMakeList.inc
 prereqs:
 	mkdir tools ;\
 	cd tools ;\
-	git clone git@github.com:google/zopfli.git ;\
+	git clone https://github.com/google/zopfli.git ;\
 	cd zopfli ;\
 	make ;\
 	cd .. ;\
+	git clone https://github.com/cc65/cc65.git ;\
 	cd cc65 ;\
-    git clone https://github.com/cc65/cc65.git ;\
 	git checkout 6efe447d14a31e98cb14e8a3d45621e844c89ebe ;\
 	make bin ;\
 	make lib ;\
