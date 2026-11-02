@@ -203,8 +203,8 @@ prereqs:
 	cd zopfli ;\
 	make ;\
 	cd .. ;\
-	git clone git@github.com:cc65/cc65.git ;\
 	cd cc65 ;\
+    git clone https://github.com/cc65/cc65.git ;\
 	git checkout 6efe447d14a31e98cb14e8a3d45621e844c89ebe ;\
 	make bin ;\
 	make lib ;\
