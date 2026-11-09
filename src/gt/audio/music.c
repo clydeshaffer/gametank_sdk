@@ -10,6 +10,21 @@
 
 #ifdef ENABLE_MODULE_AUDIO_DEFAULT_FM
 
+char tracker_line_buf[33] = "xx -- -- | -- -- | -- -- | -- --";
+char tracker_line_number = 0;
+
+const char hexChars[17] = "0123456789ABCDEF";
+
+void write_tracker_line(char idx, char val) {
+	if(val == 255) {
+		tracker_line_buf[idx] = '-';
+		tracker_line_buf[idx+1] = '-';
+		return;
+	}
+	tracker_line_buf[idx] = hexChars[(val >> 4) & 0x0F];
+	tracker_line_buf[idx+1] = hexChars[val & 0x0F];	
+}
+
 typedef struct music_state_t {
     track_header_t* song_base;
     unsigned char bank;
@@ -341,12 +356,19 @@ void tick_music() {
                             set_note(n, evt);
                         }
                         channelStates[n] = 0;
-                    }
+			write_tracker_line((n<<3) + 3, evt);
+		       	write_tracker_line((n<<3) + 6, ins);	
+                    } else {
+			write_tracker_line((n<<3) + 3, 255);
+			write_tracker_line((n<<3) + 6, 255);
+		    }
                 }
+		tracker_line_number = music_state.step_idx;
+		write_tracker_line(0, tracker_line_number);
+		tracker_line_buf[32] = 0;
             }
         }
 
-        
     }
 
     for(n = 0; n < NUM_FM_CHANNELS; ++n) {

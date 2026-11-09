@@ -1,0 +1,1 @@
+extern unsigned char system_font_monochrome[436];
