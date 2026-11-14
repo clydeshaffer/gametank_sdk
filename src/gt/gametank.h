@@ -44,7 +44,7 @@ typedef char bool;
 #define BANK_CLIP_Y 32
 #define BANK_RAM_MASK 192
 
-#define GRAM_PAGE(x) x
+#define GRAM_PAGE(x) (x&7)
 
 #define VX 0
 #define VY 1
