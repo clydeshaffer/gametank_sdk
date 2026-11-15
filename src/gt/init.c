@@ -1,5 +1,6 @@
 #include "./gametank.h"
 #include "./gfx/draw_direct.h"
+#include "./audio/audio_coprocessor.h"
 #include "./audio/music.h"
 #include "../gen/bank_nums.h"
 
