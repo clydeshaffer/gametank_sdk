@@ -104,6 +104,7 @@ _rect = $3201 ;borrow unbanked Audio RAM memory
         ;make sure DMA mode is set to input these params
         LDA _flagsMirror
         ORA #$01
+        STA DMAFlags
 
         LDY _queue_start
 

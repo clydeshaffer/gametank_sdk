@@ -174,7 +174,9 @@ void await_draw_queue() {
         asm ("CLI");
         await_drawing();
     }
+    *dma_flags = flagsMirror | DMA_ENABLE;
     vram[START] = 0;
+    *dma_flags = flagsMirror;
     queue_pending = 0;
     asm ("CLI");
 #endif
