@@ -1,6 +1,6 @@
 #include "bittext.h"
 #include "font.h"
-
+#include "gametank.h"
 
 pointer_t bittext_dest_u;
 char bittext_color = 32;
@@ -93,14 +93,18 @@ void bittext_erase_char() {
 
 
 void bittext_set_cursor(char x, char y) {
-    dest_bytes.msb = 0x40 | (y >> 1);
-    dest_bytes.lsb = x & 0x7F;
-    if(y & 1) dest_bytes.lsb |= 128;
+    //dest_bytes.msb = 0x40 | (y >> 1);
+    //dest_bytes.lsb = x & 0x7F;
+    //if(y & 1) dest_bytes.lsb |= 128;
+    bittext_set_x(x);
+    bittext_set_y(y & 127);
 }
 
 void bittext_write_str_opaque(char* c) {
     while(*c != 0) {
-        bittext_write_char_opaque(*c);
+        PROFILER_START(0);
+        bittext_draw_char(*c);
+        PROFILER_END(0);
         ++c;
     }
 }
