@@ -92,18 +92,9 @@ void clear_spritebank(char bank) {
     *bank_reg = banksMirror;
 }
 
-SpriteSlot allocate_sprite(const SpritePage* sprite) {
-    register const SpritePage* current;
-    register char mask, i, free_page;
-    push_rom_bank();
-    change_rom_bank(BANK_LOADERS);
-    mask = 0; i = 1;
-    for(current = sprite; current != 0; current = current->next) {
-        if(current->data != 0) {
-            mask |= i;
-        }
-        i = i << 1;
-    }
+SpriteSlot get_sprite_slot(char size_mask) {
+    char mask, i, free_page;
+    mask = size_mask;
     free_page = 0xFF;
     for(i = 0; i < 8; ++i) {
         if(!(bank_occupied[i] & mask)) {
@@ -145,6 +136,23 @@ SpriteSlot allocate_sprite(const SpritePage* sprite) {
     }
 
     sprite_size_cache[free_page] = mask;
+    return free_page;
+}
+
+SpriteSlot allocate_sprite(const SpritePage* sprite) {
+    register const SpritePage* current;
+    register char mask, i, free_page;
+    push_rom_bank();
+    change_rom_bank(BANK_LOADERS);
+    mask = 0; i = 1;
+    for(current = sprite; current != 0; current = current->next) {
+        if(current->data != 0) {
+            mask |= i;
+        }
+        i = i << 1;
+    }
+    
+    free_page = get_sprite_slot(mask);
 
     i = 1;
 

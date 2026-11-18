@@ -34,6 +34,7 @@ void clear_spritebank(char bank);
 
 void sprite_fetch_frame(SpriteSlot sprite, char frame);
 
+SpriteSlot get_sprite_slot(char size_mask);
 SpriteSlot allocate_sprite(const SpritePage* sprite);
 void set_sprite_frametable(SpriteSlot sprite, const Frame *frametable, char frametable_bank);
 void free_sprite(SpriteSlot slot);
