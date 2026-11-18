@@ -9,6 +9,7 @@
         "DRAWQUEUE",
         "PADDLEINPUT",
         "AUDIO_DEFAULT_FM_FIRMWARE",
-        "SDK_TRACKER_FM_BACKEND"
+        "SDK_TRACKER_FM_BACKEND",
+        "BITTEXT"
     ]
 }
