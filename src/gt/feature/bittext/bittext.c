@@ -12,7 +12,10 @@
 char bittext_color = 32;
 char bittext_bg = 7;
 
-void bittext_write_str(char* c) {
+extern char bittext_x;
+
+char bittext_write_str(char* c) {
+    char oldx = bittext_x;
     push_rom_bank();
     change_rom_bank(BANK_sdk_default);
     while(*c != 0) {
@@ -22,5 +25,6 @@ void bittext_write_str(char* c) {
         ++c;
     }
     pop_rom_bank();
+    return bittext_x - oldx;
 }
 #endif
