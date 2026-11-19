@@ -1,0 +1,15 @@
+{
+  "name": "gtsdk-tools",
+  "version": "1.0.0",
+  "description": "tool scripts meant to be run manually",
+  "main": "gtsdk-tools.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "clyde",
+  "license": "MIT",
+  "dependencies": {
+    "bitmap-manipulation": "^2.0.0",
+    "minimist": "^1.2.5"
+  }
+}
